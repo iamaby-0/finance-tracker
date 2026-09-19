@@ -94,6 +94,8 @@ const loginUser = async (data) => {
     }
 }
 
+const forgotPassword = async(d)
+
 module.exports = {
     userResistration,
     findUserById,

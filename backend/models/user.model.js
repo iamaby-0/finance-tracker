@@ -30,8 +30,8 @@ const userSchema = new mongoose.Schema({
     },
     occupation : {
         type : String,
-        required : true,
-        enum : ["student", "employed", "unemployed"]
+        enum : ["student", "employed", "unemployed"],
+        default : "student"
     },
     currency : {
         type : String,
