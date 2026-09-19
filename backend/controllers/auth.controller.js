@@ -1,7 +1,7 @@
 const authService = require("../services/auth.service")
 const {errorResponseBody, successResponseBody} = require("../utils/responseBody")
 
-const userRegister = async(req, res)=>{
+const signup = async(req, res)=>{
     try{
         const response = await authService.userResistration(req.body);
 
@@ -48,7 +48,48 @@ const signin = async(req, res)=>{
     }
 }
 
+const getUserById = async(req, res)=>{
+    try{
+        const response = await authService.findUserById(req.user.id)    
+         
+        if(response.error){
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+
+        successResponseBody.data = response;
+        successResponseBody.message = "User fetched successfully by id"
+        return res.status(200).json(successResponseBody)
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
+const getUserByEmail = async(req, res)=>{
+    try{
+        const response = await authService.findUserByEmail(req.body.email)
+
+        if(response.error){
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response;
+        successResponseBody.message = "User fetched successfully by email"
+        return res.status(200).json(successResponseBody)
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
 module.exports = {
-    userRegister,
-    signin
+    signup,
+    getUserById,
+    signin,
+    getUserByEmail
 }

@@ -37,6 +37,22 @@ const userResistration = async (data) => {
     }
 }
 
+const findUserByEmail = async (email) => {
+    try {
+        const response = await User.findOne({ email }); 
+
+        if (!response){
+            throw{error: "No user found on given email", code: 404}
+        }
+
+        return response;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 const findUserById = async (UserId) => {
     try {
         const response = await User.findById(UserId);
@@ -94,11 +110,12 @@ const loginUser = async (data) => {
     }
 }
 
-const forgotPassword = async(d)
+
 
 module.exports = {
     userResistration,
     findUserById,
-    loginUser
+    loginUser,
+    findUserByEmail
 
 }
