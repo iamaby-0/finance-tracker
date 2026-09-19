@@ -110,12 +110,38 @@ const loginUser = async (data) => {
     }
 }
 
+const update = async(userId, data) =>{
+    try{
+        const response = await User.findByIdAndUpdate(
+            userId,
+            {
+                $set : data
+            },
+            {
+                new : true,
+                runValidators : true
+            }
+        )
+
+        if(!response){
+            throw {error : "invalid id ,user not found", code : 404}
+        }
+
+        return response;
+    }
+    catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 
 
 module.exports = {
     userResistration,
     findUserById,
     loginUser,
-    findUserByEmail
+    findUserByEmail,
+    update
 
 }

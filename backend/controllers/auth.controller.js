@@ -87,9 +87,22 @@ const getUserByEmail = async(req, res)=>{
     }
 }
 
+const updateUser = async(req, res) => {
+    try{
+        const response = await authService.update(req.params.id, req.body)
+
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
 module.exports = {
     signup,
     getUserById,
     signin,
-    getUserByEmail
+    getUserByEmail,
+    updateUser
 }

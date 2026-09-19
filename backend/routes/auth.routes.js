@@ -22,6 +22,11 @@ const routes = (app) =>{
         authMiddleware.isAuthenticated,
         authController.getUserByEmail
     )
+
+    app.post('/aft/api/v1/user/:id',
+        authMiddleware.isAuthenticated,
+        authController.updateUser
+    )
 }
 
 
