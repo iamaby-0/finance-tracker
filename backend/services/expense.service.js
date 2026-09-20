@@ -34,6 +34,7 @@ const getExpenses = async(userId)=>{
             date : -1
         });
 
+        
         return response;
         
     }
@@ -43,7 +44,25 @@ const getExpenses = async(userId)=>{
     }
 }
 
+const getExpenseById = async(id)=>{
+    try{
+        const response = await findOne({id});
+        if(!response){
+            throw {
+                error :"invalid expense id",
+                code : 404
+            }
+        }
+        return response
+    }
+    catch(error){
+        console.log(error)
+        throw error;
+    }
+}
+
 module.exports = {
     createExpense,
-    getExpenses
+    getExpenses,
+    getExpenseById
 }

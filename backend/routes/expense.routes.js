@@ -8,7 +8,12 @@ const routes = (app) =>{
     )
 
     app.get('/aft/api/v1/expenses',
+        authMiddleware.isAuthenticated,
         expenseController.getAllExpernses
+    )
+
+    app.get('/aft/api/v1/expenses/:id',
+        expenseController.getExpenseByid
     )
 }
 
