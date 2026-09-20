@@ -13,7 +13,11 @@ const expenseSchema = new mongoose.Schema({
         required: true,
         min: [0, "Amount cannot be negative"]
     },
-    description: {
+    description : {
+        type : String,
+        required : true,
+    },
+    category: {
         type: String,
         enum: [
             "Food",
@@ -64,6 +68,6 @@ const expenseSchema = new mongoose.Schema({
     }
 },{timestamps : true});
 
-const Expense = mongoose.module('Expense', expenseSchema);
+const Expense = mongoose.model('Expense', expenseSchema);
 
 module.exports = Expense;
