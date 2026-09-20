@@ -15,6 +15,11 @@ const routes = (app) =>{
     app.get('/aft/api/v1/expenses/:id',
         expenseController.getExpenseByid
     )
+
+    app.post('/aft/api/v1/expenses/:id',
+        authMiddleware.isAuthenticated,
+        expenseController.updateExpense
+    )
 }
 
 module.exports = routes;

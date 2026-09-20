@@ -61,8 +61,35 @@ const getExpenseById = async(id)=>{
     }
 }
 
+const updateExpense = async(id, newData) =>{
+    try{
+        const response = await Expense.findByIdAndUpdate(
+            id, 
+            {$set : newData},
+            {
+                returnDocument : 'after',
+                runValidators : true
+            }
+        )
+
+        if(!response){
+            throw {
+                error :"invalid id , cannot find expense",
+                code : 404
+            }
+        }
+
+        return response;
+    }
+    catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
 module.exports = {
     createExpense,
     getExpenses,
-    getExpenseById
+    getExpenseById,
+    updateExpense
 }

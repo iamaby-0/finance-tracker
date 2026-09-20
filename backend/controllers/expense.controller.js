@@ -55,8 +55,29 @@ const getExpenseByid = async(req, res)=>{
     }
 }
 
+const updateExpense = async(req, res)=>{
+    try{
+        const response = await expenseService.updateExpense(req.params.id, req.body);
+
+        if(response.error){
+            errorResponseBody.error=response.error
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response;
+        successResponseBody.message = "Successfully Update Expense"
+
+        return res.status(200).json(successResponseBody);
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
     createExp,
     getAllExpernses,
-    getExpenseByid
+    getExpenseByid,
+    updateExpense
 }
