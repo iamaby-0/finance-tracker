@@ -26,9 +26,12 @@ const createExpense = async(userId, data) =>{
     }
 }
 
-const getExpenses = async()=>{
+const getExpenses = async(userId)=>{
     try{
         const response = await Expense.find({
+            userId
+        }).sort({
+            date : -1
         });
 
         return response;

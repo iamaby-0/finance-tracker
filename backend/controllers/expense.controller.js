@@ -23,7 +23,8 @@ const createExp = async(req, res)=>{
 
 const getAllExpernses = async(req, res)=>{
     try{
-        const response = await expenseService.getExpenses();
+        const userId = req.user.id
+        const response = await expenseService.getExpenses(userId);
 
         successResponseBody.data = response
         successResponseBody.message = "Successfully fetch all expenses"
