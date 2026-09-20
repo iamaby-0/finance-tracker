@@ -26,6 +26,21 @@ const createExpense = async(userId, data) =>{
     }
 }
 
+const getExpenses = async()=>{
+    try{
+        const response = await Expense.find({
+        });
+
+        return response;
+        
+    }
+    catch(error){
+        console.log(error);
+        throw error;
+    }
+}
+
 module.exports = {
-    createExpense
+    createExpense,
+    getExpenses
 }

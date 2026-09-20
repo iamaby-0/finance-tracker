@@ -6,6 +6,10 @@ const routes = (app) =>{
        authMiddleware.isAuthenticated,
         expenseController.createExp
     )
+
+    app.get('/aft/api/v1/expenses',
+        expenseController.getAllExpernses
+    )
 }
 
 module.exports = routes;

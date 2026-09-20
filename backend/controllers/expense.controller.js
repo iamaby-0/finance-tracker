@@ -21,6 +21,23 @@ const createExp = async(req, res)=>{
     }
 }
 
+const getAllExpernses = async(req, res)=>{
+    try{
+        const response = await expenseService.getExpenses();
+
+        successResponseBody.data = response
+        successResponseBody.message = "Successfully fetch all expenses"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch(error){
+        errorResponseBody.error = error
+
+        return res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
-    createExp
+    createExp,
+    getAllExpernses
 }
