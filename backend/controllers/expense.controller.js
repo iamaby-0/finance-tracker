@@ -75,9 +75,30 @@ const updateExpense = async(req, res)=>{
     }
 }
 
+const deleteEX = async(req, res)=>{
+    try{
+        const response = await expenseService.deleteExpense(req.params.id)
+
+        if(response.error){
+            errorResponseBody.error=response.error
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response;
+        successResponseBody.message = "Successfully deleted Expense"
+
+        return res.status(200).json(successResponseBody);
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
     createExp,
     getAllExpernses,
     getExpenseByid,
-    updateExpense
+    updateExpense,
+    deleteEX
 }

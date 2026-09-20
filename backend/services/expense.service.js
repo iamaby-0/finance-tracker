@@ -87,9 +87,29 @@ const updateExpense = async(id, newData) =>{
     }
 }
 
+const deleteExpense = async(id)=>{
+    try{
+        const response = await Expense.findByIdAndDelete(id)
+
+        if(!response){
+            throw {
+                error : "invalid id , cannot find expense",
+                code :404
+            }
+        }
+
+        return response;
+    }
+    catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
 module.exports = {
     createExpense,
     getExpenses,
     getExpenseById,
-    updateExpense
+    updateExpense,
+    deleteExpense
 }

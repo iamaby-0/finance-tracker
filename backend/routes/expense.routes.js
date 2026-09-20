@@ -13,10 +13,16 @@ const routes = (app) =>{
     )
 
     app.get('/aft/api/v1/expenses/:id',
+        authMiddleware.isAuthenticated,
         expenseController.getExpenseByid
     )
 
-    app.post('/aft/api/v1/expenses/:id',
+    app.patch('/aft/api/v1/expenses/:id',
+        authMiddleware.isAuthenticated,
+        expenseController.updateExpense
+    )
+
+    app.delete('/aft/api/v1/expenses/:id',
         authMiddleware.isAuthenticated,
         expenseController.updateExpense
     )
