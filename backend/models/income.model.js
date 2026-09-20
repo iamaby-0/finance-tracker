@@ -22,6 +22,7 @@ const incomeSchema = mongoose.Schema({
                 'Investment',
                 'Dividends',
                 'Rental',
+                "Parents",
                 'Gift',
                 'Other'
             ]

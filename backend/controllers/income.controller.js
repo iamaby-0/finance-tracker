@@ -1,0 +1,26 @@
+const incomeService = require('../services/income.service')
+const {errorResponseBody, successResponseBody} = require('../utils/responseBody')
+
+const createIncome = async(req, res)=>{
+    try{
+        const userId = req.user.id;
+        const response = await incomeService.create(userId, req.body)
+
+        if(response.error){
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response
+        successResponseBody.message = "income added successfully"
+
+        return res.status(201).json(successResponseBody);
+    }
+    catch(error){
+        errorResponseBody.error = error;
+        return  res.status(500).json(errorResponseBody)
+    }
+}
+
+module.exports = {
+    createIncome
+}

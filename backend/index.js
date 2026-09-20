@@ -3,6 +3,7 @@ const env = require("./config/env");
 const connectDB = require("./config/db");
 const authRoutes = require('./routes/auth.routes')
 const expenseRoutes = require('./routes/expense.routes')
+const incomeRoutes = require('./routes/income.routes')
 
 const app = express();
 
@@ -11,6 +12,7 @@ app.use(express.urlencoded({extended : true}))
 
 authRoutes(app); // invoking auth routes
 expenseRoutes(app) // calling expense routes
+incomeRoutes(app)
 
 
 app.listen(env.port, ()=>{
