@@ -61,8 +61,50 @@ const getAllincome = async (req, res) => {
     }
 }
 
+const updateIncome = async(req, res)=>{
+    try{
+        const response  = await incomeService.updateIncome(req.params.id, req.body);
+
+        if (response.error) {
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response
+        successResponseBody.message = "income details updated successfully"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch (error) {
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
+const deleteIncome = async(req, res)=>{
+    try{
+        const response  = await incomeService.deleteIncome(req.params.id);
+
+        if (response.error) {
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response
+        successResponseBody.message = "income details deleted successfully"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch (error) {
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
 module.exports = {
     createIncome,
     getIncomeById,
-    getAllincome
+    getAllincome,
+    deleteIncome,
+    updateIncome
 }

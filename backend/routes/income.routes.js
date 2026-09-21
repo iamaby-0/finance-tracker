@@ -17,6 +17,18 @@ const routes = (app) =>{
         authMiddleware.isAuthenticated,
         incomeController.getAllincome
     )
+
+    app.patch('/aft/api/v1/income/:id',
+        authMiddleware.isAuthenticated,
+        incomeController.updateIncome
+    )
+
+    app.delete('/aft/api/v1/income/:id',
+        authMiddleware.isAuthenticated,
+        incomeController.deleteIncome
+    )
+
+
 }
 
 module.exports = routes
