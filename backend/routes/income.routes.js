@@ -1,9 +1,11 @@
 const incomeController = require("../controllers/income.controller")
+const incomeMiddleware = require('../middlewares/income.middleware')
 const authMiddleware = require('../middlewares/auth.middlewares')
 
 const routes = (app) =>{
     app.post('/aft/api/v1/income',
         authMiddleware.isAuthenticated,
+        incomeMiddleware.incomeCreateRequest,
         incomeController.createIncome
 
     )
