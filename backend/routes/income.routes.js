@@ -7,6 +7,16 @@ const routes = (app) =>{
         incomeController.createIncome
 
     )
+
+    app.get('/aft/api/v1/income/:id',
+        authMiddleware.isAuthenticated,
+        incomeController.getIncomeById
+    )
+
+    app.get('/aft/api/v1/income/',
+        authMiddleware.isAuthenticated,
+        incomeController.getAllincome
+    )
 }
 
 module.exports = routes
