@@ -28,7 +28,25 @@ const createBudget = async (req, res) => {
         return res.status(500).json(errorResponseBody)
     }
 }
+const getBudgets = async(req, res)=>{
+    try{
+        const {month, year , category} = req.query;
 
+        const response = await budgetService.getbudgets(req.user.id,req.query)
+
+        successResponseBody.data = response;
+        successResponseBody.message = "Successfully  Fetched the Budgets"
+
+        return res.status(200).json(successResponseBody)
+        
+    }
+    catch(error){
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
 module.exports = {
-    createBudget
+    createBudget,
+    getBudgets
 }

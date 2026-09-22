@@ -16,7 +16,7 @@ const createBudget = async (userId, data) => {
                 `Budget already exists for ${category} in ${month}/${year}`
             );
         }
-        
+
         const response = await Budget.create({ userId, ...data })
 
         return response;
@@ -37,6 +37,42 @@ const createBudget = async (userId, data) => {
     }
 }
 
+const getbudgets = async(userId, filters={})=>{
+    try{
+        const query = {userId }
+
+        if(filters.month){
+            query.month = filters.month
+        }
+
+        
+        if(filters.year){
+            query.year = filters.year
+        }
+
+        
+        if(filters.category){
+            query.category = filters.category
+        }
+
+        console.log("QUERY:", query);
+
+
+        const response = await Budget.find(query)
+
+        console.log(response)
+
+        
+
+        return response;
+    }
+    catch(error){
+        console.log(error);
+        throw error
+    }
+}
+
 module.exports = {
-    createBudget
+    createBudget,
+    getbudgets
 }
