@@ -22,6 +22,10 @@ const routes = (app) => {
       budgetController.updateBudget
    )
 
+   app.delete('/aft/api/v1/expenses/:id',
+      authMiddleware.isAuthenticated,
+      budgetController.deleteBudget
+   )
 
 
 }

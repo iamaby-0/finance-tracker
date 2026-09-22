@@ -83,9 +83,32 @@ const updateBudget = async (req, res) => {
         return res.status(500).json(errorResponseBody);
     }
 }
+
+
+const deleteBudget = async (req, res) => {
+    try {
+        const response = await incomeService.deleteIncome(req.params.id);
+
+        if (response.error) {
+            errorResponseBody.error = response.error;
+            return res.status(response.code).json(errorResponseBody)
+        }
+        successResponseBody.data = response
+        successResponseBody.message = "income details deleted successfully"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch (error) {
+        errorResponseBody.error = error;
+
+        return res.status(500).json(errorResponseBody)
+    }
+}
 module.exports = {
     createBudget,
     getBudgets,
     getBudgetByid,
-    updateBudget
+    updateBudget,
+    deleteBudget
+
 }

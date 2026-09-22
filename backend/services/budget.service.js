@@ -37,21 +37,21 @@ const createBudget = async (userId, data) => {
     }
 }
 
-const getbudgets = async(userId, filters={})=>{
-    try{
-        const query = {userId }
+const getbudgets = async (userId, filters = {}) => {
+    try {
+        const query = { userId }
 
-        if(filters.month){
+        if (filters.month) {
             query.month = filters.month
         }
 
-        
-        if(filters.year){
+
+        if (filters.year) {
             query.year = filters.year
         }
 
-        
-        if(filters.category){
+
+        if (filters.category) {
             query.category = filters.category
         }
 
@@ -62,63 +62,84 @@ const getbudgets = async(userId, filters={})=>{
 
         console.log(response)
 
-        
+
 
         return response;
     }
-    catch(error){
+    catch (error) {
         console.log(error);
         throw error
     }
 }
 
-const getBudgetById = async(id)=>{
-    try{
-        const response = await Budget.findOne({id});
-        if(!response){
+const getBudgetById = async (id) => {
+    try {
+        const response = await Budget.findOne({ id });
+        if (!response) {
             throw {
-                error :"invalid budget id",
-                code : 404
+                error: "invalid budget id",
+                code: 404
             }
         }
         return response
     }
-    catch(error){
+    catch (error) {
         console.log(error)
         throw error;
     }
 }
 
-const updateBudget = async(id, newData) =>{
-    try{
+const updateBudget = async (id, newData) => {
+    try {
         const response = await Budget.findByIdAndUpdate(
-            id, 
-            {$set : newData},
+            id,
+            { $set: newData },
             {
-                returnDocument : 'after',
-                runValidators : true
+                returnDocument: 'after',
+                runValidators: true
             }
         )
 
-        if(!response){
+        if (!response) {
             throw {
-                error :"invalid id , cannot find expense",
-                code : 404
+                error: "invalid id , cannot find budget",
+                code: 404
             }
         }
 
         return response;
     }
-    catch(error){
+    catch (error) {
         console.log(error)
         throw error
     }
 }
 
+const deleteBudget = async (id) => {
+    try {
+        const response = await Budget.findByIdAndDelete(id)
+
+        if (!response) {
+            throw {
+                error: "invalid id , cannot find Budget",
+                code: 404
+            }
+        }
+
+        return response;
+    }
+    catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
+
 module.exports = {
     createBudget,
     getbudgets,
     getBudgetById,
-    updateBudget
+    updateBudget,
+    deleteBudget
 
 }
