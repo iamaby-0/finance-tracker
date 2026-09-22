@@ -72,7 +72,53 @@ const getbudgets = async(userId, filters={})=>{
     }
 }
 
+const getBudgetById = async(id)=>{
+    try{
+        const response = await Budget.findOne({id});
+        if(!response){
+            throw {
+                error :"invalid budget id",
+                code : 404
+            }
+        }
+        return response
+    }
+    catch(error){
+        console.log(error)
+        throw error;
+    }
+}
+
+const updateBudget = async(id, newData) =>{
+    try{
+        const response = await Budget.findByIdAndUpdate(
+            id, 
+            {$set : newData},
+            {
+                returnDocument : 'after',
+                runValidators : true
+            }
+        )
+
+        if(!response){
+            throw {
+                error :"invalid id , cannot find expense",
+                code : 404
+            }
+        }
+
+        return response;
+    }
+    catch(error){
+        console.log(error)
+        throw error
+    }
+}
+
 module.exports = {
     createBudget,
-    getbudgets
+    getbudgets,
+    getBudgetById,
+    updateBudget
+
 }

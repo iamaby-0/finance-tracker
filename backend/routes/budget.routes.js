@@ -12,6 +12,16 @@ const routes = (app) => {
       budgetController.getBudgets
    )
 
+   app.get('/aft/api/v1/expenses/:id',
+      authMiddleware.isAuthenticated,
+      budgetController.getBudgetByid
+   )
+
+   app.patch('/aft/api/v1/expenses/:id',
+      authMiddleware.isAuthenticated,
+      budgetController.updateBudget
+   )
+
 
 
 }

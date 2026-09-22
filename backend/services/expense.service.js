@@ -46,7 +46,7 @@ const getExpenses = async(userId)=>{
 
 const getExpenseById = async(id)=>{
     try{
-        const response = await findOne({id});
+        const response = await Expense.findOne({id});
         if(!response){
             throw {
                 error :"invalid expense id",
