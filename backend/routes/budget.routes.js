@@ -1,9 +1,13 @@
 const budgetController = require('../controllers/budget.controller')
 const authMiddleware = require('../middlewares/auth.middlewares')
+const budgetMiddleware = require('../middlewares/budget.middleware')
+
+
 
 const routes = (app) => {
    app.post('/aft/api/v1/budget',
       authMiddleware.isAuthenticated,
+      budgetMiddleware.budgetCreateRequest,
       budgetController.createBudget
    )
 
