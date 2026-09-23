@@ -11,7 +11,6 @@ const getMonthlySummary = async (userId, month, year) => {
         const endDate = new Date(year, month, 1);
         const userObjectId = new mongoose.Types.ObjectId(userId);
 
-        console.log("income :" , income , " : expense : ",expense)
         const incomeResult = await Income.aggregate([
             {
                 $match: {
