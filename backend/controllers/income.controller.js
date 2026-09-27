@@ -61,9 +61,9 @@ const getAllincome = async (req, res) => {
     }
 }
 
-const updateIncome = async(req, res)=>{
-    try{
-        const response  = await incomeService.updateIncome(req.params.id, req.body);
+const updateIncome = async (req, res) => {
+    try {
+        const response = await incomeService.updateIncome(req.params.id, req.body);
 
         if (response.error) {
             errorResponseBody.error = response.error;
@@ -81,9 +81,10 @@ const updateIncome = async(req, res)=>{
     }
 }
 
-const deleteIncome = async(req, res)=>{
-    try{
-        const response  = await incomeService.deleteIncome(req.params.id);
+
+const deleteIncome = async (req, res) => {
+    try {
+        const response = await incomeService.deleteIncome(req.params.id);
 
         if (response.error) {
             errorResponseBody.error = response.error;
