@@ -126,17 +126,17 @@ const getMonthlytrend = async (userId, year) => {
     try {
         const userObjectId = new ObjectId(userId);
 
-        if(!userId || !year){
+        if (!userId || !year) {
             throw {
-                error : "userID or Year not found , unable fetch trends",
-                code : 404
+                error: "userID or Year not found , unable fetch trends",
+                code: 404
             }
         }
-        
+
         const result = await Expense.aggregate([
             {
                 $match: {
-                    userId : userObjectId,
+                    userId: userObjectId,
                     date: {
                         $gte: new Date(year, 0, 1),
                         $lt: new Date(year + 1, 0, 1)
@@ -177,8 +177,95 @@ const getMonthlytrend = async (userId, year) => {
     }
 }
 
+const getBudgetStatus = async (userId, budgetId) => {
+    try {
+
+        const userObjectId = new ObjectId(userId);
+        const budget = await Budget.findOne({
+            budgetId,
+            userId :userObjectId
+        });
+
+
+        if (!budget) {
+            return {
+                error : "budget not found , invalid id", code : 404
+            }
+        }
+
+
+        const startDate = new Date(
+            budget.year,
+            budget.month - 1,
+            1
+        );
+
+        const endDate = new Date(
+            budget.year,
+            budget.month,
+            1
+        );
+
+
+        const match = {
+            userId,
+            date: {
+                $gte: startDate,
+                $lt: endDate
+            }
+        };
+
+
+        // If category-specific budget
+        if (budget.category !== "Overall") {
+            match.category = budget.category;
+        }
+
+
+        const result = await Expense.aggregate([
+            {
+                $match: match
+            },
+
+            {
+                $group: {
+                    _id: null,
+                    spent: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+
+        const spent = result[0]?.spent || 0;
+
+        const remaining = budget.amount - spent;
+
+        const percentageUsed = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
+
+
+        return {
+            budget: budget.amount,
+            spent,
+            remaining,
+            percentageUsed:
+                Number(percentageUsed.toFixed(2)),
+            alert:
+                percentageUsed >= budget.alertPercentage,
+            exceeded:
+                spent > budget.amount
+        }
+    }
+    catch (error) {
+        console.log(error)
+        throw error
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCategorySpending,
     getMonthlytrend,
+    getBudgetStatus
 }

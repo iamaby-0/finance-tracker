@@ -30,7 +30,8 @@ const getCatogarySpend = async(req, res)=>{
         )
 
         successResponseBody.data = response;
-        successResponseBody.message = "Successfully catogoriesed by "
+        successResponseBody.message = "Successfully catogoriesed by month & year"
+        return res.status(200).json(successResponseBody)
 
     }
     catch(error){
@@ -50,14 +51,49 @@ const getMonthlyTrend = async(req, res)=>{
         successResponseBody.data = response;
         successResponseBody.message = "Successfully fetch Trends "
 
+        return res.status(200).json(successResponseBody)
     }
     catch(error){
         errorResponseBody.error = error;
         return res.status(500).json(errorResponseBody)
     }
 }
+
+const getBudgetStatus = async (req, res) => {
+
+    try {
+
+        const userId = req.user.id;
+
+        const { id } = req.params;
+
+
+        const status =
+            await analyticsService.getBudgetStatus(
+                userId,
+                id
+            );
+
+
+        if (status.error) {
+            errorResponseBody.error = status.error
+            return res.status(status.code).json(errorResponseBody)
+        }
+
+
+         successResponseBody.data = response;
+        successResponseBody.message = "Successfully fetch Trends "
+        return res.status(200).json(successResponseBody)
+
+    } catch (error) {
+        errorResponseBody.error = error
+        res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCatogarySpend,
-    getMonthlyTrend
+    getMonthlyTrend,
+    getBudgetStatus
 }
