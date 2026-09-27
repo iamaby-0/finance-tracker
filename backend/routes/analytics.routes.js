@@ -20,6 +20,11 @@ const routes = (app) =>{
         analyitcsController.getMonthlyTrend
     )
 
+    app.get('/aft/api/v1/analytics/budget/:id',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getBudgetStatus
+    )
+
 }
 
 module.exports = routes;
