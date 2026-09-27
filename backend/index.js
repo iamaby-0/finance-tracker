@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth.routes')
 const expenseRoutes = require('./routes/expense.routes')
 const incomeRoutes = require('./routes/income.routes')
 const budgetRoutes = require('./routes/budget.routes')
+const analyticsRoutes = require('./routes/analytics.routes')
 
 const app = express();
 
@@ -15,6 +16,7 @@ authRoutes(app); // invoking auth routes
 expenseRoutes(app) // calling expense routes
 incomeRoutes(app)
 budgetRoutes(app)
+analyticsRoutes(app)
 
 
 app.listen(env.port, ()=>{
