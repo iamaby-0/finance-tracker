@@ -20,6 +20,44 @@ const getMonthlySummary = async(req, res) =>{
     }
 }
 
+const getCatogarySpend = async(req, res)=>{
+    try{
+
+        const response = await analyticsService.getCategorySpending(
+            req.user.id,
+            req.query.month,
+            req.query.year
+        )
+
+        successResponseBody.data = response;
+        successResponseBody.message = "Successfully catogoriesed by "
+
+    }
+    catch(error){
+        errorResponseBody.error = error;
+        return res.status(500).json(errorResponseBody)
+    }
+}
+
+const getMonthlyTrend = async(req, res)=>{
+    try{
+
+        const response = await analyticsService.getMonthlytrend(
+            req.user.id,
+            req.query.year
+        )
+
+        successResponseBody.data = response;
+        successResponseBody.message = "Successfully fetch Trends "
+
+    }
+    catch(error){
+        errorResponseBody.error = error;
+        return res.status(500).json(errorResponseBody)
+    }
+}
 module.exports = {
-    getMonthlySummary
+    getMonthlySummary,
+    getCatogarySpend,
+    getMonthlyTrend
 }
