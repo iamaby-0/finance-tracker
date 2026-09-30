@@ -3,7 +3,7 @@ const { generateAIResponse } = require("./groq.service")
 const Expense = require('../../models/expense.model')
 const Income = require('../../models/income.model')
 const Budget = require('../../models/budget.model')
-const ObjectId = new mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 
 const allowedCategories = [
@@ -106,9 +106,11 @@ Rules:
     };
 }
 
+
+
 const generateFinancialInsights = async (userId) => {
     try {
-        const userObjId = ObjectId(userId);
+        const userObjectId = new ObjectId(userId);
 
         // for ^ Months
         const endDate = new Date();
@@ -121,7 +123,7 @@ const generateFinancialInsights = async (userId) => {
         const incomeResult = await Income.aggregate([
             {
                 $match: {
-                    userId: userObjId,
+                    userId: userObjectId,
 
                     date: {
                         $gte: startDate,
@@ -147,7 +149,7 @@ const generateFinancialInsights = async (userId) => {
         const expenseResult = await Expense.aggregate([
             {
                 $match: {
-                    userId: userObjId,
+                    userId: userObjectId,
 
                     date: {
                         $gte: startDate,
@@ -173,7 +175,7 @@ const generateFinancialInsights = async (userId) => {
         const categoryResult = await Expense.aggregate([
             {
                 $match: {
-                    userId: userObjId,
+                    userId: userObjectId,
 
                     date: {
                         $gte: startDate,
@@ -416,6 +418,11 @@ Analyze the user's financial data and provide
 practical, conservative and easy-to-understand
 financial insights.
 
+The user's currency is Indian Rupees (INR)
+
+All monetary amounts are in INR.
+When mentioning monetary values, use the ₹ symbol.
+
 Do NOT invent data.
 
 Do NOT provide investment, tax or legal advice.
@@ -517,5 +524,5 @@ Keep each insight and recommendation concise.
 
 module.exports = {
     categorizeExpense,
-     generateAIResponse
+    generateFinancialInsights
 };
