@@ -25,6 +25,18 @@ const routes = (app) =>{
         analyitcsController.getBudgetStatus
     )
 
+    app.get('/aft/api/v1/analytics/unusual-spending',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getUnusualSpending
+    )
+
+     app.get('/aft/api/v1/analytics/savings-prediction',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getSavingsPrediction
+    )
+
+    
+
 }
 
 module.exports = routes;

@@ -91,9 +91,59 @@ const getBudgetStatus = async (req, res) => {
     }
 }
 
+const getUnusualSpending = async (req, res)=>{
+    try{
+
+        const userId = req.user.id;
+
+        const month =
+            Number(req.query.month);
+
+        const year =
+            Number(req.query.year);
+
+
+        if (!month || month < 1 || month > 12 || !year) {
+            return res.status(400).json({
+                success: false,
+                message:
+                    "Valid month and year are required"
+            });
+        }
+
+        const alerts = await analyticsService.getUnusualSpending(userId, month, year);
+
+        successResponseBody.data = alerts;
+        successResponseBody.message = "Successfully fetch Unusual spendings "
+        return res.status(200).json(successResponseBody)
+
+    }
+    catch(error){
+        errorResponseBody.error = error
+        res.status(500).json(errorResponseBody);
+    }
+}
+
+const getSavingsPrediction = async (req, res) =>{
+    try{
+        const response = await analyticsService.getSavingsPrediction(req.user.id);
+
+        successResponseBody.data = response
+        successResponseBody.message = "Savings prediction generated successfully"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch(error){
+         errorResponseBody.error = error
+        res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCatogarySpend,
     getMonthlyTrend,
-    getBudgetStatus
+    getBudgetStatus,
+    getUnusualSpending,
+    getSavingsPrediction
 }
