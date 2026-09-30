@@ -25,6 +25,11 @@ const routes = (app) =>{
         analyitcsController.getBudgetStatus
     )
 
+    app.get('/aft/api/v1/analytics/unusual-spending',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getUnusualSpending
+    )
+
 }
 
 module.exports = routes;

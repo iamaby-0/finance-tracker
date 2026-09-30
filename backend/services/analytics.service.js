@@ -183,13 +183,13 @@ const getBudgetStatus = async (userId, budgetId) => {
         const userObjectId = new ObjectId(userId);
         const budget = await Budget.findOne({
             budgetId,
-            userId :userObjectId
+            userId: userObjectId
         });
 
 
         if (!budget) {
             return {
-                error : "budget not found , invalid id", code : 404
+                error: "budget not found , invalid id", code: 404
             }
         }
 
@@ -263,9 +263,155 @@ const getBudgetStatus = async (userId, budgetId) => {
     }
 }
 
+// for unusualSpending
+const getUnusualSpending = async (userId, month, year) => {
+    try {
+
+        const currentStart = new Date(year, month - 1, 1);
+        const currentEnd = new Date(year, month, 1);
+
+        const previousStart = new Date(year, month - 4, 1);
+
+        const currentSpending = await Expense.aggregate([
+            {
+                $match: {
+                    userId,
+                    date: {
+                        $gte: currentStart,
+                        $lt: currentEnd
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$category",
+
+                    amount: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+
+        const previousSpending = await Expense.aggregate([
+            {
+                $match: {
+                    userId,
+                    date: {
+                        $gte: previousStart,
+                        $lt: currentStart
+                    }
+                }
+            },
+
+            {
+                $group: {
+                    _id: {
+                        category: "$category",
+                        year: {
+                            $year: "$date"
+                        },
+                        month: {
+                            $month: "$date"
+                        }
+                    },
+
+                    amount: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+
+        let alerts = [];
+
+        for (const current of currentSpending) {
+
+            const category =
+                current._id;
+
+            const currentAmount =
+                current.amount;
+
+
+            // Find previous monthly values
+            const previousValues =
+                previousSpending
+                    .filter(
+                        item =>
+                            item._id.category === category
+                    )
+                    .map(
+                        item => item.amount
+                    );
+
+
+            // No historical data
+            if (previousValues.length === 0) {
+                continue;
+            }
+
+
+            const average =
+                previousValues.reduce(
+                    (sum, value) =>
+                        sum + value,
+                    0
+                ) / previousValues.length;
+
+
+            if (average === 0) {
+                continue;
+            }
+
+
+            const increasePercentage =
+                (
+                    (currentAmount - average) /
+                    average
+                ) * 100;
+
+
+            // 50% higher than historical average
+            if (increasePercentage >= 50) {
+
+                alerts.push({
+
+                    category,
+
+                    currentSpending:
+                        Number(
+                            currentAmount.toFixed(2)
+                        ),
+
+                    averageSpending:
+                        Number(
+                            average.toFixed(2)
+                        ),
+
+                    increasePercentage:
+                        Number(
+                            increasePercentage.toFixed(2)
+                        ),
+
+                    unusual: true
+                });
+            }
+        }
+        return alerts;
+    }
+    catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCategorySpending,
     getMonthlytrend,
-    getBudgetStatus
+    getBudgetStatus,
+    getUnusualSpending
 }
