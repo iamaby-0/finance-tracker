@@ -245,16 +245,32 @@ const getBudgetStatus = async (userId, budgetId) => {
         const percentageUsed = budget.amount > 0 ? (spent / budget.amount) * 100 : 0;
 
 
+        let status;
+        if(percentageUsed > 100){
+            status = "EXCEEDED";
+        }
+        else if(percentageUsed >= 80){
+            status = "WARNING";
+        }
+        else if(percentageUsed >= 70){
+            status = "WATCH"
+        }
+        else{
+            status = "NORMAL"
+        }
+
         return {
-            budget: budget.amount,
-            spent,
-            remaining,
-            percentageUsed:
-                Number(percentageUsed.toFixed(2)),
-            alert:
-                percentageUsed >= budget.alertPercentage,
-            exceeded:
-                spent > budget.amount
+            budgetId : budget.budgetId,
+            category : budget.category,
+            month : budget.month,
+            year : budget.year,
+            budget : Number(budgetAmount.toFixed(2)),
+            spent : Number(budgetAmount.toFixed(2)),
+            remaining : Number(budgetAmount.toFixed(2)),
+            percentageUsed : Number(budgetAmount.toFixed(2)),
+            status,
+            alert : percentageUsed >= budget.alertPercentage,
+            exceeded : spent > budgetAmount
         }
     }
     catch (error) {
