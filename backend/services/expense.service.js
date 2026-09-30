@@ -1,10 +1,38 @@
 const Expense = require("../models/expense.model")
+const {categorizeExpense} = require("./ai/ai.service") 
 
 const createExpense = async(userId, data) =>{
     try{
+        const { amount , description, category ,paymentMethod, subCategory, date, notes} = data;
+
+        let finalCategory = category;
+        let finalSubCategory = subCategory;
+
+        let aiCategorized = false;
+        let aiConfidence = null;
+
+        if(!category){
+            const aiResult = await categorizeExpense(description, amount);
+
+            finalCategory = aiResult.category;
+            finalSubCategory = aiResult.subCategory;
+            
+            aiCategorized = true;
+
+            aiConfidence = aiResult.confidence;
+        }
+
         const response = await Expense.create({
             userId,
-            ...data
+            amount,
+            description,
+            category : finalCategory,
+            subCategory : finalSubCategory,
+            paymentMethod,
+            date,
+            notes,
+            aiCategorized,
+            aiConfidence
         });
 
         return response;
