@@ -246,31 +246,31 @@ const getBudgetStatus = async (userId, budgetId) => {
 
 
         let status;
-        if(percentageUsed > 100){
+        if (percentageUsed > 100) {
             status = "EXCEEDED";
         }
-        else if(percentageUsed >= 80){
+        else if (percentageUsed >= 80) {
             status = "WARNING";
         }
-        else if(percentageUsed >= 70){
+        else if (percentageUsed >= 70) {
             status = "WATCH"
         }
-        else{
+        else {
             status = "NORMAL"
         }
 
         return {
-            budgetId : budget.budgetId,
-            category : budget.category,
-            month : budget.month,
-            year : budget.year,
-            budget : Number(budgetAmount.toFixed(2)),
-            spent : Number(budgetAmount.toFixed(2)),
-            remaining : Number(budgetAmount.toFixed(2)),
-            percentageUsed : Number(budgetAmount.toFixed(2)),
+            budgetId: budget.budgetId,
+            category: budget.category,
+            month: budget.month,
+            year: budget.year,
+            budget: Number(budgetAmount.toFixed(2)),
+            spent: Number(budgetAmount.toFixed(2)),
+            remaining: Number(budgetAmount.toFixed(2)),
+            percentageUsed: Number(budgetAmount.toFixed(2)),
             status,
-            alert : percentageUsed >= budget.alertPercentage,
-            exceeded : spent > budgetAmount
+            alert: percentageUsed >= budget.alertPercentage,
+            exceeded: spent > budgetAmount
         }
     }
     catch (error) {
@@ -424,10 +424,285 @@ const getUnusualSpending = async (userId, month, year) => {
     }
 }
 
+const getSavingsPrediction = async (userId) => {
+    try {
+        const userObjectId = ObjectId(userId);
+
+        const startDate = new Date();
+        const endDate = new Date();
+
+        startDate.setMonth(startDate.getMonth() - 6);
+
+        // Monthaly income
+        const incomeDate = await Income.aggregate([
+            {
+                $match: {
+                    userId: userObjectId,
+                    date: {
+                        $gte: startDate,
+                        $lte: endDate
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: {
+                            $year: "$date"
+                        },
+                        month: {
+                            $month: "$date"
+                        }
+                    },
+
+                    income: {
+                        $sum: "$amount"
+                    }
+                }
+            },
+
+            {
+                $sort: {
+                    "_id.year": 1,
+                    "_id.month": 1
+                }
+            }
+        ])
+
+        // Monthaly Expense
+        const expenseDate = await Expense.aggregate([
+            {
+                $match: {
+                    userId: userObjectId,
+
+                    date: {
+                        $gte: startDate,
+                        $lte: endDate
+                    }
+                }
+            },
+
+            {
+                $group: {
+
+                    _id: {
+                        year: {
+                            $year: "$date"
+                        },
+
+                        month: {
+                            $month: "$date"
+                        }
+                    },
+
+                    expense: {
+                        $sum: "$amount"
+                    }
+                }
+            },
+
+            {
+                $sort: {
+                    "_id.year": 1,
+                    "_id.month": 1
+                }
+            }
+        ])
+
+
+        // Combine income and expenses
+        const monthlyData = [];
+
+
+        const months = new Set();
+
+
+        incomeData.forEach(item => {
+
+            months.add(
+                `${item._id.year}-${item._id.month}`
+            );
+        });
+
+
+        expenseData.forEach(item => {
+
+            months.add(
+                `${item._id.year}-${item._id.month}`
+            );
+        });
+
+
+        for (const monthKey of months) {
+
+            const [year, month] =
+                monthKey.split("-");
+
+
+            const income =
+                incomeData.find(
+                    item =>
+                        item._id.year ===
+                        Number(year) &&
+                        item._id.month ===
+                        Number(month)
+                )?.income || 0;
+
+
+            const expense =
+                expenseData.find(
+                    item =>
+                        item._id.year ===
+                        Number(year) &&
+                        item._id.month ===
+                        Number(month)
+                )?.expense || 0;
+
+
+            const savings =
+                income - expense;
+
+
+            const savingsRate =
+                income > 0
+                    ? (savings / income) * 100
+                    : 0;
+
+
+            monthlyData.push({
+
+                year: Number(year),
+
+                month: Number(month),
+
+                income,
+
+                expense,
+
+                savings,
+
+                savingsRate:
+                    Number(
+                        savingsRate.toFixed(2)
+                    )
+            });
+        }
+
+
+        // Sort chronologically
+        monthlyData.sort((a, b) => {
+
+            if (a.year !== b.year) {
+                return a.year - b.year;
+            }
+
+            return a.month - b.month;
+        });
+
+
+        if (monthlyData.length === 0) {
+
+            return {
+                message:
+                    "Not enough financial data"
+            };
+        }
+
+
+        // Average values
+        const totalIncome =
+            monthlyData.reduce(
+                (sum, item) =>
+                    sum + item.income,
+                0
+            );
+
+
+        const totalExpense =
+            monthlyData.reduce(
+                (sum, item) =>
+                    sum + item.expense,
+                0
+            );
+
+
+        const totalSavings =
+            totalIncome - totalExpense;
+
+
+        const averageMonthlyIncome =
+            totalIncome /
+            monthlyData.length;
+
+
+        const averageMonthlyExpense =
+            totalExpense /
+            monthlyData.length;
+
+
+        const averageMonthlySavings =
+            totalSavings /
+            monthlyData.length;
+
+
+        const averageSavingsRate =
+            averageMonthlyIncome > 0
+                ? (
+                    averageMonthlySavings /
+                    averageMonthlyIncome
+                ) * 100
+                : 0;
+
+
+        return {
+
+            monthsAnalyzed:
+                monthlyData.length,
+
+            averageMonthlyIncome:
+                Number(
+                    averageMonthlyIncome.toFixed(2)
+                ),
+
+            averageMonthlyExpense:
+                Number(
+                    averageMonthlyExpense.toFixed(2)
+                ),
+
+            averageMonthlySavings:
+                Number(
+                    averageMonthlySavings.toFixed(2)
+                ),
+
+            averageSavingsRate:
+                Number(
+                    averageSavingsRate.toFixed(2)
+                ),
+
+            projectedMonthlySavings:
+                Number(
+                    averageMonthlySavings.toFixed(2)
+                ),
+
+            projectedYearlySavings:
+                Number(
+                    (
+                        averageMonthlySavings * 12
+                    ).toFixed(2)
+                ),
+
+            monthlyData
+        };
+    } catch (error) {
+
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCategorySpending,
     getMonthlytrend,
     getBudgetStatus,
-    getUnusualSpending
+    getUnusualSpending,
+    getSavingsPrediction
 }

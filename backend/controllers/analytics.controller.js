@@ -124,10 +124,26 @@ const getUnusualSpending = async (req, res)=>{
     }
 }
 
+const getSavingsPrediction = async (req, res) =>{
+    try{
+        const response = await analyticsService.getSavingsPrediction(req.user.id);
+
+        successResponseBody.data = response
+        successResponseBody.message = "Savings prediction generated successfully"
+
+        return res.status(200).json(successResponseBody)
+    }
+    catch(error){
+         errorResponseBody.error = error
+        res.status(500).json(errorResponseBody);
+    }
+}
+
 module.exports = {
     getMonthlySummary,
     getCatogarySpend,
     getMonthlyTrend,
     getBudgetStatus,
-    getUnusualSpending
+    getUnusualSpending,
+    getSavingsPrediction
 }

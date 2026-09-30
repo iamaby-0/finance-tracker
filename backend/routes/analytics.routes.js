@@ -30,6 +30,13 @@ const routes = (app) =>{
         analyitcsController.getUnusualSpending
     )
 
+     app.get('/aft/api/v1/analytics/savings-prediction',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getSavingsPrediction
+    )
+
+    
+
 }
 
 module.exports = routes;
