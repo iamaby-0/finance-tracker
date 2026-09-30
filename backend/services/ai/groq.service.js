@@ -5,7 +5,7 @@ const groq = new Groq({
     apiKey: config.groqApiKey
 });
 
-const generateQwenResponse = async (messages, options = {}) => {
+const generateAIResponse = async (messages, options = {}) => {
 
     try {
 
@@ -36,5 +36,5 @@ const generateQwenResponse = async (messages, options = {}) => {
 };
 
 module.exports = {
-    generateQwenResponse
+    generateAIResponse
 };

@@ -6,6 +6,7 @@ const expenseRoutes = require('./routes/expense.routes')
 const incomeRoutes = require('./routes/income.routes')
 const budgetRoutes = require('./routes/budget.routes')
 const analyticsRoutes = require('./routes/analytics.routes')
+const aiRoutes = require('./routes/ai.routes')
 
 const app = express();
 
@@ -17,6 +18,7 @@ expenseRoutes(app) // calling expense routes
 incomeRoutes(app)
 budgetRoutes(app)
 analyticsRoutes(app)
+aiRoutes(app);
 
 
 app.listen(env.port, ()=>{
