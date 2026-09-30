@@ -1,6 +1,6 @@
 const {errorResponseBody} = require("../utils/responseBody")
 
-const expenseCreateMiddleware = async(req, res,next)=>{
+const expenseCreateRequest = async(req, res,next)=>{
     if (!req.user || !req.user.id) {
         errorResponseBody.error = "userId required";
         return res.status(400).json(errorResponseBody);
