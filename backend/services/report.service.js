@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
-const Expense = require("../models/Expense");
-const Income = require("../models/Income");
-const Budget = require("../models/Budget");
+const Expense = require("../models/expense.model");
+const Income = require("../models/income.model");
+const Budget = require("../models/budget.model");
 
 
 const { getUnusualSpending, getSavingsPrediction } = require("./analytics.service");
-const { generateFinancialInsights } = require("./ai/ai.service");
 
-const getMonthlyReports = async (ueserId, month, year) => {
+
+const getMonthlyReports = async (userId, month, year) => {
     try {
         const userObjectId =
             new mongoose.Types.ObjectId(userId);
