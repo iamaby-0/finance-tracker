@@ -436,6 +436,310 @@ const getMonthlyReports = async (userId, month, year) => {
     }
 }
 
+const getYearlyReport = async (userId, year) => {
+
+    try {
+
+        const userObjectId =
+            new mongoose.Types.ObjectId(userId);
+
+        const startDate = new Date(
+            year,
+            0,
+            1
+        );
+
+        const endDate = new Date(
+            year + 1,
+            0,
+            1
+        );
+
+
+        // ==========================================
+        // MONTHLY INCOME
+        // ==========================================
+
+        const incomeData =
+            await Income.aggregate([
+
+                {
+                    $match: {
+                        userId: userObjectId,
+
+                        date: {
+                            $gte: startDate,
+                            $lt: endDate
+                        }
+                    }
+                },
+
+                {
+                    $group: {
+
+                        _id: {
+                            month: {
+                                $month: "$date"
+                            }
+                        },
+
+                        income: {
+                            $sum: "$amount"
+                        }
+                    }
+                },
+
+                {
+                    $sort: {
+                        "_id.month": 1
+                    }
+                }
+            ]);
+
+
+        // ==========================================
+        // MONTHLY EXPENSE
+        // ==========================================
+
+        const expenseData =
+            await Expense.aggregate([
+
+                {
+                    $match: {
+                        userId: userObjectId,
+
+                        date: {
+                            $gte: startDate,
+                            $lt: endDate
+                        }
+                    }
+                },
+
+                {
+                    $group: {
+
+                        _id: {
+                            month: {
+                                $month: "$date"
+                            }
+                        },
+
+                        expense: {
+                            $sum: "$amount"
+                        }
+                    }
+                },
+
+                {
+                    $sort: {
+                        "_id.month": 1
+                    }
+                }
+            ]);
+
+
+        // ==========================================
+        // CATEGORY BREAKDOWN
+        // ==========================================
+
+        const categoryData =
+            await Expense.aggregate([
+
+                {
+                    $match: {
+                        userId: userObjectId,
+
+                        date: {
+                            $gte: startDate,
+                            $lt: endDate
+                        }
+                    }
+                },
+
+                {
+                    $group: {
+
+                        _id: "$category",
+
+                        amount: {
+                            $sum: "$amount"
+                        }
+                    }
+                },
+
+                {
+                    $sort: {
+                        amount: -1
+                    }
+                }
+            ]);
+
+
+        // ==========================================
+        // BUILD 12 MONTHS
+        // ==========================================
+
+        const monthlyData = [];
+
+        for (let month = 1; month <= 12; month++) {
+
+            const income =
+                incomeData.find(
+                    item =>
+                        item._id.month === month
+                )?.income || 0;
+
+
+            const expense =
+                expenseData.find(
+                    item =>
+                        item._id.month === month
+                )?.expense || 0;
+
+
+            const savings =
+                income - expense;
+
+
+            const savingsRate =
+                income > 0
+                    ? (savings / income) * 100
+                    : 0;
+
+
+            monthlyData.push({
+
+                month,
+
+                income:
+                    Number(
+                        income.toFixed(2)
+                    ),
+
+                expense:
+                    Number(
+                        expense.toFixed(2)
+                    ),
+
+                savings:
+                    Number(
+                        savings.toFixed(2)
+                    ),
+
+                savingsRate:
+                    Number(
+                        savingsRate.toFixed(2)
+                    )
+            });
+        }
+
+
+        // ==========================================
+        // YEAR TOTALS
+        // ==========================================
+
+        const totalIncome =
+            monthlyData.reduce(
+                (sum, item) =>
+                    sum + item.income,
+                0
+            );
+
+
+        const totalExpense =
+            monthlyData.reduce(
+                (sum, item) =>
+                    sum + item.expense,
+                0
+            );
+
+
+        const totalSavings =
+            totalIncome - totalExpense;
+
+
+        const savingsRate =
+            totalIncome > 0
+                ? (
+                    totalSavings /
+                    totalIncome
+                ) * 100
+                : 0;
+
+
+        // ==========================================
+        // CATEGORY BREAKDOWN
+        // ==========================================
+
+        const categoryBreakdown =
+            categoryData.map(item => ({
+
+                category:
+                    item._id,
+
+                amount:
+                    Number(
+                        item.amount.toFixed(2)
+                    )
+            }));
+
+
+        // ==========================================
+        // TOP CATEGORY
+        // ==========================================
+
+        const topCategory =
+            categoryBreakdown.length > 0
+                ? categoryBreakdown[0]
+                : null;
+
+
+        return {
+
+            year,
+
+            summary: {
+
+                totalIncome:
+                    Number(
+                        totalIncome.toFixed(2)
+                    ),
+
+                totalExpense:
+                    Number(
+                        totalExpense.toFixed(2)
+                    ),
+
+                totalSavings:
+                    Number(
+                        totalSavings.toFixed(2)
+                    ),
+
+                savingsRate:
+                    Number(
+                        savingsRate.toFixed(2)
+                    )
+            },
+
+            topCategory,
+
+            categoryBreakdown,
+
+            monthlyData
+
+        };
+
+    } catch (error) {
+
+        console.error(
+            "Yearly report error:",
+            error
+        );
+
+        throw error;
+    }
+};
 module.exports = {
-    getMonthlyReports
+    getMonthlyReports,
+    getYearlyReport
 }

@@ -6,7 +6,11 @@ const routes = (app) => {
         authMiddleware.isAuthenticated,
         reportController.getMonthlyReport
     )
-}   
 
+    app.get('/aft/api/v1/report/yearly-report',
+        authMiddleware.isAuthenticated,
+        reportController.getYearlyReport
+    )
+}
 
 module.exports = routes;
