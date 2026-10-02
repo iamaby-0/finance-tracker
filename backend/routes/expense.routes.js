@@ -1,9 +1,11 @@
 const expenseController = require('../controllers/expense.controller')
 const authMiddleware = require('../middlewares/auth.middlewares')
+const expenseMiddleware = require('../middlewares/expense.middleware')
 
 const routes = (app) =>{
     app.post('/aft/api/v1/expenses',
        authMiddleware.isAuthenticated,
+       expenseMiddleware.expenseCreateRequest,
         expenseController.createExp
     )
 
