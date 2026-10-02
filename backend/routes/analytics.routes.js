@@ -34,9 +34,6 @@ const routes = (app) =>{
         authMiddleware.isAuthenticated,
         analyitcsController.getSavingsPrediction
     )
-
-    
-
 }
 
 module.exports = routes;
