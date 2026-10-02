@@ -35,8 +35,10 @@ const routes = (app) =>{
         analyitcsController.getSavingsPrediction
     )
 
-    
-
+    app.get('/aft/api/v1/analytics/monthly-report',
+        authMiddleware.isAuthenticated,
+        analyitcsController.getMonthlyReport
+    )
 }
 
 module.exports = routes;
