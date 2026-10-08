@@ -6,11 +6,11 @@ const env = require("../config/env")
 const userResistration = async (data) => {
     try {
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({email : data.email});
 
         if (existingUser) {
-            throw {
-                error: "User already Exist", code: 404
+            return {
+                error: "User already Exist", code: 409
             }
         }
 
@@ -24,15 +24,26 @@ const userResistration = async (data) => {
     }
     catch (error) {
         console.log(error);
-        if (error == "ValidationError") {
-            let err = {};
+        if (error.name == "ValidationError") {
+            const err = {};
             Object.keys(error.errors).forEach((key) => {
                 err[key] = error.errors[key].message;
             })
             throw {
-                error: err, code: 400
+                error: err,
+                message: "Validation failed",
+                code: 400
             }
         }
+
+        if (error && error.code === 11000) {
+            throw {
+                error: "User already exists with this email",
+                message: "User already exists with this email",
+                code: 409
+            }
+        }
+
         throw error;
     }
 }

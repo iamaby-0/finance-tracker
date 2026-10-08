@@ -6,7 +6,7 @@ export const loginUser = async(data) =>{
     return response.data
 }
 
-export const registerUser =async(data)=>{
+export const registerUser = async(data)=>{
     const response = await api.post("/auth/signup",data);
 
     return response.data;
@@ -19,6 +19,17 @@ export const logoutUser = () => {
 
 export const getStoreUser = () =>{
     const user = localStorage.getItem('user');
+
+    if(!user){
+        return null;
+    }
+
+    try{
+        return JSON.parse(user);
     
-    return user ? JSON.parse(user) : null ;
+    } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("user");
+        return null;
+    }
 }

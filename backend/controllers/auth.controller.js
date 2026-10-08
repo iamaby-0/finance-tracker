@@ -1,6 +1,20 @@
 const authService = require("../services/auth.service")
 const {errorResponseBody, successResponseBody} = require("../utils/responseBody")
 
+const normalizeErrorPayload = (error) => {
+    if (typeof error === "string") return error;
+
+    if (Array.isArray(error)) return error.join(", ");
+
+    if (error && typeof error === "object") {
+        const values = Object.values(error);
+        if (values.length) return values.join(", ");
+        return "Registration failed";
+    }
+
+    return "Registration failed";
+};
+
 const signup = async(req, res)=>{
     try{
         const response = await authService.userResistration(req.body);
@@ -8,8 +22,8 @@ const signup = async(req, res)=>{
         if(response.error){
             return res.status(response.code).json({
                 success : false,
-                error : response.error,
-                message : "something went wrong",
+                error : normalizeErrorPayload(response.error),
+                message : response.message || normalizeErrorPayload(response.error),
                 data : {}
             })
         }
@@ -21,11 +35,14 @@ const signup = async(req, res)=>{
         })
     }
     catch(error){
-        return res.status(500).json({
-            success : false ,
-            error : erorr,
-            message : "User Not Registered || Invalid Server Error"
+        const status = error?.code || 500;
+        const payloadError = normalizeErrorPayload(error?.error || error?.message || "Registration failed");
 
+        return res.status(status).json({
+            success : false,
+            error : payloadError,
+            message : error?.message || payloadError,
+            data : {}
         })
     }
 }
