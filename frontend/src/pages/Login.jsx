@@ -36,8 +36,7 @@ function Login() {
 
         try {
 
-            const response =
-                await loginUser(formData);
+            const response = await loginUser(formData);
 
             console.log("Login response:", response);
 
@@ -56,8 +55,8 @@ function Login() {
              * adjust these two lines.
              */
 
-            const token = response.data.token;
-            const user = response.data.user;
+            const token = response.token;
+            const user = response.data;
 
             login(user, token);
 
