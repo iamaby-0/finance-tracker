@@ -41,7 +41,9 @@ const validateSigninRequest = async(req, res, next)=>{
 const isAuthenticated = async(req, res, next)=>{
     try{
 
-        const token = req.headers["x-access-token"];
+        const authHeader = req.headers.authorization;
+        const bearerToken = authHeader && authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
+        const token = req.headers["x-access-token"] || bearerToken;
 
         if(!token){
             errorResponseBody.error = "No token provided"
@@ -56,7 +58,7 @@ const isAuthenticated = async(req, res, next)=>{
         }
 
         req.user = {
-            id : response.id
+            id : response.id || response.userId
         }
 
         next()

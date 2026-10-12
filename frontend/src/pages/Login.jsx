@@ -327,6 +327,11 @@ function Login() {
 
                         <button
                             type="button"
+                            
+                            onClick={()=>{
+                                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
+                            }}
+
                             className="
                                 w-full
                                 h-10
@@ -345,84 +350,6 @@ function Login() {
                             </span>
 
                             Continue with Google
-
-                        </button>
-
-
-                        {/* APPLE */}
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-
-                            <span className="mr-2">
-                                ●
-                            </span>
-
-                            Continue with Apple
-
-                        </button>
-
-
-                        {/* BINANCE */}
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-
-                            <span className="mr-2">
-                                ◆
-                            </span>
-
-                            Continue with Binance
-
-                        </button>
-
-
-                        {/* WALLET */}
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-
-                            <span className="mr-2">
-                                ▣
-                            </span>
-
-                            Continue with Wallet
 
                         </button>
 

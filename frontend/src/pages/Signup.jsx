@@ -536,30 +536,32 @@ function Signup() {
                         DIVIDER
                     ========================== */}
 
-                    {/* OR Divider */}
+                    <div className="flex items-center gap-3 my-6">
 
-                    <div className="flex flex-col items-center">
-
-                        <div className="w-px h-2 bg-gray-200"></div>
+                        <div className="flex-1 h-px bg-gray-200" />
 
                         <span className="text-xs text-gray-400">
                             OR
                         </span>
 
-                        <div className="w-px h-3 bg-gray-200"></div>
+                        <div className="flex-1 h-px bg-gray-200" />
 
                     </div>
 
 
                     {/* =========================
-                        SOCIAL BUTTONS
+                        SOCIAL LOGIN
                     ========================== */}
 
                     <div className="space-y-3">
 
+                        {/* GOOGLE */}
 
                         <button
                             type="button"
+                            onClick={()=>{
+                                window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
+                            }}
                             className="
                                 w-full
                                 h-10
@@ -572,82 +574,19 @@ function Signup() {
                                 transition
                             "
                         >
+
                             <span className="mr-2 font-bold">
                                 G
                             </span>
 
                             Continue with Google
-                        </button>
 
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-                            <span className="mr-2">
-                                ●
-                            </span>
-
-                            Continue with Apple
-                        </button>
-
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-                            <span className="mr-2">
-                                ◆
-                            </span>
-
-                            Continue with Binance
-                        </button>
-
-
-                        <button
-                            type="button"
-                            className="
-                                w-full
-                                h-10
-                                border
-                                border-gray-300
-                                rounded-lg
-                                text-sm
-                                font-medium
-                                hover:bg-gray-50
-                                transition
-                            "
-                        >
-                            <span className="mr-2">
-                                ▣
-                            </span>
-
-                            Continue with Wallet
                         </button>
 
                     </div>
 
                 </div>
+
 
 
                 {/* =========================

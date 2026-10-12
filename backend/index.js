@@ -8,15 +8,17 @@ const incomeRoutes = require('./routes/income.routes')
 const budgetRoutes = require('./routes/budget.routes')
 const analyticsRoutes = require('./routes/analytics.routes')
 const reportRoutes = require('./routes/report.routes')
+const passport = require('./config/passport');
 
 const app = express();
 ``
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 app.use(cors({
-    origin: "*"
+    origin: "http://localhost:5173", // Replace with your frontend URL
+    credentials: true, // Allow cookies to be sent
 }))
-
+app.use(passport.initialize());
 authRoutes(app); // invoking auth routes
 expenseRoutes(app) // calling expense routes
 incomeRoutes(app) // calling income routes
