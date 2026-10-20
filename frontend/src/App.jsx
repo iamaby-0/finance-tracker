@@ -3,7 +3,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import ProtectedRoutes from './routes/ProtectedRoute'
 import { Dashboard } from './pages/Dashboard'
-import Signup from './pages/SignUp'
+import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
 
