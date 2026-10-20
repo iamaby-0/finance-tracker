@@ -327,8 +327,8 @@ function Login() {
 
                         <button
                             type="button"
-                            
-                            onClick={()=>{
+
+                            onClick={() => {
                                 window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`
                             }}
 
