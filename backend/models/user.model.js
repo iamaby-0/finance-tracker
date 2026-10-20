@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
         type : String,
         required : true,
         minlength : 2,
-        maxlength : 20
+        maxlength : 50
     },
 
     email : {
@@ -20,7 +20,10 @@ const userSchema = new mongoose.Schema({
 
     password : {
         type : String,
-        required : true
+        required : function () {
+            return this.authProvider === "local";
+        }
+        
     },
 
     monthlyIncome : {
@@ -36,7 +39,25 @@ const userSchema = new mongoose.Schema({
     currency : {
         type : String,
         default : "INR "
-    }
+    },
+
+    googleId : {
+        type : String,
+        default : null,
+        unique : true,
+        sparse : true
+    },
+
+    authProvider : {
+        type : String,
+        enum : ["local", "google"],
+        default : "local"
+    },
+
+    profilePicture : {
+        type : String,
+        default : null
+    },
 })
 
 const User = mongoose.model('User', userSchema)
