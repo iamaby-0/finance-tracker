@@ -37,8 +37,8 @@ function App() {
         
         {/* Auth routes */}
         <Route path="/signin" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Navigate to="/signin" replace />} />
         <Route path="/google-success" element={<GoogleSuccess />} />
 
         {/* Authenticated Dashboard */}
