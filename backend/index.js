@@ -8,10 +8,10 @@ const incomeRoutes = require('./routes/income.routes')
 const budgetRoutes = require('./routes/budget.routes')
 const analyticsRoutes = require('./routes/analytics.routes')
 const reportRoutes = require('./routes/report.routes')
+const aiRoutes = require('./routes/ai.routes')
 const passport = require('./config/passport');
 
 const app = express();
-``
 app.use(express.json())
 app.use(express.urlencoded({extended : true}))
 app.use(cors({
@@ -25,6 +25,7 @@ incomeRoutes(app) // calling income routes
 budgetRoutes(app) // calling budget routes
 analyticsRoutes(app) // calling analytics routes
 reportRoutes(app) // calling report routes
+aiRoutes(app) // calling ai routes
 
 
 app.listen(env.port, ()=>{

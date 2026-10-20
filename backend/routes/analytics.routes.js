@@ -12,7 +12,7 @@ const routes = (app) =>{
     app.get('/aft/api/v1/analytics/categories',
         authMiddleware.isAuthenticated,
         analyticsMiddleware.monthalySummaryRequest,
-        analyitcsController.getMonthlySummary
+        analyitcsController.getCatogarySpend
     )
 
     app.get('/aft/api/v1/analytics/trends',

@@ -142,7 +142,7 @@ const generateFinancialInsights = async (userId) => {
             }
         ]);
 
-        const totalIncome = incomeResult[0].totalIncome || 0;
+        const totalIncome = incomeResult[0]?.totalIncome || 0;
 
         //for Expense
 
@@ -168,7 +168,7 @@ const generateFinancialInsights = async (userId) => {
             }
         ]);
 
-        totalExpense = expenseResult[0].totalExpense || 0;
+        let totalExpense = expenseResult[0]?.totalExpense || 0;
 
         //category Spending
 
