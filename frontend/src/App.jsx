@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import ProtectedRoutes from './routes/ProtectedRoute'
 import { Dashboard } from './pages/Dashboard'
+import { Income } from './pages/Income'
 import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
@@ -41,9 +42,10 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/google-success" element={<GoogleSuccess />} />
 
-        {/* Authenticated Dashboard */}
+        {/* Authenticated Dashboard & Income */}
         <Route element={<ProtectedRoutes />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/income" element={<Income />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
