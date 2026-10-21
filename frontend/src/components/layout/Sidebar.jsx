@@ -32,7 +32,7 @@ export default function Sidebar({
     { id: 'Transactions', label: 'Transactions', icon: ArrowLeftRight, path: '/dashboard' },
     { id: 'Income', label: 'Income', icon: TrendingUp, path: '/income' },
     { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/dashboard' },
-    { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/dashboard' },
+    { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard' },
     { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/dashboard' },
@@ -158,11 +158,15 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            Track Smarter
-            <span className="block font-semibold text-[#A5B4B8] text-xs">Live Better</span>
+            {activeItem === 'Budgets' ? 'Stay on Budget' : 'Track Smarter'}
+            <span className="block font-semibold text-[#A5B4B8] text-xs">
+              {activeItem === 'Budgets' ? 'Build Your Future' : 'Live Better'}
+            </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            Get AI insights and better financial control.
+            {activeItem === 'Budgets'
+              ? 'Create smart budgets and achieve your goals.'
+              : 'Get AI insights and better financial control.'}
           </p>
 
           {/* Decorative Mini Trend Chart & Arrow Button */}

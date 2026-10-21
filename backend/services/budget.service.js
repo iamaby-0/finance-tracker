@@ -2,40 +2,40 @@ const Budget = require('../models/budget.model')
 
 const createBudget = async (userId, data) => {
     try {
-
-        const { userId, category, month, year } = data;
+        const { category, month, year } = data;
 
         const existingBudget = await Budget.findOne({
-            category,
+            userId,
+            category: category || 'Overall',
             month,
             year
-        })
+        });
 
         if (existingBudget) {
-            throw new Error(
-                `Budget already exists for ${category} in ${month}/${year}`
-            );
+            throw {
+                message: `A budget already exists for ${category || 'Overall'} in ${month}/${year}`,
+                code: 409
+            };
         }
 
-        const response = await Budget.create({ userId, ...data })
-
+        const response = await Budget.create({ ...data, userId });
         return response;
     }
     catch (error) {
         console.log(error);
-        if (error.name == "ValidationError") {
+        if (error.name === "ValidationError") {
             let err = {};
             Object.keys(error.errors).forEach((keys) => {
-                err[keys] = error.errors[keys].message
+                err[keys] = error.errors[keys].message;
             });
 
             throw {
                 error: err, code: 400
-            }
+            };
         }
         throw error;
     }
-}
+};
 
 const getbudgets = async (userId, filters = {}) => {
     try {
@@ -74,14 +74,14 @@ const getbudgets = async (userId, filters = {}) => {
 
 const getBudgetById = async (id) => {
     try {
-        const response = await Budget.findOne({ id });
+        const response = await Budget.findById(id);
         if (!response) {
             throw {
                 error: "invalid budget id",
                 code: 404
-            }
+            };
         }
-        return response
+        return response;
     }
     catch (error) {
         console.log(error)

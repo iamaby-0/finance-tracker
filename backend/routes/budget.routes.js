@@ -5,28 +5,28 @@ const budgetMiddleware = require('../middlewares/budget.middleware')
 
 
 const routes = (app) => {
-   app.post('/aft/api/v1/budget',
+   app.post(['/aft/api/v1/budget', '/aft/api/v1/budgets'],
       authMiddleware.isAuthenticated,
       budgetMiddleware.budgetCreateRequest,
       budgetController.createBudget
    )
 
-   app.get('/aft/api/v1/budget',
+   app.get(['/aft/api/v1/budget', '/aft/api/v1/budgets'],
       authMiddleware.isAuthenticated,
       budgetController.getBudgets
    )
 
-   app.get('/aft/api/v1/expenses/:id',
+   app.get(['/aft/api/v1/budget/:id', '/aft/api/v1/budgets/:id'],
       authMiddleware.isAuthenticated,
       budgetController.getBudgetByid
    )
 
-   app.patch('/aft/api/v1/expenses/:id',
+   app.patch(['/aft/api/v1/budget/:id', '/aft/api/v1/budgets/:id'],
       authMiddleware.isAuthenticated,
       budgetController.updateBudget
    )
 
-   app.delete('/aft/api/v1/expenses/:id',
+   app.delete(['/aft/api/v1/budget/:id', '/aft/api/v1/budgets/:id'],
       authMiddleware.isAuthenticated,
       budgetController.deleteBudget
    )

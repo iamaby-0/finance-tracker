@@ -26,7 +26,7 @@ const routes = (app) =>{
 
     app.delete('/aft/api/v1/expenses/:id',
         authMiddleware.isAuthenticated,
-        expenseController.updateExpense
+        expenseController.deleteEX
     )
 }
 
