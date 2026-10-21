@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Lightbulb,
   TrendingUp,
@@ -12,6 +13,15 @@ export default function AIInsights({
   onViewAll,
   onActionClick
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/ai-insights');
+    }
+  };
   // Reference insights matching UI reference exactly
   const primaryInsight = {
     title: 'You spent 28% more on food this month',
@@ -53,7 +63,7 @@ export default function AIInsights({
         </div>
 
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

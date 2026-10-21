@@ -58,8 +58,17 @@ const DEFAULT_TRANSACTIONS = [
   }
 ];
 
-export default function RecentCategoryTransactions({ transactions = null }) {
+export default function RecentCategoryTransactions({ transactions = null, onViewAll }) {
   const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/transactions');
+    }
+  };
+
   const items = transactions && transactions.length > 0 ? transactions : DEFAULT_TRANSACTIONS;
 
   const getCategoryBadge = (cat) => {
@@ -126,7 +135,7 @@ export default function RecentCategoryTransactions({ transactions = null }) {
         </h3>
         <button
           type="button"
-          onClick={() => navigate('/transactions')}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] transition-colors cursor-pointer"
         >
           View All

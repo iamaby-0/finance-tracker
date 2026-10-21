@@ -57,7 +57,7 @@ export default function FinancialGoalsProgress({ goals }) {
           Financial Goals Progress
         </h3>
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/goals')}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] transition cursor-pointer"
         >
           View All

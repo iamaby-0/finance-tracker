@@ -209,7 +209,8 @@ export default function RecentExpensesTable({
   expenses = [],
   loading = false,
   onEdit,
-  onDelete
+  onDelete,
+  onViewAll
 }) {
   const navigate = useNavigate();
 
@@ -233,7 +234,13 @@ export default function RecentExpensesTable({
 
         {/* View All Link */}
         <button
-          onClick={() => navigate('/transactions')}
+          onClick={() => {
+            if (onViewAll) {
+              onViewAll();
+            } else {
+              navigate('/transactions?type=Expenses');
+            }
+          }}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

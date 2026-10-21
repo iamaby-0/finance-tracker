@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp,
   DollarSign,
@@ -40,6 +41,16 @@ export default function BudgetInsights({
   insights = null,
   onViewAll
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/ai-insights');
+    }
+  };
+
   const items = (insights && insights.length > 0) ? insights : DEFAULT_INSIGHTS;
 
   return (
@@ -56,7 +67,7 @@ export default function BudgetInsights({
         </div>
 
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

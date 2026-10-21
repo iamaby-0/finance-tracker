@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -29,6 +30,7 @@ const INITIAL_CATEGORIES = [
 
 export function Categories() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Navigation and search states
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -357,7 +359,14 @@ export function Categories() {
 
             {/* Right (~55%): Recent Transactions by Category */}
             <div className="lg:col-span-7 h-full">
-              <RecentCategoryTransactions transactions={recentTransactionsData} />
+              <RecentCategoryTransactions
+                transactions={recentTransactionsData}
+                onViewAll={() => {
+                  if (activeTab === 'Income') navigate('/transactions?type=Income');
+                  else if (activeTab === 'Expense') navigate('/transactions?type=Expenses');
+                  else navigate('/transactions');
+                }}
+              />
             </div>
           </div>
         </main>

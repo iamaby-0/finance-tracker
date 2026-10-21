@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -15,6 +16,7 @@ import { formatDate } from '../utils/formatters';
 
 export function Income() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Mobile sidebar state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -323,6 +325,7 @@ export function Income() {
                 onEdit={(row) => setEditingIncome(row)}
                 onRefresh={fetchIncomeData}
                 searchQuery={searchQuery}
+                onViewAll={() => navigate('/transactions?type=Income')}
               />
             </div>
 

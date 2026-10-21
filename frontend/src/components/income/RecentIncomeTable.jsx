@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Landmark,
   Laptop,
@@ -154,8 +155,10 @@ export default function RecentIncomeTable({
   incomes = null,
   onEdit,
   onRefresh,
-  searchQuery = ''
+  searchQuery = '',
+  onViewAll
 }) {
+  const navigate = useNavigate();
   const [deleteId, setDeleteId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -222,7 +225,13 @@ export default function RecentIncomeTable({
           Recent Income
         </h3>
         <button
-          onClick={() => {}}
+          onClick={() => {
+            if (onViewAll) {
+              onViewAll();
+            } else {
+              navigate('/transactions?type=Income');
+            }
+          }}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

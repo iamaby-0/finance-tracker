@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -16,15 +17,92 @@ const PAGE_SIZE = 10;
 
 export function Transactions() {
   const { user, logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Mobile sidebar state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Filter States
-  const [activeType, setActiveType] = useState('All'); // 'All' | 'Income' | 'Expenses'
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPeriod, setSelectedPeriod] = useState('This Month');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
+  // Helper resolvers for URL params
+  const parseTypeParam = (param) => {
+    if (!param) return 'All';
+    const lower = param.toLowerCase();
+    if (lower === 'income') return 'Income';
+    if (lower === 'expense' || lower === 'expenses') return 'Expenses';
+    return 'All';
+  };
+
+  const parsePeriodParam = (periodParam, typeParam, catParam) => {
+    if (periodParam) {
+      const lower = periodParam.toLowerCase();
+      if (lower === 'all' || lower === 'all time') return 'All Time';
+      if (lower === 'this month') return 'This Month';
+      if (lower === 'last month') return 'Last Month';
+      if (lower === 'last 3 months') return 'Last 3 Months';
+      if (lower === 'this year') return 'This Year';
+      return periodParam;
+    }
+    // When navigated via "View All" (e.g. ?type=Income or ?type=Expenses),
+    // default to 'All Time' so all records are visible
+    if (typeParam || catParam) {
+      return 'All Time';
+    }
+    return 'This Month';
+  };
+
+  // Filter States initialized from URL params
+  const [activeType, setActiveType] = useState(() =>
+    parseTypeParam(searchParams.get('type'))
+  );
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get('search') || ''
+  );
+  const [selectedPeriod, setSelectedPeriod] = useState(() =>
+    parsePeriodParam(
+      searchParams.get('period'),
+      searchParams.get('type'),
+      searchParams.get('category')
+    )
+  );
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get('category') || 'All Categories'
+  );
+
+  // Synchronize state when URL query parameters change
+  useEffect(() => {
+    const typeP = searchParams.get('type');
+    const periodP = searchParams.get('period');
+    const catP = searchParams.get('category');
+    const searchP = searchParams.get('search');
+
+    setActiveType(parseTypeParam(typeP));
+    setSelectedPeriod(parsePeriodParam(periodP, typeP, catP));
+
+    if (catP) {
+      setSelectedCategory(catP);
+    } else {
+      setSelectedCategory('All Categories');
+    }
+
+    if (searchP !== null) {
+      setSearchQuery(searchP);
+    }
+  }, [searchParams]);
+
+  const handleTypeChange = (tab) => {
+    setActiveType(tab);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (tab === 'All') {
+          next.delete('type');
+        } else {
+          next.set('type', tab);
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -254,7 +332,7 @@ export function Transactions() {
           {/* 4. Filter Toolbar */}
           <TransactionToolbar
             activeType={activeType}
-            onTypeChange={setActiveType}
+            onTypeChange={handleTypeChange}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             selectedPeriod={selectedPeriod}

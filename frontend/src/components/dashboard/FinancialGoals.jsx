@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plane, Plus } from 'lucide-react';
 import { formatCurrency, calculatePercentage } from '../../utils/formatters';
 
@@ -15,6 +16,16 @@ export default function FinancialGoals({
   onViewAll,
   onAddGoal
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/goals');
+    }
+  };
+
   const goal = goals && goals.length > 0 ? goals[0] : DEFAULT_GOAL;
   const percentage = calculatePercentage(goal.saved, goal.target);
   const Icon = goal.icon || Plane;
@@ -27,7 +38,7 @@ export default function FinancialGoals({
           Financial Goals
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All
