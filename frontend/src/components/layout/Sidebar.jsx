@@ -39,7 +39,7 @@ export default function Sidebar({
     { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/ai-insights' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/reports' },
     { id: 'Categories', label: 'Categories', icon: LayoutGrid, path: '/categories' },
-    { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
+    { id: 'Goals', label: 'Goals', icon: Target, path: '/goals' },
   ];
 
   const handleItemClick = (item) => {
@@ -168,7 +168,9 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'AI Insights'
+            {activeItem === 'Goals'
+              ? 'Achieve Your Financial Goals'
+              : activeItem === 'AI Insights'
               ? 'Unlock the Power of AI Insights'
               : activeItem === 'Budgets'
               ? 'Stay on Budget'
@@ -182,7 +184,9 @@ export default function Sidebar({
               ? 'Organize Your Finances Better'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
-              {activeItem === 'AI Insights'
+              {activeItem === 'Goals'
+                ? ''
+                : activeItem === 'AI Insights'
                 ? ''
                 : activeItem === 'Budgets'
                 ? 'Build Your Future'
@@ -198,7 +202,9 @@ export default function Sidebar({
             </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            {activeItem === 'AI Insights'
+            {activeItem === 'Goals'
+              ? 'Set goals, track progress and get AI powered recommendations to reach them faster.'
+              : activeItem === 'AI Insights'
               ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
               : activeItem === 'Budgets'
               ? 'Create smart budgets and achieve your goals.'

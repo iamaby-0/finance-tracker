@@ -10,6 +10,7 @@ const analyticsRoutes = require('./routes/analytics.routes')
 const reportRoutes = require('./routes/report.routes')
 const aiRoutes = require('./routes/ai.routes')
 const categoryRoutes = require('./routes/category.routes')
+const goalRoutes = require('./routes/goal.routes')
 const passport = require('./config/passport');
 
 const app = express();
@@ -28,6 +29,7 @@ analyticsRoutes(app) // calling analytics routes
 reportRoutes(app) // calling report routes
 aiRoutes(app) // calling ai routes
 categoryRoutes(app) // calling category routes
+goalRoutes(app) // calling goal routes
 
 
 app.listen(env.port, ()=>{
