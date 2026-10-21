@@ -8,7 +8,8 @@ import {
   Settings,
   LogOut,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  CircleDot
 } from 'lucide-react';
 
 export default function Navbar({
@@ -18,7 +19,9 @@ export default function Navbar({
   searchQuery,
   onSearchChange,
   placeholder = "Search transactions, categories, or insights...",
-  notificationCount = 1
+  notificationCount = 1,
+  showAvatarOnly = false,
+  showSecondaryIcon = false
 }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -94,7 +97,7 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* Right: Notifications & User Profile */}
+      {/* Right: Notifications, Secondary Icon & User Profile */}
       <div className="flex items-center gap-3 sm:gap-4">
         {/* Notifications Button */}
         <div className="relative" ref={notifRef}>
@@ -138,11 +141,23 @@ export default function Navbar({
           )}
         </div>
 
+        {/* Secondary Icon (if enabled, matching Transactions UI reference) */}
+        {showSecondaryIcon && (
+          <button
+            className="w-10 h-10 rounded-full border border-[#24363B] bg-[#121E22] hover:bg-[#18272C] flex items-center justify-center text-[#A5B4B8] hover:text-[#F1F5F4] hover:border-[#35E9A0]/40 transition cursor-pointer"
+            aria-label="Secondary action"
+          >
+            <CircleDot className="w-4 h-4 text-[#A5B4B8]" />
+          </button>
+        )}
+
         {/* User Profile */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2.5 p-1 sm:px-2 sm:py-1.5 rounded-xl hover:bg-[#121E22] border border-transparent hover:border-[#24363B] transition cursor-pointer"
+            className={`flex items-center gap-2.5 p-1 sm:px-2 sm:py-1.5 rounded-xl hover:bg-[#121E22] border border-transparent hover:border-[#24363B] transition cursor-pointer ${
+              showAvatarOnly ? 'p-0 sm:px-0 sm:py-0' : ''
+            }`}
             aria-label="User menu"
           >
             {/* Circular Avatar */}
@@ -150,25 +165,28 @@ export default function Navbar({
               <img
                 src={user.profilePicture}
                 alt={displayName}
-                className="w-9 h-9 rounded-full object-cover border border-[#24363B]"
+                className="w-10 h-10 rounded-full object-cover border border-[#24363B]"
               />
             ) : (
-              <div className="w-9 h-9 rounded-full bg-[#15372F] border border-[#35E9A0]/30 text-[#35E9A0] font-bold text-xs flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-full bg-[#187A68] border border-[#35E9A0]/40 text-[#F1F5F4] font-bold text-xs flex items-center justify-center shadow-xs">
                 {initials}
               </div>
             )}
 
-            {/* User Name */}
-            <span className="hidden sm:inline-block text-xs sm:text-sm font-medium text-[#F1F5F4] tracking-tight">
-              {displayName}
-            </span>
+            {/* User Name & Chevron (hidden if showAvatarOnly) */}
+            {!showAvatarOnly && (
+              <>
+                <span className="hidden sm:inline-block text-xs sm:text-sm font-medium text-[#F1F5F4] tracking-tight">
+                  {displayName}
+                </span>
 
-            {/* Dropdown Chevron */}
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-[#71848A] transition-transform duration-200 ${
-                profileOpen ? 'rotate-180 text-[#35E9A0]' : ''
-              }`}
-            />
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-[#71848A] transition-transform duration-200 ${
+                    profileOpen ? 'rotate-180 text-[#35E9A0]' : ''
+                  }`}
+                />
+              </>
+            )}
           </button>
 
           {/* Profile Dropdown Menu */}

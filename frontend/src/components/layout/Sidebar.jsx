@@ -20,6 +20,7 @@ import {
 
 export default function Sidebar({
   activeItem = 'Dashboard',
+  user,
   onNavigate,
   onLogout,
   isOpen = false,
@@ -29,15 +30,13 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { id: 'Transactions', label: 'Transactions', icon: ArrowLeftRight, path: '/dashboard' },
-    { id: 'Income', label: 'Income', icon: TrendingUp, path: '/income' },
-    { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/dashboard' },
-    { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
-    { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard' },
-    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/dashboard' },
-    { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
+    { id: 'Transactions', label: 'Transactions', icon: ArrowLeftRight, path: '/transactions' },
+    { id: 'Income', label: 'Income', icon: TrendingUp, path: '/income' },
+    { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
     { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
+    { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
+    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
   ];
 
   const handleItemClick = (item) => {
@@ -51,6 +50,16 @@ export default function Sidebar({
       onClose();
     }
   };
+
+  const getInitials = (name) => {
+    if (!name) return 'AA';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const displayName = user?.name || 'Abrar Ahmad';
+  const initials = getInitials(displayName);
 
   const sidebarContent = (
     <div className="flex flex-col h-full bg-[#101A1D] border-r border-[#24363B] w-[266px] flex-shrink-0 select-none">
@@ -89,8 +98,15 @@ export default function Sidebar({
         )}
       </div>
 
+      {/* Main Menu Label */}
+      <div className="px-5 pt-3 pb-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-[#71848A]">
+          MAIN MENU
+        </span>
+      </div>
+
       {/* Navigation List */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto scrollbar-thin">
+      <nav className="flex-1 px-3 py-1 space-y-1 overflow-y-auto scrollbar-thin">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeItem === item.id;
@@ -99,9 +115,9 @@ export default function Sidebar({
             <button
               key={item.id}
               onClick={() => handleItemClick(item)}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer ${
                 isActive
-                  ? 'bg-[#15372F] text-[#F1F5F4] border-l-4 border-[#35E9A0] shadow-sm font-semibold'
+                  ? 'bg-[#15372F] text-[#35E9A0] border-l-4 border-[#35E9A0] shadow-sm font-semibold'
                   : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C]'
               }`}
             >
@@ -123,27 +139,18 @@ export default function Sidebar({
         {/* Settings */}
         <button
           onClick={() => handleItemClick({ id: 'Settings', label: 'Settings' })}
-          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left ${
+          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer ${
             activeItem === 'Settings'
-              ? 'bg-[#15372F] text-[#F1F5F4] border-l-4 border-[#35E9A0]'
+              ? 'bg-[#15372F] text-[#35E9A0] border-l-4 border-[#35E9A0]'
               : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C]'
           }`}
         >
           <Settings className="w-4 h-4 text-[#71848A] group-hover:text-[#A5B4B8]" />
           <span>Settings</span>
         </button>
-
-        {/* Logout */}
-        <button
-          onClick={onLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-[#A5B4B8] hover:text-[#FF667A] hover:bg-[#3D1A22]/30 transition-all duration-200 group text-left"
-        >
-          <LogOut className="w-4 h-4 text-[#71848A] group-hover:text-[#FF667A]" />
-          <span>Logout</span>
-        </button>
       </nav>
 
-      {/* Promotional Card at bottom */}
+      {/* Promotional Card at bottom (consistent across all pages) */}
       <div className="p-4 pt-2">
         <div className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300">
           {/* Subtle Glow Backdrop */}
