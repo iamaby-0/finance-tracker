@@ -167,7 +167,10 @@ export default function Sidebar({
 
       {/* Promotional Card at bottom (consistent across all pages) */}
       <div className="p-4 pt-2">
-        <div className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300">
+        <div
+          onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' })}
+          className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300 cursor-pointer"
+        >
           {/* Subtle Glow Backdrop */}
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#35E9A0]/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -265,7 +268,10 @@ export default function Sidebar({
 
             {/* Circular Arrow Button */}
             <button
-              onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights' })}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' });
+              }}
               className="w-7 h-7 rounded-full bg-[#35E9A0] hover:bg-[#4FFFB0] text-[#0B1114] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
               aria-label="Explore AI Insights"
             >
