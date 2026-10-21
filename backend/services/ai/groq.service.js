@@ -6,32 +6,35 @@ const groq = new Groq({
 });
 
 const generateAIResponse = async (messages, options = {}) => {
-
     try {
-
         const response = await groq.chat.completions.create({
-            model: "openai/gpt-oss-120b",
-
+            model: options.model || "openai/gpt-oss-120b",
             messages: messages,
-
             temperature: options.temperature ?? 0.2,
-
-            max_completion_tokens:
-                options.max_completion_tokens ?? 300
+            max_completion_tokens: options.max_completion_tokens ?? 600
         });
 
         return response.choices[0].message.content;
-
     } catch (error) {
-
         console.log("========== GROQ ERROR ==========");
         console.log("Message:", error.message);
         console.log("Status:", error.status);
         console.log("Code:", error.code);
-        console.log(error);
         console.log("================================");
 
-        throw new Error("Qwen Ai service Failed");
+        // Fallback to llama-3.3-70b-versatile if gpt-oss-120b has issues
+        try {
+            const fallback = await groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages: messages,
+                temperature: options.temperature ?? 0.2,
+                max_completion_tokens: options.max_completion_tokens ?? 600
+            });
+            return fallback.choices[0].message.content;
+        } catch (fallbackErr) {
+            console.log("Fallback also failed:", fallbackErr.message);
+            throw new Error("AI service temporarily unavailable");
+        }
     }
 };
 

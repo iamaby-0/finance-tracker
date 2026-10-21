@@ -10,6 +10,7 @@ import { Expenses } from './pages/Expenses'
 import { Analytics } from './pages/Analytics'
 import { Reports } from './pages/Reports'
 import { Categories } from './pages/Categories'
+import { AIInsights } from './pages/AIInsights'
 import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
@@ -48,7 +49,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/google-success" element={<GoogleSuccess />} />
 
-        {/* Authenticated Dashboard, Income, Budgets, Transactions & Expenses */}
+        {/* Authenticated Dashboard, Income, Budgets, Transactions, Expenses, Analytics, Reports, Categories & AI Insights */}
         <Route element={<ProtectedRoutes />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/income" element={<Income />} />
@@ -62,6 +63,8 @@ function App() {
           <Route path="/report" element={<Reports />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/category" element={<Categories />} />
+          <Route path="/ai-insights" element={<AIInsights />} />
+          <Route path="/ai" element={<AIInsights />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

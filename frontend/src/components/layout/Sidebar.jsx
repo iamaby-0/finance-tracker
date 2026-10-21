@@ -36,7 +36,7 @@ export default function Sidebar({
     { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/expenses' },
     { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
-    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
+    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/ai-insights' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/reports' },
     { id: 'Categories', label: 'Categories', icon: LayoutGrid, path: '/categories' },
     { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
@@ -168,7 +168,9 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'Budgets'
+            {activeItem === 'AI Insights'
+              ? 'Unlock the Power of AI Insights'
+              : activeItem === 'Budgets'
               ? 'Stay on Budget'
               : activeItem === 'Expenses'
               ? 'Control Your Spending Better'
@@ -180,7 +182,9 @@ export default function Sidebar({
               ? 'Organize Your Finances Better'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
-              {activeItem === 'Budgets'
+              {activeItem === 'AI Insights'
+                ? ''
+                : activeItem === 'Budgets'
                 ? 'Build Your Future'
                 : activeItem === 'Expenses'
                 ? ''
@@ -194,7 +198,9 @@ export default function Sidebar({
             </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            {activeItem === 'Budgets'
+            {activeItem === 'AI Insights'
+              ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
+              : activeItem === 'Budgets'
               ? 'Create smart budgets and achieve your goals.'
               : activeItem === 'Expenses'
               ? 'Track expenses, find insights and save more.'
