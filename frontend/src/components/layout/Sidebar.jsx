@@ -30,13 +30,15 @@ export default function Sidebar({
 
   const navItems = [
     { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { id: 'Reports', label: 'Reports', icon: FileText, path: '/dashboard' },
     { id: 'Transactions', label: 'Transactions', icon: ArrowLeftRight, path: '/transactions' },
     { id: 'Income', label: 'Income', icon: TrendingUp, path: '/income' },
+    { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/expenses' },
     { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
-    { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
-    { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
+    { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard' },
     { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
+    { id: 'Reports', label: 'Reports', icon: FileText, path: '/dashboard' },
+    { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
+    { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
   ];
 
   const handleItemClick = (item) => {
@@ -165,14 +167,24 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'Budgets' ? 'Stay on Budget' : 'Track Smarter'}
+            {activeItem === 'Budgets'
+              ? 'Stay on Budget'
+              : activeItem === 'Expenses'
+              ? 'Control Your Spending Better'
+              : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
-              {activeItem === 'Budgets' ? 'Build Your Future' : 'Live Better'}
+              {activeItem === 'Budgets'
+                ? 'Build Your Future'
+                : activeItem === 'Expenses'
+                ? ''
+                : 'Live Better'}
             </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
             {activeItem === 'Budgets'
               ? 'Create smart budgets and achieve your goals.'
+              : activeItem === 'Expenses'
+              ? 'Track expenses, find insights and save more.'
               : 'Get AI insights and better financial control.'}
           </p>
 
