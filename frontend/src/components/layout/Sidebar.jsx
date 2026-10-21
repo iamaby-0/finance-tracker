@@ -34,7 +34,7 @@ export default function Sidebar({
     { id: 'Income', label: 'Income', icon: TrendingUp, path: '/income' },
     { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/expenses' },
     { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
-    { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/dashboard' },
+    { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
     { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/dashboard' },
     { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
@@ -171,11 +171,15 @@ export default function Sidebar({
               ? 'Stay on Budget'
               : activeItem === 'Expenses'
               ? 'Control Your Spending Better'
+              : activeItem === 'Analytics'
+              ? 'Unlock Deeper Financial Insights'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
               {activeItem === 'Budgets'
                 ? 'Build Your Future'
                 : activeItem === 'Expenses'
+                ? ''
+                : activeItem === 'Analytics'
                 ? ''
                 : 'Live Better'}
             </span>
@@ -185,6 +189,8 @@ export default function Sidebar({
               ? 'Create smart budgets and achieve your goals.'
               : activeItem === 'Expenses'
               ? 'Track expenses, find insights and save more.'
+              : activeItem === 'Analytics'
+              ? 'Get detailed analytics and personalized reports.'
               : 'Get AI insights and better financial control.'}
           </p>
 

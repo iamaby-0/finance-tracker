@@ -7,6 +7,7 @@ import { Income } from './pages/Income'
 import { Budgets } from './pages/Budgets'
 import { Transactions } from './pages/Transactions'
 import { Expenses } from './pages/Expenses'
+import { Analytics } from './pages/Analytics'
 import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
@@ -54,6 +55,7 @@ function App() {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/expense" element={<Expenses />} />
+          <Route path="/analytics" element={<Analytics />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
