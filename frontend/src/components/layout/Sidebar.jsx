@@ -141,15 +141,27 @@ export default function Sidebar({
 
         {/* Settings */}
         <button
-          onClick={() => handleItemClick({ id: 'Settings', label: 'Settings' })}
+          onClick={() => handleItemClick({ id: 'Settings', label: 'Settings', path: '/settings' })}
           className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer ${
             activeItem === 'Settings'
-              ? 'bg-[#15372F] text-[#35E9A0] border-l-4 border-[#35E9A0]'
+              ? 'bg-[#15372F] text-[#F1F5F4] border border-[#35E9A0]/50 shadow-[0_0_15px_rgba(53,233,160,0.15)] font-semibold'
               : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C]'
           }`}
         >
-          <Settings className="w-4 h-4 text-[#71848A] group-hover:text-[#A5B4B8]" />
+          <Settings className={`w-4 h-4 transition-colors ${activeItem === 'Settings' ? 'text-[#35E9A0]' : 'text-[#71848A] group-hover:text-[#A5B4B8]'}`} />
           <span>Settings</span>
+        </button>
+
+        {/* Logout */}
+        <button
+          onClick={() => {
+            if (onLogout) onLogout();
+            if (onClose) onClose();
+          }}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer text-[#A5B4B8] hover:text-[#FF667A] hover:bg-[#18272C]"
+        >
+          <LogOut className="w-4 h-4 text-[#71848A] group-hover:text-[#FF667A] transition-colors" />
+          <span>Logout</span>
         </button>
       </nav>
 
@@ -168,7 +180,9 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'Goals'
+            {activeItem === 'Settings'
+              ? 'Unlock More Financial Insights'
+              : activeItem === 'Goals'
               ? 'Achieve Your Financial Goals'
               : activeItem === 'AI Insights'
               ? 'Unlock the Power of AI Insights'
@@ -184,7 +198,9 @@ export default function Sidebar({
               ? 'Organize Your Finances Better'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
-              {activeItem === 'Goals'
+              {activeItem === 'Settings'
+                ? ''
+                : activeItem === 'Goals'
                 ? ''
                 : activeItem === 'AI Insights'
                 ? ''
@@ -202,7 +218,9 @@ export default function Sidebar({
             </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            {activeItem === 'Goals'
+            {activeItem === 'Settings'
+              ? 'Get AI-powered insights, advanced analytics and more features.'
+              : activeItem === 'Goals'
               ? 'Set goals, track progress and get AI powered recommendations to reach them faster.'
               : activeItem === 'AI Insights'
               ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
