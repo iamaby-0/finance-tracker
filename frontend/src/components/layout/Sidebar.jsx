@@ -15,6 +15,7 @@ import {
   LogOut,
   Crown,
   ArrowUpRight,
+  LayoutGrid,
   X
 } from 'lucide-react';
 
@@ -37,7 +38,7 @@ export default function Sidebar({
     { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
     { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/reports' },
-    { id: 'Categories', label: 'Categories', icon: Tags, path: '/dashboard' },
+    { id: 'Categories', label: 'Categories', icon: LayoutGrid, path: '/categories' },
     { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
   ];
 
@@ -175,6 +176,8 @@ export default function Sidebar({
               ? 'Unlock Deeper Financial Insights'
               : activeItem === 'Reports'
               ? 'Generate Detailed Financial Reports'
+              : activeItem === 'Categories'
+              ? 'Organize Your Finances Better'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
               {activeItem === 'Budgets'
@@ -184,6 +187,8 @@ export default function Sidebar({
                 : activeItem === 'Analytics'
                 ? ''
                 : activeItem === 'Reports'
+                ? ''
+                : activeItem === 'Categories'
                 ? ''
                 : 'Live Better'}
             </span>
@@ -197,6 +202,8 @@ export default function Sidebar({
               ? 'Get detailed analytics and personalized reports.'
               : activeItem === 'Reports'
               ? 'Analyze your spending, income and savings with beautiful reports.'
+              : activeItem === 'Categories'
+              ? 'Create and manage custom categories for better tracking.'
               : 'Get AI insights and better financial control.'}
           </p>
 

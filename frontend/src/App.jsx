@@ -9,6 +9,7 @@ import { Transactions } from './pages/Transactions'
 import { Expenses } from './pages/Expenses'
 import { Analytics } from './pages/Analytics'
 import { Reports } from './pages/Reports'
+import { Categories } from './pages/Categories'
 import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
@@ -59,6 +60,8 @@ function App() {
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/report" element={<Reports />} />
+          <Route path="/categories" element={<Categories />} />
+          <Route path="/category" element={<Categories />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

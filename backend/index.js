@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");``
+const cors = require("cors");
 const env = require("./config/env");
 const connectDB = require("./config/db");
 const authRoutes = require('./routes/auth.routes')
@@ -9,6 +9,7 @@ const budgetRoutes = require('./routes/budget.routes')
 const analyticsRoutes = require('./routes/analytics.routes')
 const reportRoutes = require('./routes/report.routes')
 const aiRoutes = require('./routes/ai.routes')
+const categoryRoutes = require('./routes/category.routes')
 const passport = require('./config/passport');
 
 const app = express();
@@ -26,6 +27,7 @@ budgetRoutes(app) // calling budget routes
 analyticsRoutes(app) // calling analytics routes
 reportRoutes(app) // calling report routes
 aiRoutes(app) // calling ai routes
+categoryRoutes(app) // calling category routes
 
 
 app.listen(env.port, ()=>{
