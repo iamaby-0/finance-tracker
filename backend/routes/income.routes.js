@@ -15,7 +15,7 @@ const routes = (app) =>{
         incomeController.getIncomeById
     )
 
-    app.get('/aft/api/v1/income/',
+    app.get(['/aft/api/v1/income', '/aft/api/v1/income/'],
         authMiddleware.isAuthenticated,
         incomeController.getAllincome
     )

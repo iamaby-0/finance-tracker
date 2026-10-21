@@ -11,10 +11,12 @@ const expenseCreateRequest = async(req, res,next)=>{
         return res.status(400).json(errorResponseBody);
     }
 
-    if (typeof req.body.amount !== "number" || req.body.amount < 0) {
+    const num = Number(req.body.amount);
+    if (isNaN(num) || num < 0) {
         errorResponseBody.error = "amount must be a non-negative number";
         return res.status(400).json(errorResponseBody);
     }
+    req.body.amount = num;
 
     if (!req.body.description || req.body.description.trim() === "") {
         errorResponseBody.error = "description required";

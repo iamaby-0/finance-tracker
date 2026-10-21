@@ -264,13 +264,13 @@ const getBudgetStatus = async (userId, budgetId) => {
             category: budget.category,
             month: budget.month,
             year: budget.year,
-            budget: Number(budgetAmount.toFixed(2)),
-            spent: Number(budgetAmount.toFixed(2)),
-            remaining: Number(budgetAmount.toFixed(2)),
-            percentageUsed: Number(budgetAmount.toFixed(2)),
+            budget: Number(budget.amount.toFixed(2)),
+            spent: Number(spent.toFixed(2)),
+            remaining: Number(remaining.toFixed(2)),
+            percentageUsed: Number(percentageUsed.toFixed(2)),
             status,
             alert: percentageUsed >= budget.alertPercentage,
-            exceeded: spent > budgetAmount
+            exceeded: spent > budget.amount
         }
     }
     catch (error) {
@@ -426,7 +426,7 @@ const getUnusualSpending = async (userId, month, year) => {
 
 const getSavingsPrediction = async (userId) => {
     try {
-        const userObjectId = ObjectId(userId);
+        const userObjectId = new ObjectId(userId);
 
         const startDate = new Date();
         const endDate = new Date();
@@ -434,7 +434,7 @@ const getSavingsPrediction = async (userId) => {
         startDate.setMonth(startDate.getMonth() - 6);
 
         // Monthaly income
-        const incomeDate = await Income.aggregate([
+        const incomeData = await Income.aggregate([
             {
                 $match: {
                     userId: userObjectId,
@@ -470,7 +470,7 @@ const getSavingsPrediction = async (userId) => {
         ])
 
         // Monthaly Expense
-        const expenseDate = await Expense.aggregate([
+        const expenseData = await Expense.aggregate([
             {
                 $match: {
                     userId: userObjectId,
