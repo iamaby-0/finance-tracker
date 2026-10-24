@@ -194,8 +194,8 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [conversationId, setConversationId] = useState(() => {
     return localStorage.getItem('mft_ai_conversation_id') || `conv_${Date.now()}`;
   });
@@ -207,7 +207,6 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const menuRef = useRef(null);
 
   // Save messages to localStorage
   useEffect(() => {
@@ -219,17 +218,6 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
-
-  // Close three-dot menu on outside click
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const formatCurrentTime = () => {
     const d = new Date();
@@ -355,7 +343,7 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
         timestamp: formatCurrentTime()
       }
     ]);
-    setMenuOpen(false);
+    setShowClearConfirm(false);
   };
 
   const handleNewConversation = () => {
@@ -369,59 +357,84 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
         timestamp: formatCurrentTime()
       }
     ]);
-    setMenuOpen(false);
   };
 
   return (
-    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[520px] sm:h-[580px] xl:h-[calc(100vh-100px)] xl:min-h-[580px] xl:sticky xl:top-[82px] shadow-xl overflow-hidden">
+    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[520px] sm:h-[580px] xl:h-[calc(100vh-100px)] xl:min-h-[580px] xl:sticky xl:top-[82px] shadow-xl overflow-hidden relative">
+      {/* Clear Chat Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-[#18272C] border border-[#24363B] rounded-2xl p-4 sm:p-5 max-w-[320px] w-full shadow-2xl space-y-3.5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-[#3D1A22] border border-[#FF667A]/30 flex items-center justify-center text-[#FF667A] shrink-0">
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs sm:text-sm font-bold text-[#F1F5F4]">Clear Chat History?</h4>
+                <p className="text-[11px] text-[#A5B4B8] mt-1 leading-relaxed">
+                  This will delete all current messages in this conversation.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#24363B]/60">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="px-3 py-1.5 rounded-xl bg-[#121E22] hover:bg-[#203238] border border-[#24363B] text-[11px] font-medium text-[#A5B4B8] hover:text-[#F1F5F4] transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleClearChat}
+                className="px-3 py-1.5 rounded-xl bg-[#FF667A] hover:bg-[#FF4D66] text-[11px] font-semibold text-white transition shadow-sm cursor-pointer"
+              >
+                Clear Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
-      <div className="p-4 sm:p-4.5 border-b border-[#24363B] bg-[#121E22] flex items-center justify-between shrink-0">
-        <div>
-          <h3 className="text-sm sm:text-base font-bold text-[#F1F5F4] tracking-tight">
-            Finance AI Assistant
+      <div className="p-3.5 sm:p-4 border-b border-[#24363B] bg-[#121E22] flex items-center justify-between shrink-0 gap-2">
+        <div className="min-w-0">
+          <h3 className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight truncate flex items-center gap-1.5">
+            <span>Finance AI Assistant</span>
           </h3>
-          <p className="text-[11px] text-[#71848A]">
+          <p className="text-[10px] sm:text-[11px] text-[#71848A] truncate">
             Ask anything about your finances
           </p>
         </div>
 
-        {/* Right Status & Menu */}
-        <div className="flex items-center gap-3">
+        {/* Right Status & Action Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Online status indicator */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#123D32]/80 border border-[#35E9A0]/20 text-[11px] text-[#35E9A0] font-medium">
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#123D32]/80 border border-[#35E9A0]/20 text-[10px] text-[#35E9A0] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-[#35E9A0] animate-pulse" />
             <span>Online</span>
           </div>
 
-          {/* Three-dot Menu */}
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
-              aria-label="Chat options"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
+          {/* New Conversation Button */}
+          <button
+            onClick={handleNewConversation}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/50 text-[11px] font-medium text-[#F1F5F4] hover:text-[#35E9A0] transition shadow-xs cursor-pointer group"
+            title="Start a new conversation"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#35E9A0] group-hover:-rotate-45 transition-transform duration-200 shrink-0" />
+            <span className="hidden sm:inline">New Chat</span>
+          </button>
 
-            {menuOpen && (
-              <div className="absolute right-0 mt-1 w-44 bg-[#18272C] border border-[#24363B] rounded-xl shadow-2xl p-1 z-30 animate-in fade-in zoom-in-95 duration-100 text-xs">
-                <button
-                  onClick={handleNewConversation}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#203238] transition text-left cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#35E9A0]" />
-                  <span>New Conversation</span>
-                </button>
-                <button
-                  onClick={handleClearChat}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#FF667A] hover:bg-[#3D1A22]/50 transition text-left cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-[#FF667A]" />
-                  <span>Clear Chat</span>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Clear Chat Button */}
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18272C] hover:bg-[#3D1A22]/50 border border-[#24363B] hover:border-[#FF667A]/50 text-[11px] font-medium text-[#A5B4B8] hover:text-[#FF667A] transition shadow-xs cursor-pointer group"
+            title="Clear all messages in chat"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-[#FF667A] group-hover:scale-105 transition-transform shrink-0" />
+            <span className="hidden sm:inline">Clear Chat</span>
+          </button>
         </div>
       </div>
 
