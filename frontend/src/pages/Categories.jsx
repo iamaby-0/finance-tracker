@@ -10,6 +10,7 @@ import AddCategoryForm from '../components/categories/AddCategoryForm';
 import CategorySpendingTrend from '../components/categories/CategorySpendingTrend';
 import RecentCategoryTransactions from '../components/categories/RecentCategoryTransactions';
 import { LayoutGrid, Calendar, ChevronDown } from 'lucide-react';
+import { compareLatestFirst } from '../utils/formatters';
 
 const INITIAL_CATEGORIES = [
   // 8 Expense Categories
@@ -227,7 +228,8 @@ export function Categories() {
   // Recent Transactions Data
   const recentTransactionsData = useMemo(() => {
     if (filteredExpenses.length === 0) return null;
-    return filteredExpenses.slice(0, 5).map((exp, idx) => ({
+    const sorted = [...filteredExpenses].sort(compareLatestFirst);
+    return sorted.slice(0, 5).map((exp, idx) => ({
       id: exp._id || idx + 1,
       date: exp.date,
       description: exp.description || 'Expense',

@@ -9,7 +9,7 @@ import {
   Gamepad2,
   MoreHorizontal
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 import { getCategoryConfig } from './BudgetCategoryList';
 
 const DEFAULT_ACTIVITY_ROWS = [
@@ -88,7 +88,8 @@ export default function RecentBudgetActivity({
   let displayRows = [];
 
   if (expenses && expenses.length > 0) {
-    displayRows = expenses.slice(0, 5).map((exp) => {
+    const sorted = [...expenses].sort(compareLatestFirst);
+    displayRows = sorted.slice(0, 5).map((exp) => {
       const cfg = getCategoryConfig(exp.category);
       const catStatus = categoryStatusMap[exp.category] || 'On Track';
 

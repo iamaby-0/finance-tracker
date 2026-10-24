@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   Loader2
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 import api from '../../services/api';
 
 const YoutubeIcon = ({ className = "w-3.5 h-3.5" }) => (
@@ -166,7 +166,8 @@ export default function RecentIncomeTable({
   let displayList = [];
 
   if (incomes && incomes.length > 0) {
-    displayList = incomes.map((item) => {
+    const sorted = [...incomes].sort(compareLatestFirst);
+    displayList = sorted.map((item) => {
       const style = getSourceStyle(item.source, item.category);
       return {
         _id: item._id,

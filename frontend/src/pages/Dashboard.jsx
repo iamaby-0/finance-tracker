@@ -18,6 +18,7 @@ import {
   SetBudgetModal
 } from '../components/dashboard/TransactionModals';
 import { Calendar, ChevronDown, RefreshCw } from 'lucide-react';
+import { compareLatestFirst } from '../utils/formatters';
 
 export function Dashboard() {
   const { user, logout } = useAuth();
@@ -110,9 +111,7 @@ export function Dashboard() {
             }))
           : [];
 
-      const mergedTransactions = [...allExpenses, ...allIncomes].sort(
-        (a, b) => new Date(b.date || 0) - new Date(a.date || 0)
-      );
+      const mergedTransactions = [...allExpenses, ...allIncomes].sort(compareLatestFirst);
 
       if (mergedTransactions.length > 0) {
         setTransactions(mergedTransactions);

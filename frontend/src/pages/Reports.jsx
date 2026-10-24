@@ -13,7 +13,7 @@ import TopMerchants from '../components/reports/TopMerchants';
 import RecentReportTransactions from '../components/reports/RecentReportTransactions';
 import ReportActions from '../components/reports/ReportActions';
 import { FileText, Download } from 'lucide-react';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../utils/formatters';
 
 export function Reports() {
   const { user, logout } = useAuth();
@@ -325,7 +325,8 @@ export function Reports() {
   const reportTransactions = useMemo(() => {
     if (filteredExpenses.length === 0) return null;
 
-    return filteredExpenses.slice(0, 5).map((exp, idx) => ({
+    const sorted = [...filteredExpenses].sort(compareLatestFirst);
+    return sorted.slice(0, 5).map((exp, idx) => ({
       id: exp._id || idx + 1,
       date: exp.date,
       description: exp.description || 'Expense',

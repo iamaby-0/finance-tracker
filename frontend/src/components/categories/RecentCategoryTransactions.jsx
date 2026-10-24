@@ -8,7 +8,7 @@ import {
   Film,
   Tag
 } from 'lucide-react';
-import { formatDate, formatCurrency } from '../../utils/formatters';
+import { formatDate, formatCurrency, compareLatestFirst } from '../../utils/formatters';
 
 const DEFAULT_TRANSACTIONS = [
   {
@@ -69,7 +69,10 @@ export default function RecentCategoryTransactions({ transactions = null, onView
     }
   };
 
-  const items = transactions && transactions.length > 0 ? transactions : DEFAULT_TRANSACTIONS;
+  const items =
+    transactions && transactions.length > 0
+      ? [...transactions].sort(compareLatestFirst).slice(0, 5)
+      : DEFAULT_TRANSACTIONS;
 
   const getCategoryBadge = (cat) => {
     switch (cat) {

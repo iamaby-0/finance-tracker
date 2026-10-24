@@ -10,7 +10,7 @@ import {
   ArrowDownLeft,
   DollarSign
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 
 const DEFAULT_TRANSACTIONS = [
   {
@@ -167,7 +167,8 @@ export default function RecentTransactions({
   let displayList = [];
 
   if (transactions && transactions.length > 0) {
-    displayList = transactions.slice(0, 5).map((tx, idx) => {
+    const sorted = [...transactions].sort(compareLatestFirst);
+    displayList = sorted.slice(0, 5).map((tx, idx) => {
       const isIncome = tx.type === 'income' || Boolean(tx.source);
       const style = getCategoryStyle(tx.category || tx.source || (isIncome ? 'Income' : 'General'), isIncome ? 'income' : 'expense');
       return {

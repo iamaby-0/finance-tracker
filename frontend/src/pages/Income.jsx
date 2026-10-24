@@ -12,7 +12,7 @@ import IncomeCategoryChart from '../components/income/IncomeCategoryChart';
 import IncomeInsights from '../components/income/IncomeInsights';
 import EditIncomeModal from '../components/income/EditIncomeModal';
 import { TrendingUp, Calendar, ChevronDown } from 'lucide-react';
-import { formatDate } from '../utils/formatters';
+import { formatDate, compareLatestFirst } from '../utils/formatters';
 
 export function Income() {
   const { user, logout } = useAuth();
@@ -51,7 +51,7 @@ export function Income() {
       setLoading(true);
       const res = await api.get('/income');
       if (res.data?.data && Array.isArray(res.data.data)) {
-        setIncomes(res.data.data);
+        setIncomes([...res.data.data].sort(compareLatestFirst));
       }
     } catch (err) {
       console.warn('Income fetch notice:', err);

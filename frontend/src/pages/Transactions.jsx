@@ -12,6 +12,7 @@ import EditTransactionModal from '../components/transactions/EditTransactionModa
 import TransactionDetailsModal from '../components/transactions/TransactionDetailsModal';
 import DeleteConfirmModal from '../components/transactions/DeleteConfirmModal';
 import { Plus } from 'lucide-react';
+import { compareLatestFirst } from '../utils/formatters';
 
 const PAGE_SIZE = 10;
 
@@ -170,6 +171,7 @@ export function Transactions() {
       description: exp.description || exp.category || 'Expense',
       category: exp.category || 'Other',
       date: exp.date || exp.createdAt,
+      createdAt: exp.createdAt || exp.date,
       notes: exp.notes || '',
       raw: exp
     }));
@@ -183,6 +185,7 @@ export function Transactions() {
       category: inc.source || 'Salary',
       source: inc.source || 'Salary',
       date: inc.date || inc.createdAt,
+      createdAt: inc.createdAt || inc.date,
       notes: inc.notes || '',
       raw: inc
     }));
@@ -196,16 +199,13 @@ export function Transactions() {
       category: b.category || 'Overall',
       source: b.category || 'Overall',
       date: b.startDate || (b.year && b.month ? new Date(b.year, b.month - 1, 1).toISOString() : b.createdAt || new Date().toISOString()),
+      createdAt: b.createdAt || b.startDate,
       notes: b.notes || (b.month && b.year ? `Monthly limit for ${b.month}/${b.year}` : ''),
       raw: b
     }));
 
-    // Merge and sort descending by date (newest first)
-    return [...normalizedExpenses, ...normalizedIncomes, ...normalizedBudgets].sort((a, b) => {
-      const dateA = new Date(a.date).getTime() || 0;
-      const dateB = new Date(b.date).getTime() || 0;
-      return dateB - dateA;
-    });
+    // Merge and sort latest first (newest to oldest)
+    return [...normalizedExpenses, ...normalizedIncomes, ...normalizedBudgets].sort(compareLatestFirst);
   }, [expenses, incomes, budgets]);
 
   // Dynamic category options based on loaded records
