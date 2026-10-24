@@ -552,6 +552,92 @@ Currency is INR (₹). Format amounts using the ₹ symbol. Return ONLY valid JS
 };
 
 /**
+ * Helper to extract clean chat message and suggestions from raw AI outputs.
+ * Gracefully handles direct markdown, JSON wrapped, truncated JSON, or escaped text.
+ */
+const extractCleanChatMessage = (rawResponse) => {
+    if (!rawResponse || typeof rawResponse !== 'string') {
+        return { message: '', suggestions: [] };
+    }
+
+    let text = rawResponse.trim();
+    let suggestions = [];
+
+    // Case 1: Wrapped in markdown code block ```json ... ```
+    const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (codeBlockMatch) {
+        try {
+            const parsed = JSON.parse(codeBlockMatch[1]);
+            if (parsed && typeof parsed.message === 'string') {
+                return {
+                    message: parsed.message.trim(),
+                    suggestions: Array.isArray(parsed.suggestedQuestions) ? parsed.suggestedQuestions : []
+                };
+            }
+        } catch (_) {}
+    }
+
+    // Case 2: Full valid JSON
+    try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed.message === 'string') {
+            return {
+                message: parsed.message.trim(),
+                suggestions: Array.isArray(parsed.suggestedQuestions) ? parsed.suggestedQuestions : []
+            };
+        }
+    } catch (_) {}
+
+    // Case 3: Truncated or malformed JSON with "message": "..."
+    const messageMatch = text.match(/"message"\s*:\s*"([\s\S]*)/i);
+    if (messageMatch) {
+        let content = messageMatch[1];
+
+        // Check if there are suggestedQuestions in this JSON string
+        const suggMatch = content.match(/",\s*"suggestedQuestions"\s*:\s*(\[[\s\S]*?\])/i);
+        if (suggMatch) {
+            try {
+                suggestions = JSON.parse(suggMatch[1]);
+            } catch (_) {}
+            content = content.substring(0, suggMatch.index);
+        } else {
+            // Strip trailing quote/braces if present, or trailing truncated escape
+            content = content.replace(/(?:",?\s*\}?|\s*"\}?|\s*")$/, '');
+        }
+
+        // Clean unescaped sequences
+        content = content
+            .replace(/\\n/g, '\n')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\')
+            .replace(/\\t/g, '\t');
+
+        return { message: content.trim(), suggestions };
+    }
+
+    // Case 4: Plain Markdown with SUGGESTIONS block at the end
+    const suggBlockMatch = text.match(/(?:---|###|\*\*|\n)?\s*(?:SUGGESTIONS|RECOMMENDED QUESTIONS|FOLLOW-UP QUESTIONS):?\s*([\s\S]*)$/i);
+    if (suggBlockMatch) {
+        const rawSuggs = suggBlockMatch[1];
+        const parsedSuggs = rawSuggs
+            .split('\n')
+            .map(s => s.replace(/^[-*•\d.)\]\s]+/, '').trim())
+            .filter(s => s.length > 5 && s.length < 90);
+        if (parsedSuggs.length > 0) {
+            suggestions = parsedSuggs.slice(0, 3);
+        }
+        text = text.substring(0, suggBlockMatch.index).trim();
+    }
+
+    // Case 5: Clean any remaining escaped newlines if text has literal \n but no real newlines
+    if (text.includes('\\n') && !text.includes('\n')) {
+        text = text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+    }
+
+    return { message: text.trim(), suggestions };
+};
+
+/**
  * AI Finance Chat Service
  * Handles conversational queries grounded in user's real financial records
  */
@@ -621,18 +707,22 @@ ${recentExp.map(t => `  * ${t.date ? new Date(t.date).toISOString().split('T')[0
 `;
 
         const systemPrompt = `You are the Finance AI Assistant for My Finance Track, an intelligent personal finance platform.
-You assist the user by answering financial queries, analyzing spending patterns, suggesting budget allocations, and giving realistic advice grounded in the user's REAL financial records.
+You assist the user by answering financial queries, analyzing spending patterns, suggesting budget allocations, and giving realistic, actionable advice grounded in the user's REAL financial records.
 
 Rules:
 1. Ground your answers strictly in the provided User Financial Context.
 2. All currency is in Indian Rupees (₹). Format all amounts with ₹ (e.g., ₹42,350, ₹6,450).
-3. Be concise, actionable, and structured. Use numbered lists, bold bullet points, and short paragraphs. Avoid walls of text.
-4. If asked why expenses increased, break down the main categories that contributed, mention specific rupee differences, and offer 2-3 specific suggestions to reduce spending.
-5. If asked for a budget, break down sensible allocations based on the user's income (e.g. 50/30/20 rule or tailored limits).
-6. Never make up transactions that contradict the data.
-7. Return your response in JSON format with two keys:
-   - "message": (string formatted with markdown, line breaks, bold headers, and numbered lists)
-   - "suggestedQuestions": (array of 2 to 3 concise, highly relevant follow-up questions for the user)
+3. Chat naturally in clear, well-structured, beautiful Markdown:
+   - Use headings (## or ###) with relevant emojis (e.g., 📊 Monthly Finance Report, 💡 Recommendations)
+   - Use bold bullet points for key metrics and insights
+   - When presenting category breakdowns, comparison data, or budgets, use clean markdown tables
+   - Keep answers readable, structured, and actionable
+4. DO NOT wrap your response in JSON format or {"message": ...}. Respond directly as a conversational AI chat assistant.
+5. At the very end of your response, provide 2 to 3 concise follow-up questions the user might ask, formatted exactly as:
+SUGGESTIONS:
+- Show me my spending trends
+- Suggest a budget plan
+- How can I improve my savings?
 `;
 
         const groqMessages = [
@@ -661,28 +751,18 @@ Rules:
         try {
             const rawResponse = await generateAIResponse(groqMessages, {
                 temperature: 0.3,
-                max_completion_tokens: 700
+                max_completion_tokens: 1800
             });
 
-            // Attempt JSON parse
-            let parsed = null;
-            try {
-                // Find JSON substring if wrapped in markdown
-                const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    parsed = JSON.parse(jsonMatch[0]);
-                }
-            } catch (jsonErr) {
-                // not strict JSON, fallback to raw response
-            }
-
-            if (parsed && parsed.message) {
-                aiMessage = parsed.message;
-                if (Array.isArray(parsed.suggestedQuestions) && parsed.suggestedQuestions.length > 0) {
-                    suggestedQuestions = parsed.suggestedQuestions;
-                }
+            const extracted = extractCleanChatMessage(rawResponse);
+            if (extracted.message) {
+                aiMessage = extracted.message;
             } else {
                 aiMessage = rawResponse;
+            }
+
+            if (Array.isArray(extracted.suggestions) && extracted.suggestions.length > 0) {
+                suggestedQuestions = extracted.suggestions;
             }
         } catch (groqErr) {
             console.error("Groq chat error:", groqErr);

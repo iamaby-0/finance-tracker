@@ -128,20 +128,20 @@ export default function NotificationSettings({ notifications, onUpdateNotificati
           return (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-3 p-1 rounded-xl transition hover:bg-[#18272C]/40"
+              className="flex items-center justify-between gap-3 p-1.5 rounded-xl transition hover:bg-[#18272C]/40"
             >
               {/* Left icon & text */}
-              <div className="flex items-center gap-3 min-w-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
                 <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${item.iconBg}`}
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${item.iconBg}`}
                 >
                   <Icon className="w-4 h-4" />
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="text-xs font-semibold text-[#F1F5F4] truncate">
                     {item.label}
                   </div>
-                  <div className="text-[11px] text-[#71848A] truncate">
+                  <div className="text-[11px] text-[#71848A] line-clamp-2 leading-tight">
                     {item.description}
                   </div>
                 </div>
@@ -152,9 +152,10 @@ export default function NotificationSettings({ notifications, onUpdateNotificati
                 type="button"
                 role="switch"
                 aria-checked={isChecked}
+                aria-label={`Toggle ${item.label}`}
                 disabled={isUpdating}
                 onClick={() => handleToggle(item.id)}
-                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#35E9A0] ${
+                className={`relative inline-flex h-5 w-9 shrink-0 ml-2 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-1 focus:ring-[#35E9A0] ${
                   isChecked ? 'bg-[#35E9A0]' : 'bg-[#24363B]'
                 }`}
               >

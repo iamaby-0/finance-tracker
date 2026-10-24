@@ -4,19 +4,18 @@ import {
   FileSpreadsheet,
   Share2,
   CalendarClock,
-  ChevronRight,
   Check,
   X
 } from 'lucide-react';
 
 export default function ReportActions({
   onDownloadPDF,
-  onDownloadExcel,
-  reportData
+  onDownloadExcel
 }) {
   const [toastMessage, setToastMessage] = useState('');
   const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
   const [scheduleCadence, setScheduleCadence] = useState('Monthly');
+  const [hoveredAction, setHoveredAction] = useState(null);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -42,10 +41,53 @@ export default function ReportActions({
     showToast('Report summary copied to clipboard!');
   };
 
+  const actionButtons = [
+    {
+      id: 'pdf',
+      name: 'PDF',
+      fullTitle: 'Download PDF',
+      icon: FileText,
+      accentColor: '#35E9A0',
+      bgColor: 'bg-[#123D32]',
+      iconColor: 'text-[#35E9A0]',
+      onClick: onDownloadPDF,
+    },
+    {
+      id: 'excel',
+      name: 'Excel',
+      fullTitle: 'Download Excel',
+      icon: FileSpreadsheet,
+      accentColor: '#45B7F5',
+      bgColor: 'bg-[#152538]',
+      iconColor: 'text-[#45B7F5]',
+      onClick: onDownloadExcel,
+    },
+    {
+      id: 'share',
+      name: 'Share',
+      fullTitle: 'Share Report',
+      icon: Share2,
+      accentColor: '#B18AFF',
+      bgColor: 'bg-[#241833]',
+      iconColor: 'text-[#B18AFF]',
+      onClick: handleShare,
+    },
+    {
+      id: 'schedule',
+      name: 'Schedule',
+      fullTitle: 'Schedule Report',
+      icon: CalendarClock,
+      accentColor: '#F6C85F',
+      bgColor: 'bg-[#2A2315]',
+      iconColor: 'text-[#F6C85F]',
+      onClick: () => setScheduleModalOpen(true),
+    },
+  ];
+
   return (
-    <div className="rounded-2xl bg-[#121E22] border border-[#24363B] p-5 flex flex-col justify-between h-full shadow-sm relative">
+    <div className="rounded-2xl bg-[#121E22] border border-[#24363B] p-5 flex flex-col justify-between h-full shadow-sm relative overflow-visible">
       {/* Header Row */}
-      <div className="mb-3">
+      <div className="mb-2">
         <h3 className="text-base font-bold text-[#F1F5F4] tracking-tight">
           Report Actions
         </h3>
@@ -54,95 +96,86 @@ export default function ReportActions({
         </p>
       </div>
 
-      {/* 4 Action Tiles Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 my-auto">
-        {/* 1. Download PDF */}
-        <button
-          type="button"
-          onClick={onDownloadPDF}
-          className="p-3.5 rounded-xl bg-[#18272C] border border-[#24363B] hover:border-[#35E9A0]/50 transition-all flex items-center justify-between text-left group cursor-pointer shadow-xs"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-[#123D32] border border-[#35E9A0]/30 flex items-center justify-center text-[#35E9A0] flex-shrink-0 shadow-xs">
-              <FileText className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-bold text-[#F1F5F4] group-hover:text-[#35E9A0] transition-colors truncate">
-                Download PDF
-              </h4>
-              <p className="text-[10px] text-[#71848A] truncate mt-0.5">
-                Get a detailed PDF report
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#71848A] group-hover:text-[#35E9A0] group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-1" />
-        </button>
+      {/* 4 Action Buttons Row with Hover Tooltips */}
+      <div className="grid grid-cols-4 gap-2 sm:gap-3.5 my-auto py-3">
+        {actionButtons.map((action) => {
+          const Icon = action.icon;
+          const isHovered = hoveredAction === action.id;
 
-        {/* 2. Download Excel */}
-        <button
-          type="button"
-          onClick={onDownloadExcel}
-          className="p-3.5 rounded-xl bg-[#18272C] border border-[#24363B] hover:border-[#45B7F5]/50 transition-all flex items-center justify-between text-left group cursor-pointer shadow-xs"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-[#152538] border border-[#45B7F5]/30 flex items-center justify-center text-[#45B7F5] flex-shrink-0 shadow-xs">
-              <FileSpreadsheet className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-bold text-[#F1F5F4] group-hover:text-[#45B7F5] transition-colors truncate">
-                Download Excel
-              </h4>
-              <p className="text-[10px] text-[#71848A] truncate mt-0.5">
-                Export raw data
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#71848A] group-hover:text-[#45B7F5] group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-1" />
-        </button>
+          return (
+            <div
+              key={action.id}
+              className="relative flex flex-col items-center group"
+              onMouseEnter={() => setHoveredAction(action.id)}
+              onMouseLeave={() => setHoveredAction(null)}
+            >
+              {/* Floating Tooltip that pops up when moving mouse over button */}
+              <div
+                role="tooltip"
+                className={`absolute -top-11 left-1/2 -translate-x-1/2 pointer-events-none z-50 flex flex-col items-center whitespace-nowrap transition-all duration-200 drop-shadow-2xl ${
+                  isHovered ? 'opacity-100 -translate-y-1 scale-100' : 'opacity-0 scale-95 group-hover:opacity-100 group-hover:-translate-y-1 group-hover:scale-100'
+                }`}
+              >
+                <div
+                  className="px-2.5 py-1 rounded-lg bg-[#18272C] border text-[11px] font-semibold text-[#F1F5F4] shadow-2xl flex items-center gap-1.5 backdrop-blur-md"
+                  style={{ borderColor: action.accentColor }}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{ backgroundColor: action.accentColor }}
+                  />
+                  <span className="font-bold">{action.name}</span>
+                  <span className="text-[10px] text-[#A5B4B8] font-normal">
+                    ({action.fullTitle})
+                  </span>
+                </div>
+                {/* Tooltip Downward Caret Arrow */}
+                <div
+                  className="w-2 h-2 rotate-45 -mt-1 bg-[#18272C] border-r border-b"
+                  style={{ borderColor: action.accentColor }}
+                />
+              </div>
 
-        {/* 3. Share Report */}
-        <button
-          type="button"
-          onClick={handleShare}
-          className="p-3.5 rounded-xl bg-[#18272C] border border-[#24363B] hover:border-[#B18AFF]/50 transition-all flex items-center justify-between text-left group cursor-pointer shadow-xs"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-[#241833] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] flex-shrink-0 shadow-xs">
-              <Share2 className="w-4 h-4 stroke-[2.2]" />
-            </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-bold text-[#F1F5F4] group-hover:text-[#B18AFF] transition-colors truncate">
-                Share Report
-              </h4>
-              <p className="text-[10px] text-[#71848A] truncate mt-0.5">
-                Share with others
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#71848A] group-hover:text-[#B18AFF] group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-1" />
-        </button>
+              {/* Action Button Tile */}
+              <button
+                type="button"
+                onClick={action.onClick}
+                onMouseEnter={() => setHoveredAction(action.id)}
+                onMouseLeave={() => setHoveredAction(null)}
+                onFocus={() => setHoveredAction(action.id)}
+                onBlur={() => setHoveredAction(null)}
+                title={`${action.name} - ${action.fullTitle}`}
+                aria-label={`${action.name} - ${action.fullTitle}`}
+                className={`w-full max-w-[76px] aspect-square rounded-2xl bg-[#18272C] border transition-all duration-200 flex items-center justify-center cursor-pointer shadow-xs group-hover:scale-105 active:scale-95 ${
+                  isHovered ? 'scale-105' : 'hover:border-[#35E9A0]/40'
+                }`}
+                style={{
+                  borderColor: isHovered ? action.accentColor : '#24363B',
+                  boxShadow: isHovered ? `0 0 16px ${action.accentColor}35` : undefined
+                }}
+              >
+                <div
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${action.bgColor} border flex items-center justify-center ${action.iconColor} shadow-inner transition-transform duration-200 group-hover:scale-110 ${
+                    isHovered ? 'scale-110' : ''
+                  }`}
+                  style={{ borderColor: `${action.accentColor}40` }}
+                >
+                  <Icon className="w-5 h-5 stroke-[2.2]" />
+                </div>
+              </button>
 
-        {/* 4. Schedule Report */}
-        <button
-          type="button"
-          onClick={() => setScheduleModalOpen(true)}
-          className="p-3.5 rounded-xl bg-[#18272C] border border-[#24363B] hover:border-[#F6C85F]/50 transition-all flex items-center justify-between text-left group cursor-pointer shadow-xs"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-[#2A2315] border border-[#F6C85F]/30 flex items-center justify-center text-[#F6C85F] flex-shrink-0 shadow-xs">
-              <CalendarClock className="w-4 h-4 stroke-[2.2]" />
+              {/* Label beneath button */}
+              <span
+                className="text-[11px] font-medium transition-colors mt-2 text-center group-hover:text-white"
+                style={{
+                  color: isHovered ? action.accentColor : '#71848A'
+                }}
+              >
+                {action.name}
+              </span>
             </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-bold text-[#F1F5F4] group-hover:text-[#F6C85F] transition-colors truncate">
-                Schedule Report
-              </h4>
-              <p className="text-[10px] text-[#71848A] truncate mt-0.5">
-                Auto-generate reports
-              </p>
-            </div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-[#71848A] group-hover:text-[#F6C85F] group-hover:translate-x-0.5 transition-transform flex-shrink-0 ml-1" />
-        </button>
+          );
+        })}
       </div>
 
       {/* Floating Feedback Toast */}
@@ -164,7 +197,8 @@ export default function ReportActions({
               </div>
               <button
                 onClick={() => setScheduleModalOpen(false)}
-                className="text-[#71848A] hover:text-[#F1F5F4] p-1"
+                className="text-[#71848A] hover:text-[#F1F5F4] p-1 cursor-pointer"
+                aria-label="Close"
               >
                 <X className="w-4 h-4" />
               </button>

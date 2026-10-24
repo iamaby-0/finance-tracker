@@ -114,16 +114,16 @@ export default function EditTransactionModal({ transaction, isOpen, onClose, onS
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-lg max-h-[calc(100dvh-1.5rem)] flex flex-col bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl my-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#24363B] flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-4 border-b border-[#24363B] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#18272C] border border-[#35E9A0]/30 flex items-center justify-center text-[#35E9A0]">
+            <div className="w-8 h-8 rounded-lg bg-[#18272C] border border-[#35E9A0]/30 flex items-center justify-center text-[#35E9A0] shrink-0">
               <Pencil className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#F1F5F4]">
+              <h3 className="text-base font-bold text-[#F1F5F4] truncate">
                 Edit {isIncome ? 'Income' : 'Expense'}
               </h3>
               <p className="text-xs text-[#71848A]">Update transaction details</p>
@@ -131,7 +131,7 @@ export default function EditTransactionModal({ transaction, isOpen, onClose, onS
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
+            className="p-1.5 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -139,9 +139,9 @@ export default function EditTransactionModal({ transaction, isOpen, onClose, onS
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto pr-2">
           {error && (
-            <div className="p-3 rounded-xl bg-[#3D1A22]/70 border border-[#FF667A]/40 text-xs text-[#FF667A]">
+            <div className="p-3 rounded-xl bg-[#3D1A22]/70 border border-[#FF667A]/40 text-xs text-[#FF667A] shrink-0">
               {error}
             </div>
           )}

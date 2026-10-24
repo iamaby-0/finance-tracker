@@ -197,7 +197,7 @@ export function Goals() {
           {/* 2. Middle Section: Goals Grid on Left (~68%), Add New Goal Form on Right (~32%) */}
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
             {/* Left: Goals Grid Section */}
-            <div className="xl:col-span-8 space-y-4">
+            <div className="xl:col-span-8 space-y-4 min-w-0">
               <GoalFilters
                 activeFilter={activeFilter}
                 onFilterChange={setActiveFilter}
@@ -219,13 +219,13 @@ export function Goals() {
             </div>
 
             {/* Right: Add New Goal Form */}
-            <div className="xl:col-span-4" ref={formSectionRef}>
+            <div className="xl:col-span-4 min-w-0" ref={formSectionRef}>
               <AddGoalForm onSubmit={handleCreateGoal} loading={actionLoading} />
             </div>
           </div>
 
           {/* 3. Bottom Row: 3 Analytics Cards (Savings Progress, Allocation, AI Recommendations) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4.5 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4.5 pt-2">
             <SavingsProgressChart data={analytics?.savingsProgressOverTime} />
             <GoalAllocationChart
               allocation={analytics?.goalAllocation}

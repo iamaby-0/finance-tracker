@@ -459,8 +459,8 @@ export function Analytics() {
 
           {/* 4. Chart Row 1: Income vs Expenses Trend (~60%) & Spending Breakdown (~40%) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~60%): Income vs Expenses Trend */}
-            <div className="lg:col-span-7 h-full">
+            {/* Left: Income vs Expenses Trend */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <IncomeExpenseTrendChart
                 data={monthlyTrendsData}
                 selectedPeriod={selectedPeriod}
@@ -468,8 +468,8 @@ export function Analytics() {
               />
             </div>
 
-            {/* Right (~40%): Spending Breakdown */}
-            <div className="lg:col-span-5 h-full">
+            {/* Right: Spending Breakdown */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <SpendingBreakdownChart
                 categories={spendingBreakdownData}
                 totalExpenses={summaryMetrics.totalExpenses}
@@ -479,10 +479,10 @@ export function Analytics() {
             </div>
           </div>
 
-          {/* 5. Chart Row 2: Monthly Summary Heatmap (~45%) & Category Trends (~55%) */}
+          {/* 5. Chart Row 2: Monthly Summary Heatmap & Category Trends */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~45%): Monthly Summary Heatmap */}
-            <div className="lg:col-span-5 h-full">
+            {/* Left: Monthly Summary Heatmap */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <MonthlySummaryHeatmap
                 data={monthlyHeatmapData}
                 selectedPeriod={selectedPeriod}
@@ -490,8 +490,8 @@ export function Analytics() {
               />
             </div>
 
-            {/* Right (~55%): Category Trends Area Chart */}
-            <div className="lg:col-span-7 h-full">
+            {/* Right: Category Trends Area Chart */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <CategoryTrendsChart
                 categoryData={categoryTrendsData}
                 selectedPeriod={selectedPeriod}
@@ -500,10 +500,10 @@ export function Analytics() {
             </div>
           </div>
 
-          {/* 6. Chart Row 3: Income Sources (~33%), Expense Comparison (~33%), Financial Insights (~34%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~33%): Income Sources */}
-            <div className="lg:col-span-4 h-full">
+          {/* 6. Chart Row 3: Income Sources, Expense Comparison, Financial Insights */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 items-stretch">
+            {/* Left: Income Sources */}
+            <div className="xl:col-span-4 h-full min-w-0">
               <IncomeSourcesChart
                 sources={incomeSourcesData}
                 totalIncome={summaryMetrics.totalIncome}
@@ -512,16 +512,16 @@ export function Analytics() {
               />
             </div>
 
-            {/* Center (~33%): Expense Comparison */}
-            <div className="lg:col-span-4 h-full">
+            {/* Center: Expense Comparison */}
+            <div className="xl:col-span-4 h-full min-w-0">
               <ExpenseComparisonChart
                 data={comparisonData}
                 selectedPeriod="Last 3 Months"
               />
             </div>
 
-            {/* Right (~34%): Financial Insights */}
-            <div className="lg:col-span-4 h-full">
+            {/* Right: Financial Insights */}
+            <div className="md:col-span-2 xl:col-span-4 h-full min-w-0">
               <FinancialInsights />
             </div>
           </div>

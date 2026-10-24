@@ -406,8 +406,8 @@ export function Expenses() {
 
           {/* 4. Main Row 1: Expenses Trend, Expenses by Category, Add New Expense */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~42%): Expenses Trend */}
-            <div className="lg:col-span-5 h-full">
+            {/* Left: Expenses Trend */}
+            <div className="lg:col-span-7 xl:col-span-5 h-full min-w-0">
               <ExpenseTrendChart
                 data={monthlyTrendsData}
                 selectedPeriod={selectedPeriod}
@@ -415,8 +415,8 @@ export function Expenses() {
               />
             </div>
 
-            {/* Center (~36%): Expenses by Category */}
-            <div className="lg:col-span-4 h-full">
+            {/* Center: Expenses by Category */}
+            <div className="lg:col-span-5 xl:col-span-4 h-full min-w-0">
               <ExpenseCategoryChart
                 categories={categoryChartData}
                 totalExpenses={summaryMetrics.totalExpenses}
@@ -425,16 +425,16 @@ export function Expenses() {
               />
             </div>
 
-            {/* Right (~22%): Add New Expense Form */}
-            <div className="lg:col-span-3 h-full">
+            {/* Right: Add New Expense Form */}
+            <div className="lg:col-span-12 xl:col-span-3 h-full min-w-0">
               <AddExpenseForm onSuccess={fetchExpenseData} />
             </div>
           </div>
 
           {/* 5. Main Row 2: Recent Expenses & Expense Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~58%): Recent Expenses */}
-            <div className="lg:col-span-7 h-full">
+            {/* Left: Recent Expenses */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <RecentExpensesTable
                 expenses={displayExpenses}
                 loading={loading}
@@ -444,16 +444,16 @@ export function Expenses() {
               />
             </div>
 
-            {/* Right (~42%): Expense Insights */}
-            <div className="lg:col-span-5 h-full">
+            {/* Right: Expense Insights */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <ExpenseInsights />
             </div>
           </div>
 
           {/* 6. Main Row 3: Top Merchants, Expense Breakdown, Category Limits */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~34%): Top Merchants */}
-            <div className="lg:col-span-4 h-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-5 items-stretch">
+            {/* Left: Top Merchants */}
+            <div className="xl:col-span-4 h-full min-w-0">
               <TopMerchants
                 merchants={topMerchantsData}
                 selectedPeriod={selectedPeriod}
@@ -461,13 +461,13 @@ export function Expenses() {
               />
             </div>
 
-            {/* Center (~34%): Expense Breakdown */}
-            <div className="lg:col-span-4 h-full">
+            {/* Center: Expense Breakdown */}
+            <div className="xl:col-span-4 h-full min-w-0">
               <ExpenseBreakdownChart />
             </div>
 
-            {/* Right (~34%): Category Limits */}
-            <div className="lg:col-span-4 h-full">
+            {/* Right: Category Limits */}
+            <div className="md:col-span-2 xl:col-span-4 h-full min-w-0">
               <CategoryLimits limits={categoryLimitsData} />
             </div>
           </div>

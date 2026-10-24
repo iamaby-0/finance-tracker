@@ -212,7 +212,7 @@ export default function RecentTransactions({
 
       {/* Table Container */}
       <div className="overflow-x-auto scrollbar-none">
-        <table className="w-full text-left text-xs">
+        <table className="w-full min-w-[440px] text-left text-xs">
           <thead>
             <tr className="text-[#71848A] border-b border-[#24363B]/60 pb-2">
               <th className="font-medium pb-2.5 pl-1 w-28">Date</th>

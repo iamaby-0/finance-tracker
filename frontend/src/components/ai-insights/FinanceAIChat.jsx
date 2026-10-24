@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Sparkles,
   Send,
@@ -6,17 +8,157 @@ import {
   MoreVertical,
   RotateCcw,
   Trash2,
+  Copy,
+  Check,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import api from '../../services/api';
+
+/**
+ * Sanitizes and cleans AI output so raw JSON wrappers, escaped newlines,
+ * or truncated JSON strings never leak to the UI.
+ */
+export function cleanMessageContent(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let text = raw.trim();
+
+  // 1. Wrapped in markdown code fence ```json ... ```
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch) {
+    try {
+      const parsed = JSON.parse(codeBlockMatch[1]);
+      if (parsed && typeof parsed.message === 'string') {
+        text = parsed.message;
+      }
+    } catch (_) {}
+  }
+
+  // 2. Valid full JSON
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed.message === 'string') {
+      text = parsed.message;
+    }
+  } catch (_) {
+    // 3. Truncated or malformed JSON with "message": "..."
+    const messageMatch = text.match(/"message"\s*:\s*"([\s\S]*)/i);
+    if (messageMatch) {
+      let content = messageMatch[1];
+      const endMatch = content.match(/^([\s\S]*?)(?:"\s*,\s*"suggestedQuestions"|"\s*\}|\s*"$)/i);
+      if (endMatch) {
+        content = endMatch[1];
+      } else {
+        content = content.replace(/(?:",?\s*\}?|\s*"\}?|\s*")$/, '');
+      }
+      content = content
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, '\\')
+        .replace(/\\t/g, '\t');
+      text = content;
+    }
+  }
+
+  // 4. Handle plain text with literal escaped newlines
+  if (text.includes('\\n') && !text.includes('\n')) {
+    text = text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+  }
+
+  // 5. Clean any trailing SUGGESTIONS marker if leaked into message
+  const suggMatch = text.match(/(?:---|###|\*\*|\n)?\s*(?:SUGGESTIONS|RECOMMENDED QUESTIONS):?\s*([\s\S]*)$/i);
+  if (suggMatch) {
+    text = text.substring(0, suggMatch.index).trim();
+  }
+
+  return text.trim();
+}
+
+/**
+ * Renders rich conversational markdown: styled tables, headers, lists, code, and badges
+ */
+function ChatMarkdownRenderer({ content }) {
+  const sanitized = cleanMessageContent(content);
+
+  return (
+    <div className="prose prose-invert max-w-none text-xs leading-relaxed text-[#F1F5F4] break-words">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ node, ...props }) => (
+            <h1 className="text-sm sm:text-base font-bold text-[#35E9A0] flex items-center gap-1.5 mt-2 mb-2 pb-1 border-b border-[#24363B]" {...props} />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 className="text-xs sm:text-sm font-bold text-[#35E9A0] flex items-center gap-1.5 mt-2.5 mb-1.5 pb-1 border-b border-[#24363B]/60" {...props} />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 className="text-xs sm:text-xs font-semibold text-[#E2E8F0] mt-2 mb-1" {...props} />
+          ),
+          p: ({ node, ...props }) => (
+            <p className="text-xs leading-relaxed text-[#DDE5E7] mb-2 last:mb-0" {...props} />
+          ),
+          ul: ({ node, ...props }) => (
+            <ul className="space-y-1.5 my-2 pl-1 list-none" {...props} />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol className="space-y-1.5 my-2 pl-4 list-decimal list-outside text-xs text-[#DDE5E7]" {...props} />
+          ),
+          li: ({ node, children, ...props }) => (
+            <li className="flex items-start gap-2 text-xs leading-relaxed text-[#DDE5E7] my-0.5" {...props}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#35E9A0] mt-1.5 shrink-0" />
+              <div className="flex-1 min-w-0">{children}</div>
+            </li>
+          ),
+          strong: ({ node, ...props }) => (
+            <strong className="font-semibold text-white" {...props} />
+          ),
+          table: ({ node, ...props }) => (
+            <div className="my-2.5 overflow-x-auto rounded-xl border border-[#24363B] bg-[#0E1619] shadow-inner max-w-full">
+              <table className="w-full text-left border-collapse text-[11px]" {...props} />
+            </div>
+          ),
+          thead: ({ node, ...props }) => (
+            <thead className="bg-[#18272C] text-[#35E9A0] font-semibold border-b border-[#24363B]" {...props} />
+          ),
+          th: ({ node, ...props }) => (
+            <th className="px-3 py-2 font-medium tracking-wide whitespace-nowrap" {...props} />
+          ),
+          tbody: ({ node, ...props }) => (
+            <tbody className="divide-y divide-[#203238] text-[#DDE5E7]" {...props} />
+          ),
+          tr: ({ node, ...props }) => (
+            <tr className="hover:bg-[#18272C]/50 transition-colors" {...props} />
+          ),
+          td: ({ node, ...props }) => (
+            <td className="px-3 py-1.5 whitespace-nowrap text-[#F1F5F4]" {...props} />
+          ),
+          code: ({ node, inline, ...props }) => (
+            <code className="px-1.5 py-0.5 rounded bg-[#101A1D] border border-[#24363B] text-[11px] font-mono text-[#35E9A0]" {...props} />
+          ),
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-2 border-[#35E9A0] bg-[#121E22]/60 pl-2.5 py-1 my-1.5 text-xs text-[#A5B4B8] rounded-r" {...props} />
+          )
+        }}
+      >
+        {sanitized}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export default function FinanceAIChat({ period = 'This Month', financialContext }) {
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('mft_ai_chat_history');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Automatically sanitize stored messages so existing raw JSON is cleaned immediately
+          return parsed.map((m) => ({
+            ...m,
+            content: m.role === 'assistant' ? cleanMessageContent(m.content) : m.content
+          }));
+        }
       } catch (e) {
         // ignore
       }
@@ -52,19 +194,19 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
 
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [conversationId, setConversationId] = useState(() => {
     return localStorage.getItem('mft_ai_conversation_id') || `conv_${Date.now()}`;
   });
   const [suggestedQuestions, setSuggestedQuestions] = useState([
     'Show me my spending trends',
-    'Suggest a budget',
+    'Suggest a budget plan',
     'How can I improve my savings?'
   ]);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
-  const menuRef = useRef(null);
 
   // Save messages to localStorage
   useEffect(() => {
@@ -77,17 +219,6 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
-  // Close three-dot menu on outside click
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setMenuOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const formatCurrentTime = () => {
     const d = new Date();
     let hours = d.getHours();
@@ -95,6 +226,13 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12 || 12;
     return `${hours}:${minutes} ${ampm}`;
+  };
+
+  const handleCopyMessage = (id, text) => {
+    const clean = cleanMessageContent(text);
+    navigator.clipboard.writeText(clean);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
   const handleSendMessage = async (textToSend) => {
@@ -122,10 +260,11 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
 
       if (response.data && response.data.success) {
         const aiData = response.data.data;
+        const cleanContent = cleanMessageContent(aiData.message);
         const aiMsg = {
           id: `msg_ai_${Date.now()}`,
           role: 'assistant',
-          content: aiData.message,
+          content: cleanContent,
           timestamp: formatCurrentTime()
         };
         setMessages((prev) => [...prev, aiMsg]);
@@ -172,7 +311,7 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
       const aiMsg = {
         id: `msg_ai_${Date.now()}`,
         role: 'assistant',
-        content: fallbackText,
+        content: cleanMessageContent(fallbackText),
         timestamp: formatCurrentTime()
       };
       setMessages((prev) => [...prev, aiMsg]);
@@ -204,7 +343,7 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
         timestamp: formatCurrentTime()
       }
     ]);
-    setMenuOpen(false);
+    setShowClearConfirm(false);
   };
 
   const handleNewConversation = () => {
@@ -218,99 +357,84 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
         timestamp: formatCurrentTime()
       }
     ]);
-    setMenuOpen(false);
-  };
-
-  // Helper to render formatted AI response text
-  const renderMessageContent = (content) => {
-    if (!content) return null;
-
-    // Split paragraphs
-    const paragraphs = content.split('\n\n');
-    return (
-      <div className="space-y-2 text-xs leading-relaxed text-[#F1F5F4]">
-        {paragraphs.map((p, idx) => {
-          // Check for numbered lists or bullets
-          if (p.includes('\n1.') || p.startsWith('1.') || p.includes('\n•') || p.startsWith('•')) {
-            const lines = p.split('\n');
-            return (
-              <div key={idx} className="space-y-1 my-1.5">
-                {lines.map((line, lIdx) => {
-                  const formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                  return (
-                    <p
-                      key={lIdx}
-                      className="text-xs leading-relaxed text-[#F1F5F4]"
-                      dangerouslySetInnerHTML={{ __html: formatted }}
-                    />
-                  );
-                })}
-              </div>
-            );
-          }
-          const formatted = p.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-          return (
-            <p
-              key={idx}
-              className="text-xs leading-relaxed text-[#F1F5F4]"
-              dangerouslySetInnerHTML={{ __html: formatted }}
-            />
-          );
-        })}
-      </div>
-    );
   };
 
   return (
-    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[calc(100vh-100px)] min-h-[640px] sticky top-[82px] shadow-xl overflow-hidden">
+    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[520px] sm:h-[580px] xl:h-[calc(100vh-100px)] xl:min-h-[580px] xl:sticky xl:top-[82px] shadow-xl overflow-hidden relative">
+      {/* Clear Chat Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-[#18272C] border border-[#24363B] rounded-2xl p-4 sm:p-5 max-w-[320px] w-full shadow-2xl space-y-3.5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-xl bg-[#3D1A22] border border-[#FF667A]/30 flex items-center justify-center text-[#FF667A] shrink-0">
+                <Trash2 className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-xs sm:text-sm font-bold text-[#F1F5F4]">Clear Chat History?</h4>
+                <p className="text-[11px] text-[#A5B4B8] mt-1 leading-relaxed">
+                  This will delete all current messages in this conversation.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#24363B]/60">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(false)}
+                className="px-3 py-1.5 rounded-xl bg-[#121E22] hover:bg-[#203238] border border-[#24363B] text-[11px] font-medium text-[#A5B4B8] hover:text-[#F1F5F4] transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleClearChat}
+                className="px-3 py-1.5 rounded-xl bg-[#FF667A] hover:bg-[#FF4D66] text-[11px] font-semibold text-white transition shadow-sm cursor-pointer"
+              >
+                Clear Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
-      <div className="p-4 sm:p-4.5 border-b border-[#24363B] bg-[#121E22] flex items-center justify-between shrink-0">
-        <div>
-          <h3 className="text-sm sm:text-base font-bold text-[#F1F5F4] tracking-tight">
-            Finance AI Assistant
+      <div className="p-3.5 sm:p-4 border-b border-[#24363B] bg-[#121E22] flex items-center justify-between shrink-0 gap-2">
+        <div className="min-w-0">
+          <h3 className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight truncate flex items-center gap-1.5">
+            <span>Finance AI Assistant</span>
           </h3>
-          <p className="text-[11px] text-[#71848A]">
+          <p className="text-[10px] sm:text-[11px] text-[#71848A] truncate">
             Ask anything about your finances
           </p>
         </div>
 
-        {/* Right Status & Menu */}
-        <div className="flex items-center gap-3">
+        {/* Right Status & Action Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Online status indicator */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#123D32]/80 border border-[#35E9A0]/20 text-[11px] text-[#35E9A0] font-medium">
+          <div className="hidden lg:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#123D32]/80 border border-[#35E9A0]/20 text-[10px] text-[#35E9A0] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-[#35E9A0] animate-pulse" />
             <span>Online</span>
           </div>
 
-          {/* Three-dot Menu */}
-          <div className="relative" ref={menuRef}>
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
-              aria-label="Chat options"
-            >
-              <MoreVertical className="w-4 h-4" />
-            </button>
+          {/* New Conversation Button */}
+          <button
+            onClick={handleNewConversation}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/50 text-[11px] font-medium text-[#F1F5F4] hover:text-[#35E9A0] transition shadow-xs cursor-pointer group"
+            title="Start a new conversation"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-[#35E9A0] group-hover:-rotate-45 transition-transform duration-200 shrink-0" />
+            <span className="hidden sm:inline">New Chat</span>
+          </button>
 
-            {menuOpen && (
-              <div className="absolute right-0 mt-1 w-44 bg-[#18272C] border border-[#24363B] rounded-xl shadow-2xl p-1 z-30 animate-in fade-in zoom-in-95 duration-100 text-xs">
-                <button
-                  onClick={handleNewConversation}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#203238] transition text-left cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#35E9A0]" />
-                  <span>New Conversation</span>
-                </button>
-                <button
-                  onClick={handleClearChat}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[#FF667A] hover:bg-[#3D1A22]/50 transition text-left cursor-pointer"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-[#FF667A]" />
-                  <span>Clear Chat</span>
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Clear Chat Button */}
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#18272C] hover:bg-[#3D1A22]/50 border border-[#24363B] hover:border-[#FF667A]/50 text-[11px] font-medium text-[#A5B4B8] hover:text-[#FF667A] transition shadow-xs cursor-pointer group"
+            title="Clear all messages in chat"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-[#FF667A] group-hover:scale-105 transition-transform shrink-0" />
+            <span className="hidden sm:inline">Clear Chat</span>
+          </button>
         </div>
       </div>
 
@@ -371,8 +495,8 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
 
           if (msg.role === 'user') {
             return (
-              <div key={msg.id} className="flex flex-col items-end space-y-1">
-                <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#35E9A0] text-[#0B1114] px-4 py-2.5 shadow-sm font-medium text-xs leading-relaxed">
+              <div key={msg.id} className="flex flex-col items-end space-y-1 min-w-0">
+                <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#35E9A0] text-[#0B1114] px-4 py-2.5 shadow-sm font-medium text-xs leading-relaxed break-words">
                   {msg.content}
                 </div>
                 <span className="text-[10px] text-[#71848A] pr-1">{msg.timestamp}</span>
@@ -381,14 +505,39 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
           }
 
           return (
-            <div key={msg.id} className="space-y-1">
-              <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0 mt-0.5">
+            <div key={msg.id} className="space-y-1 min-w-0 group">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0 mt-0.5 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
 
-                <div className="flex-1 rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] p-3.5 shadow-sm text-xs text-[#F1F5F4]">
-                  {renderMessageContent(msg.content)}
+                <div className="flex-1 rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] p-3.5 shadow-sm text-xs text-[#F1F5F4] break-words min-w-0 relative">
+                  <ChatMarkdownRenderer content={msg.content} />
+
+                  {/* Message actions footer */}
+                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#24363B]/50 text-[10px] text-[#71848A]">
+                    <span className="flex items-center gap-1 text-[#A5B4B8]/70">
+                      <Sparkles className="w-2.5 h-2.5 text-[#B18AFF]" />
+                      <span>Finance AI</span>
+                    </span>
+                    <button
+                      onClick={() => handleCopyMessage(msg.id, msg.content)}
+                      className="flex items-center gap-1 hover:text-[#35E9A0] transition px-1.5 py-0.5 rounded hover:bg-[#203238] cursor-pointer"
+                      title="Copy response"
+                    >
+                      {copiedId === msg.id ? (
+                        <>
+                          <Check className="w-3 h-3 text-[#35E9A0]" />
+                          <span className="text-[#35E9A0]">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
               <span className="text-[10px] text-[#71848A] pl-10 block">{msg.timestamp}</span>
@@ -402,10 +551,11 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
             <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             </div>
-            <div className="rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] px-4 py-3 flex items-center gap-1.5 shadow-sm">
+            <div className="rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] px-4 py-3 flex items-center gap-2 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="text-[11px] text-[#A5B4B8] ml-1.5 font-medium">Analyzing your finances...</span>
             </div>
           </div>
         )}
@@ -420,9 +570,9 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
             <button
               key={idx}
               onClick={() => handleSendMessage(q)}
-              className="px-2.5 py-1 rounded-full bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/40 text-[10px] text-[#A5B4B8] hover:text-[#F1F5F4] transition shrink-0 cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/40 text-[10px] text-[#A5B4B8] hover:text-[#F1F5F4] transition shrink-0 cursor-pointer flex items-center gap-1"
             >
-              {q}
+              <span>{q}</span>
             </button>
           ))}
         </div>

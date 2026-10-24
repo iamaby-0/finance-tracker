@@ -208,6 +208,7 @@ export default function IncomeExpenseChart({
               tickLine={false}
               tick={{ fill: '#71848A', fontSize: 11 }}
               dy={8}
+              minTickGap={6}
             />
             <YAxis
               axisLine={false}

@@ -361,9 +361,9 @@ export function Budgets() {
             overBudgetCount={metrics.overBudgetCount}
           />
 
-          {/* 4. Main Row: 3 Cards (Card A: ~38%, Card B: ~30%, Card C: ~32%) */}
-          <div className="grid grid-cols-1 lg:grid-cols-[38fr_30fr_32fr] gap-4 sm:gap-5">
-            {/* Card A: Budget by Category (~38%) */}
+          {/* 4. Main Row: 3 Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-[38fr_30fr_32fr] gap-4 sm:gap-5">
+            {/* Card A: Budget by Category */}
             <div className="min-w-0">
               <BudgetCategoryList
                 categories={getCategoryListItems()}
@@ -372,7 +372,7 @@ export function Budgets() {
               />
             </div>
 
-            {/* Card B: Budget vs Spending (~30%) */}
+            {/* Card B: Budget vs Spending */}
             <div className="min-w-0">
               <BudgetComparisonChart
                 data={getChartData()}
@@ -381,8 +381,8 @@ export function Budgets() {
               />
             </div>
 
-            {/* Card C: Create New Budget (~32%) */}
-            <div className="min-w-0">
+            {/* Card C: Create New Budget */}
+            <div className="lg:col-span-2 xl:col-span-1 min-w-0">
               <CreateBudgetForm
                 onSuccess={fetchBudgetData}
               />

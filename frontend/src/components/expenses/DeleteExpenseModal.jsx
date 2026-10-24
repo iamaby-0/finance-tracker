@@ -31,8 +31,8 @@ export default function DeleteExpenseModal({ expense, isOpen, onClose, onSuccess
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-5 sm:p-6 my-auto overflow-y-auto">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-xl bg-[#3D1A22] border border-[#FF667A]/30 flex items-center justify-center text-[#FF667A] shrink-0">
             <AlertTriangle className="w-5 h-5" />

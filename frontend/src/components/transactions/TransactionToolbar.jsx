@@ -55,7 +55,7 @@ export default function TransactionToolbar({
   return (
     <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-6">
       {/* Left: Segmented Tabs (All, Income, Expenses) */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
         <div className="inline-flex p-1 rounded-xl bg-[#121E22] border border-[#24363B]">
           {['All', 'Income', 'Expenses'].map((tab) => {
             const isActive = activeType === tab;
@@ -63,7 +63,7 @@ export default function TransactionToolbar({
               <button
                 key={tab}
                 onClick={() => onTypeChange(tab)}
-                className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
+                className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer whitespace-nowrap ${
                   isActive
                     ? 'bg-[#123D32] text-[#35E9A0] border border-[#35E9A0] shadow-xs'
                     : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C] border border-transparent'
@@ -77,9 +77,9 @@ export default function TransactionToolbar({
       </div>
 
       {/* Right Controls: Search, Date Filter, Category Filter */}
-      <div className="flex flex-wrap items-center gap-3 flex-1 lg:justify-end">
+      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 flex-1 lg:justify-end">
         {/* Search Input */}
-        <div className="relative min-w-[200px] flex-1 max-w-xs">
+        <div className="relative w-full sm:w-auto sm:min-w-[180px] flex-1 max-w-full sm:max-w-xs">
           <Search className="w-4 h-4 text-[#71848A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
@@ -106,19 +106,19 @@ export default function TransactionToolbar({
               setDateOpen(!dateOpen);
               setCategoryOpen(false);
             }}
-            className="h-10 px-3.5 rounded-xl bg-[#121E22] border border-[#24363B] hover:border-[#35E9A0]/40 text-[#F1F5F4] text-xs font-medium flex items-center gap-2 hover:bg-[#18272C] transition cursor-pointer"
+            className="h-10 px-3 sm:px-3.5 rounded-xl bg-[#121E22] border border-[#24363B] hover:border-[#35E9A0]/40 text-[#F1F5F4] text-xs font-medium flex items-center gap-1.5 sm:gap-2 hover:bg-[#18272C] transition cursor-pointer"
           >
-            <Calendar className="w-4 h-4 text-[#71848A]" />
-            <span>{selectedPeriod}</span>
+            <Calendar className="w-4 h-4 text-[#71848A] shrink-0" />
+            <span className="whitespace-nowrap">{selectedPeriod}</span>
             <ChevronDown
-              className={`w-3.5 h-3.5 text-[#71848A] transition-transform duration-200 ${
+              className={`w-3.5 h-3.5 text-[#71848A] transition-transform duration-200 shrink-0 ${
                 dateOpen ? 'rotate-180 text-[#35E9A0]' : ''
               }`}
             />
           </button>
 
           {dateOpen && (
-            <div className="absolute right-0 mt-2 w-44 bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-1 z-30 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 mt-2 w-44 max-w-[calc(100vw-2rem)] bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-1 z-30 animate-in fade-in zoom-in-95 duration-150">
               {dateOptions.map((opt) => (
                 <button
                   key={opt}

@@ -449,10 +449,10 @@ export function Reports() {
             balanceComparison={summaryMetrics.balanceComparison}
           />
 
-          {/* 5. Content Row 1: Monthly Financial Overview (~60%) & Expense Breakdown (~40%) */}
+          {/* 5. Content Row 1: Monthly Financial Overview & Expense Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~60%): Monthly Financial Overview */}
-            <div className="lg:col-span-7 h-full">
+            {/* Left: Monthly Financial Overview */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <MonthlyFinancialOverview
                 data={monthlyFinancialData}
                 selectedPeriod={overviewPeriod}
@@ -460,8 +460,8 @@ export function Reports() {
               />
             </div>
 
-            {/* Right (~40%): Expense Breakdown */}
-            <div className="lg:col-span-5 h-full">
+            {/* Right: Expense Breakdown */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <ExpenseBreakdownChart
                 categories={categoryBreakdownData}
                 totalExpenses={summaryMetrics.totalExpenses}
@@ -471,10 +471,10 @@ export function Reports() {
             </div>
           </div>
 
-          {/* 6. Content Row 2: Category Report Table (~46%), Payment Methods (~21%), Top Merchants (~33%) */}
+          {/* 6. Content Row 2: Category Report Table, Payment Methods, Top Merchants */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~46%): Category Report */}
-            <div className="lg:col-span-6 xl:col-span-6 h-full">
+            {/* Left: Category Report */}
+            <div className="lg:col-span-12 xl:col-span-6 h-full min-w-0">
               <CategoryReportTable
                 categories={categoryTableData}
                 selectedPeriod={catPeriod}
@@ -482,16 +482,16 @@ export function Reports() {
               />
             </div>
 
-            {/* Center (~21%): Payment Methods */}
-            <div className="lg:col-span-3 xl:col-span-3 h-full">
+            {/* Center: Payment Methods */}
+            <div className="lg:col-span-6 xl:col-span-3 h-full min-w-0">
               <PaymentMethodsChart
                 methods={paymentMethodsData}
                 totalSpent={summaryMetrics.totalExpenses}
               />
             </div>
 
-            {/* Right (~33%): Top Merchants */}
-            <div className="lg:col-span-3 xl:col-span-3 h-full">
+            {/* Right: Top Merchants */}
+            <div className="lg:col-span-6 xl:col-span-3 h-full min-w-0">
               <TopMerchants
                 merchants={topMerchantsData}
                 selectedPeriod={merchantPeriod}
@@ -500,15 +500,15 @@ export function Reports() {
             </div>
           </div>
 
-          {/* 7. Content Row 3: Recent Transactions (Report View) (~55%) & Report Actions (~45%) */}
+          {/* 7. Content Row 3: Recent Transactions (Report View) & Report Actions */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~55%): Recent Transactions */}
-            <div className="lg:col-span-7 h-full">
+            {/* Left: Recent Transactions */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <RecentReportTransactions transactions={reportTransactions} />
             </div>
 
-            {/* Right (~45%): Report Actions */}
-            <div className="lg:col-span-5 h-full">
+            {/* Right: Report Actions */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <ReportActions
                 onDownloadPDF={handleDownloadPDF}
                 onDownloadExcel={handleDownloadExcel}
