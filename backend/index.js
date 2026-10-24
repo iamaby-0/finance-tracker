@@ -10,11 +10,13 @@ const analyticsRoutes = require('./routes/analytics.routes')
 const reportRoutes = require('./routes/report.routes')
 const aiRoutes = require('./routes/ai.routes')
 const categoryRoutes = require('./routes/category.routes')
+const goalRoutes = require('./routes/goal.routes')
+const userRoutes = require('./routes/user.routes')
 const passport = require('./config/passport');
 
 const app = express();
-app.use(express.json())
-app.use(express.urlencoded({extended : true}))
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors({
     origin: "http://localhost:5173", // Replace with your frontend URL
     credentials: true, // Allow cookies to be sent
@@ -28,6 +30,8 @@ analyticsRoutes(app) // calling analytics routes
 reportRoutes(app) // calling report routes
 aiRoutes(app) // calling ai routes
 categoryRoutes(app) // calling category routes
+goalRoutes(app) // calling goal routes
+userRoutes(app); // calling user routes
 
 
 app.listen(env.port, ()=>{

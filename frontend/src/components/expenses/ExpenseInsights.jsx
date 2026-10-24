@@ -58,7 +58,7 @@ export default function ExpenseInsights({ insights = null }) {
 
         {/* View All Link */}
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/ai-insights')}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

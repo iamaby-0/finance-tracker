@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -19,6 +20,7 @@ import { formatDate } from '../utils/formatters';
 
 export function Expenses() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Mobile sidebar state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -438,6 +440,7 @@ export function Expenses() {
                 loading={loading}
                 onEdit={(exp) => setEditingExpense(exp)}
                 onDelete={(exp) => setDeletingExpense(exp)}
+                onViewAll={() => navigate('/transactions?type=Expenses')}
               />
             </div>
 

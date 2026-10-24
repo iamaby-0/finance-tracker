@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Bell,
@@ -23,6 +24,7 @@ export default function Navbar({
   showAvatarOnly = false,
   showSecondaryIcon = false
 }) {
+  const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const profileRef = useRef(null);
@@ -211,18 +213,14 @@ export default function Navbar({
               {/* Menu Links */}
               <div className="py-1">
                 <button
-                  onClick={() => setProfileOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C] transition text-left"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    navigate('/settings');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C] transition text-left cursor-pointer"
                 >
                   <UserIcon className="w-3.5 h-3.5 text-[#71848A]" />
-                  <span>Profile Overview</span>
-                </button>
-                <button
-                  onClick={() => setProfileOpen(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C] transition text-left"
-                >
-                  <Settings className="w-3.5 h-3.5 text-[#71848A]" />
-                  <span>Settings & Preferences</span>
+                  <span>Profile & Settings</span>
                 </button>
               </div>
 

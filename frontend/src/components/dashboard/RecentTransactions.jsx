@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Utensils,
   Briefcase,
@@ -153,6 +154,16 @@ export default function RecentTransactions({
   onAddTransaction,
   searchQuery = ''
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/transactions');
+    }
+  };
+
   let displayList = [];
 
   if (transactions && transactions.length > 0) {
@@ -192,7 +203,7 @@ export default function RecentTransactions({
           Recent Transactions
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

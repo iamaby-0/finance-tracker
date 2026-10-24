@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
   ShoppingBag,
@@ -74,6 +75,16 @@ export default function RecentBudgetActivity({
   categoryStatusMap = {},
   onViewAll
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/transactions?type=Expenses');
+    }
+  };
+
   let displayRows = [];
 
   if (expenses && expenses.length > 0) {
@@ -105,7 +116,7 @@ export default function RecentBudgetActivity({
           Recent Budget Activity
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

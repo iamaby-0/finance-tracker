@@ -55,7 +55,7 @@ export default function FinancialInsights({ insights = null }) {
 
         <button
           type="button"
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate('/ai-insights')}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] transition-colors cursor-pointer"
         >
           View All

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -14,6 +15,7 @@ import { Target, Calendar, ChevronDown } from 'lucide-react';
 
 export function Budgets() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Mobile drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -366,7 +368,7 @@ export function Budgets() {
               <BudgetCategoryList
                 categories={getCategoryListItems()}
                 onEditBudget={(item) => setEditingBudget(item)}
-                onViewAll={() => {}}
+                onViewAll={() => navigate('/categories')}
               />
             </div>
 
@@ -394,7 +396,7 @@ export function Budgets() {
               <RecentBudgetActivity
                 expenses={expenses}
                 categoryStatusMap={getCategoryStatusMap()}
-                onViewAll={() => {}}
+                onViewAll={() => navigate('/transactions?type=Expenses')}
               />
             </div>
 
@@ -402,7 +404,7 @@ export function Budgets() {
             <div className="min-w-0">
               <BudgetInsights
                 insights={getDynamicInsights()}
-                onViewAll={() => {}}
+                onViewAll={() => navigate('/ai-insights')}
               />
             </div>
           </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   UtensilsCrossed,
   ShoppingBag,
@@ -207,6 +208,16 @@ export default function BudgetCategoryList({
   onEditBudget,
   onViewAll
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/categories');
+    }
+  };
+
   const items = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
 
   return (
@@ -217,7 +228,7 @@ export default function BudgetCategoryList({
           Budget by Category
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

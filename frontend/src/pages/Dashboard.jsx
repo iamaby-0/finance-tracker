@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
 import Sidebar from '../components/layout/Sidebar';
@@ -20,6 +21,7 @@ import { Calendar, ChevronDown, RefreshCw } from 'lucide-react';
 
 export function Dashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   // Mobile sidebar drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -375,13 +377,13 @@ export function Dashboard() {
             <RecentTransactions
               transactions={transactions.length > 0 ? transactions : null}
               searchQuery={searchQuery}
-              onViewAll={() => setActiveNav('Transactions')}
+              onViewAll={() => navigate('/transactions')}
               onAddTransaction={() => setAddExpenseOpen(true)}
             />
 
             {/* Right 50%: AI Financial Insights */}
             <AIInsights
-              onViewAll={() => setActiveNav('AI Insights')}
+              onViewAll={() => navigate('/ai-insights')}
               onActionClick={(insight) => {
                 alert(`AI Insight detail: ${insight.title}`);
               }}
@@ -394,7 +396,7 @@ export function Dashboard() {
             <div className="lg:col-span-4">
               <BudgetProgress
                 budgets={budgetList.length > 0 ? budgetList : null}
-                onViewAll={() => setActiveNav('Budgets')}
+                onViewAll={() => navigate('/budgets')}
               />
             </div>
 
@@ -404,15 +406,15 @@ export function Dashboard() {
                 onAddExpense={() => setAddExpenseOpen(true)}
                 onAddIncome={() => setAddIncomeOpen(true)}
                 onSetBudget={() => setSetBudgetOpen(true)}
-                onViewReports={() => setActiveNav('Reports')}
+                onViewReports={() => navigate('/analytics')}
               />
             </div>
 
             {/* Card C: Financial Goals (~36%) */}
             <div className="lg:col-span-4 md:col-span-2">
               <FinancialGoals
-                onViewAll={() => setActiveNav('Goals')}
-                onAddGoal={() => alert('Goal creation')}
+                onViewAll={() => navigate('/goals')}
+                onAddGoal={() => navigate('/goals')}
               />
             </div>
           </div>

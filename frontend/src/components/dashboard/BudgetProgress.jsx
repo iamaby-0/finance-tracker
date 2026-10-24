@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Utensils, ShoppingBag, Car } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
@@ -36,6 +37,16 @@ export default function BudgetProgress({
   budgets = null,
   onViewAll
 }) {
+  const navigate = useNavigate();
+
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/budgets');
+    }
+  };
+
   const displayList = budgets && budgets.length > 0 ? budgets : DEFAULT_BUDGETS;
 
   return (
@@ -46,7 +57,7 @@ export default function BudgetProgress({
           Monthly Budget Progress
         </h3>
         <button
-          onClick={onViewAll}
+          onClick={handleViewAll}
           className="text-xs font-semibold text-[#35E9A0] hover:text-[#4FFFB0] hover:underline transition cursor-pointer"
         >
           View All

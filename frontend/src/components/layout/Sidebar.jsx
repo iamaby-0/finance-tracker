@@ -36,10 +36,10 @@ export default function Sidebar({
     { id: 'Expenses', label: 'Expenses', icon: TrendingDown, path: '/expenses' },
     { id: 'Budgets', label: 'Budgets', icon: PieChart, path: '/budgets' },
     { id: 'Analytics', label: 'Analytics', icon: BarChart3, path: '/analytics' },
-    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/dashboard' },
+    { id: 'AI Insights', label: 'AI Insights', icon: Sparkles, path: '/ai-insights' },
     { id: 'Reports', label: 'Reports', icon: FileText, path: '/reports' },
     { id: 'Categories', label: 'Categories', icon: LayoutGrid, path: '/categories' },
-    { id: 'Goals', label: 'Goals', icon: Target, path: '/dashboard' },
+    { id: 'Goals', label: 'Goals', icon: Target, path: '/goals' },
   ];
 
   const handleItemClick = (item) => {
@@ -141,21 +141,36 @@ export default function Sidebar({
 
         {/* Settings */}
         <button
-          onClick={() => handleItemClick({ id: 'Settings', label: 'Settings' })}
+          onClick={() => handleItemClick({ id: 'Settings', label: 'Settings', path: '/settings' })}
           className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer ${
             activeItem === 'Settings'
-              ? 'bg-[#15372F] text-[#35E9A0] border-l-4 border-[#35E9A0]'
+              ? 'bg-[#15372F] text-[#F1F5F4] border border-[#35E9A0]/50 shadow-[0_0_15px_rgba(53,233,160,0.15)] font-semibold'
               : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C]'
           }`}
         >
-          <Settings className="w-4 h-4 text-[#71848A] group-hover:text-[#A5B4B8]" />
+          <Settings className={`w-4 h-4 transition-colors ${activeItem === 'Settings' ? 'text-[#35E9A0]' : 'text-[#71848A] group-hover:text-[#A5B4B8]'}`} />
           <span>Settings</span>
+        </button>
+
+        {/* Logout */}
+        <button
+          onClick={() => {
+            if (onLogout) onLogout();
+            if (onClose) onClose();
+          }}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 group text-left cursor-pointer text-[#A5B4B8] hover:text-[#FF667A] hover:bg-[#18272C]"
+        >
+          <LogOut className="w-4 h-4 text-[#71848A] group-hover:text-[#FF667A] transition-colors" />
+          <span>Logout</span>
         </button>
       </nav>
 
       {/* Promotional Card at bottom (consistent across all pages) */}
       <div className="p-4 pt-2">
-        <div className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300">
+        <div
+          onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' })}
+          className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300 cursor-pointer"
+        >
           {/* Subtle Glow Backdrop */}
           <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#35E9A0]/10 rounded-full blur-2xl pointer-events-none" />
 
@@ -168,7 +183,13 @@ export default function Sidebar({
 
           {/* Card Text */}
           <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'Budgets'
+            {activeItem === 'Settings'
+              ? 'Unlock More Financial Insights'
+              : activeItem === 'Goals'
+              ? 'Achieve Your Financial Goals'
+              : activeItem === 'AI Insights'
+              ? 'Unlock the Power of AI Insights'
+              : activeItem === 'Budgets'
               ? 'Stay on Budget'
               : activeItem === 'Expenses'
               ? 'Control Your Spending Better'
@@ -180,7 +201,13 @@ export default function Sidebar({
               ? 'Organize Your Finances Better'
               : 'Track Smarter'}
             <span className="block font-semibold text-[#A5B4B8] text-xs">
-              {activeItem === 'Budgets'
+              {activeItem === 'Settings'
+                ? ''
+                : activeItem === 'Goals'
+                ? ''
+                : activeItem === 'AI Insights'
+                ? ''
+                : activeItem === 'Budgets'
                 ? 'Build Your Future'
                 : activeItem === 'Expenses'
                 ? ''
@@ -194,7 +221,13 @@ export default function Sidebar({
             </span>
           </h4>
           <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            {activeItem === 'Budgets'
+            {activeItem === 'Settings'
+              ? 'Get AI-powered insights, advanced analytics and more features.'
+              : activeItem === 'Goals'
+              ? 'Set goals, track progress and get AI powered recommendations to reach them faster.'
+              : activeItem === 'AI Insights'
+              ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
+              : activeItem === 'Budgets'
               ? 'Create smart budgets and achieve your goals.'
               : activeItem === 'Expenses'
               ? 'Track expenses, find insights and save more.'
@@ -235,7 +268,10 @@ export default function Sidebar({
 
             {/* Circular Arrow Button */}
             <button
-              onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights' })}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' });
+              }}
               className="w-7 h-7 rounded-full bg-[#35E9A0] hover:bg-[#4FFFB0] text-[#0B1114] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
               aria-label="Explore AI Insights"
             >
