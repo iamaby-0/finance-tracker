@@ -28,6 +28,7 @@ export function Transactions() {
     const lower = param.toLowerCase();
     if (lower === 'income') return 'Income';
     if (lower === 'expense' || lower === 'expenses') return 'Expenses';
+    if (lower === 'budget' || lower === 'budgets') return 'Budget';
     return 'All';
   };
 
@@ -110,6 +111,7 @@ export function Transactions() {
   // Raw Data from Backend
   const [expenses, setExpenses] = useState([]);
   const [incomes, setIncomes] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modals state
@@ -118,13 +120,14 @@ export function Transactions() {
   const [detailsModalTx, setDetailsModalTx] = useState(null);
   const [deleteModalTx, setDeleteModalTx] = useState(null);
 
-  // Fetch both expenses and incomes from existing backend endpoints
+  // Fetch expenses, incomes, and budgets from existing backend endpoints
   const fetchAllTransactions = useCallback(async () => {
     try {
       setLoading(true);
-      const [expenseRes, incomeRes] = await Promise.allSettled([
+      const [expenseRes, incomeRes, budgetRes] = await Promise.allSettled([
         api.get('/expenses'),
-        api.get('/income')
+        api.get('/income'),
+        api.get('/budget')
       ]);
 
       if (expenseRes.status === 'fulfilled' && expenseRes.value?.data?.data) {
@@ -140,6 +143,13 @@ export function Transactions() {
       } else {
         setIncomes([]);
       }
+
+      if (budgetRes.status === 'fulfilled' && budgetRes.value?.data?.data) {
+        const data = budgetRes.value.data.data;
+        setBudgets(Array.isArray(data) ? data : []);
+      } else {
+        setBudgets([]);
+      }
     } catch (err) {
       console.warn('Notice while loading transactions:', err);
     } finally {
@@ -151,7 +161,7 @@ export function Transactions() {
     fetchAllTransactions();
   }, [fetchAllTransactions]);
 
-  // Combine and normalize expenses and incomes into unified transaction objects
+  // Combine and normalize expenses, incomes, and budgets into unified transaction objects
   const combinedTransactions = useMemo(() => {
     const normalizedExpenses = expenses.map((exp) => ({
       _id: exp._id,
@@ -177,13 +187,26 @@ export function Transactions() {
       raw: inc
     }));
 
+    const normalizedBudgets = budgets.map((b) => ({
+      _id: b._id,
+      type: 'Budget',
+      amount: Number(b.amount) || 0,
+      name: b.name || `${b.category || 'Overall'} Budget`,
+      description: b.name || `${b.category || 'Overall'} Budget`,
+      category: b.category || 'Overall',
+      source: b.category || 'Overall',
+      date: b.startDate || (b.year && b.month ? new Date(b.year, b.month - 1, 1).toISOString() : b.createdAt || new Date().toISOString()),
+      notes: b.notes || (b.month && b.year ? `Monthly limit for ${b.month}/${b.year}` : ''),
+      raw: b
+    }));
+
     // Merge and sort descending by date (newest first)
-    return [...normalizedExpenses, ...normalizedIncomes].sort((a, b) => {
+    return [...normalizedExpenses, ...normalizedIncomes, ...normalizedBudgets].sort((a, b) => {
       const dateA = new Date(a.date).getTime() || 0;
       const dateB = new Date(b.date).getTime() || 0;
       return dateB - dateA;
     });
-  }, [expenses, incomes]);
+  }, [expenses, incomes, budgets]);
 
   // Dynamic category options based on loaded records
   const categoryOptions = useMemo(() => {
@@ -208,9 +231,10 @@ export function Transactions() {
   // Filter transactions
   const filteredTransactions = useMemo(() => {
     return combinedTransactions.filter((tx) => {
-      // 1. Type Filter ('All', 'Income', 'Expenses')
+      // 1. Type Filter ('All', 'Income', 'Expenses', 'Budget')
       if (activeType === 'Income' && tx.type !== 'Income') return false;
       if (activeType === 'Expenses' && tx.type !== 'Expense') return false;
+      if (activeType === 'Budget' && tx.type !== 'Budget') return false;
 
       // 2. Category Filter
       if (selectedCategory !== 'All Categories') {

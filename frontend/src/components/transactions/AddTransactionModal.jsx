@@ -28,10 +28,25 @@ const INCOME_SOURCES = [
   'Other'
 ];
 
+const BUDGET_CATEGORIES = [
+  { value: 'Overall', label: 'Overall (All Spending)' },
+  { value: 'Food', label: 'Food & Dining' },
+  { value: 'Bills', label: 'Bills & Utilities' },
+  { value: 'Shopping', label: 'Shopping' },
+  { value: 'Transport', label: 'Transportation' },
+  { value: 'Entertainment', label: 'Entertainment' },
+  { value: 'Health', label: 'Health & Fitness' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Travel', label: 'Travel' },
+  { value: 'Rent', label: 'Rent' },
+  { value: 'Investment', label: 'Investment' },
+  { value: 'Other', label: 'Other' }
+];
+
 const PAYMENT_METHODS = ['UPI', 'Debit Card', 'Bank Transfer', 'Cash', 'Other'];
 
 export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
-  const [type, setType] = useState('Expense'); // 'Expense' or 'Income'
+  const [type, setType] = useState('Expense'); // 'Expense', 'Income', or 'Budget'
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('Food');
@@ -48,6 +63,8 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
     setType(newType);
     if (newType === 'Income') {
       setCategory('Salary');
+    } else if (newType === 'Budget') {
+      setCategory('Overall');
     } else {
       setCategory('Food');
     }
@@ -63,7 +80,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
       return;
     }
 
-    if (!description.trim()) {
+    if (!description.trim() && type !== 'Budget') {
       setError('Please enter a description for the transaction');
       return;
     }
@@ -81,7 +98,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
           notes: notes.trim() || undefined
         };
         await api.post('/expenses', payload);
-      } else {
+      } else if (type === 'Income') {
         const payload = {
           amount: numAmount,
           source: category,
@@ -90,17 +107,71 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
           date: new Date(date).toISOString()
         };
         await api.post('/income', payload);
+      } else if (type === 'Budget') {
+        const selectedDate = new Date(date);
+        const month = isNaN(selectedDate.getTime()) ? new Date().getMonth() + 1 : selectedDate.getMonth() + 1;
+        const year = isNaN(selectedDate.getTime()) ? new Date().getFullYear() : selectedDate.getFullYear();
+        const budgetName = description.trim() || `${category} Budget`;
+
+        // Check if budget exists to upsert
+        let existingId = null;
+        try {
+          const getRes = await api.get('/budget');
+          const allBudgets = getRes.data?.data || [];
+          const found = allBudgets.find(
+            (b) => b.category === category && Number(b.month) === month && Number(b.year) === year
+          );
+          if (found?._id) existingId = found._id;
+        } catch {
+          // Ignore
+        }
+
+        const budgetPayload = {
+          name: budgetName,
+          category,
+          amount: numAmount,
+          month,
+          year,
+          startDate: new Date(year, month - 1, 1).toISOString(),
+          endDate: new Date(year, month, 0, 23, 59, 59).toISOString(),
+          notes: notes.trim() || undefined
+        };
+
+        if (existingId) {
+          await api.patch(`/budget/${existingId}`, budgetPayload);
+        } else {
+          try {
+            await api.post('/budget', budgetPayload);
+          } catch (postErr) {
+            if (postErr.response?.status === 409) {
+              const getRes = await api.get('/budget');
+              const allBudgets = getRes.data?.data || [];
+              const found = allBudgets.find(
+                (b) => b.category === category && Number(b.month) === month && Number(b.year) === year
+              );
+              if (found?._id) {
+                await api.patch(`/budget/${found._id}`, budgetPayload);
+              } else {
+                throw postErr;
+              }
+            } else {
+              throw postErr;
+            }
+          }
+        }
       }
 
       onSuccess();
       onClose();
     } catch (err) {
       console.error('Failed to create transaction:', err);
-      setError(
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        'Failed to save transaction. Please check your inputs.'
-      );
+      const apiErr = err.response?.data;
+      const detailMsg =
+        apiErr?.error?.message ||
+        (typeof apiErr?.error === 'string' ? apiErr.error : null) ||
+        (apiErr?.message !== 'Something went wrong' ? apiErr?.message : null) ||
+        'Failed to save transaction. Please check your inputs.';
+      setError(detailMsg);
     } finally {
       setLoading(false);
     }
@@ -142,7 +213,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1.5">
               Transaction Type
             </label>
-            <div className="grid grid-cols-2 gap-2 p-1 bg-[#101A1D] rounded-xl border border-[#24363B]">
+            <div className="grid grid-cols-3 gap-2 p-1 bg-[#101A1D] rounded-xl border border-[#24363B]">
               <button
                 type="button"
                 onClick={() => handleTypeChange('Expense')}
@@ -165,6 +236,17 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
               >
                 Income
               </button>
+              <button
+                type="button"
+                onClick={() => handleTypeChange('Budget')}
+                className={`py-2 text-xs font-semibold rounded-lg transition cursor-pointer ${
+                  type === 'Budget'
+                    ? 'bg-[#2B1B3D] text-[#B18AFF] border border-[#B18AFF]/40'
+                    : 'text-[#A5B4B8] hover:text-[#F1F5F4]'
+                }`}
+              >
+                Budget
+              </button>
             </div>
           </div>
 
@@ -172,7 +254,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-[#A5B4B8] mb-1.5">
-                Amount (₹) *
+                {type === 'Budget' ? 'Budget Limit (₹) *' : 'Amount (₹) *'}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#71848A]">
@@ -193,7 +275,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
 
             <div>
               <label className="block text-xs font-medium text-[#A5B4B8] mb-1.5">
-                Date *
+                {type === 'Budget' ? 'Month / Date *' : 'Date *'}
               </label>
               <input
                 type="date"
@@ -208,12 +290,18 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
           {/* Description */}
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1.5">
-              Description / Merchant *
+              {type === 'Budget' ? 'Budget Name / Label (Optional)' : 'Description / Merchant *'}
             </label>
             <input
               type="text"
-              required
-              placeholder={type === 'Expense' ? 'e.g., Zomato, Amazon, Uber' : 'e.g., Salary, Freelance project'}
+              required={type !== 'Budget'}
+              placeholder={
+                type === 'Expense'
+                  ? 'e.g., Zomato, Amazon, Uber'
+                  : type === 'Income'
+                  ? 'e.g., Salary, Freelance project'
+                  : 'e.g., Monthly Food Limit (defaults to Category Budget)'
+              }
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full h-10 px-3 bg-[#18272C] border border-[#24363B] rounded-xl text-xs text-[#F1F5F4] placeholder-[#71848A] focus:outline-none focus:border-[#35E9A0]"
@@ -221,10 +309,10 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {/* Category & Payment Method */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className={`grid grid-cols-1 ${type === 'Expense' ? 'sm:grid-cols-2' : ''} gap-3`}>
             <div>
               <label className="block text-xs font-medium text-[#A5B4B8] mb-1.5">
-                {type === 'Expense' ? 'Category *' : 'Source *'}
+                {type === 'Expense' ? 'Category *' : type === 'Income' ? 'Source *' : 'Budget Category *'}
               </label>
               <select
                 value={category}
@@ -237,9 +325,15 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess }) {
                         {c}
                       </option>
                     ))
-                  : INCOME_SOURCES.map((s) => (
+                  : type === 'Income'
+                  ? INCOME_SOURCES.map((s) => (
                       <option key={s} value={s} className="bg-[#121E22] text-[#F1F5F4]">
                         {s}
+                      </option>
+                    ))
+                  : BUDGET_CATEGORIES.map((b) => (
+                      <option key={b.value} value={b.value} className="bg-[#121E22] text-[#F1F5F4]">
+                        {b.label}
                       </option>
                     ))}
               </select>

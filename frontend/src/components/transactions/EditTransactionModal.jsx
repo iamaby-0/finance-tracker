@@ -78,7 +78,14 @@ export default function EditTransactionModal({ transaction, isOpen, onClose, onS
     try {
       setLoading(true);
 
-      if (!isIncome) {
+      if (transaction.type === 'Budget') {
+        const payload = {
+          amount: numAmount,
+          name: description.trim(),
+          category
+        };
+        await api.patch(`/budget/${transaction._id}`, payload);
+      } else if (!isIncome) {
         const payload = {
           amount: numAmount,
           description: description.trim(),

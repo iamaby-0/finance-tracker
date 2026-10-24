@@ -57,7 +57,7 @@ export default function TransactionToolbar({
       {/* Left: Segmented Tabs (All, Income, Expenses) */}
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
         <div className="inline-flex p-1 rounded-xl bg-[#121E22] border border-[#24363B]">
-          {['All', 'Income', 'Expenses'].map((tab) => {
+          {['All', 'Income', 'Expenses', 'Budget'].map((tab) => {
             const isActive = activeType === tab;
             return (
               <button
@@ -65,7 +65,11 @@ export default function TransactionToolbar({
                 onClick={() => onTypeChange(tab)}
                 className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#123D32] text-[#35E9A0] border border-[#35E9A0] shadow-xs'
+                    ? tab === 'Budget'
+                      ? 'bg-[#2B1B3D] text-[#B18AFF] border border-[#B18AFF] shadow-xs'
+                      : tab === 'Expenses'
+                      ? 'bg-[#3D1A22] text-[#FF667A] border border-[#FF667A] shadow-xs'
+                      : 'bg-[#123D32] text-[#35E9A0] border border-[#35E9A0] shadow-xs'
                     : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#18272C] border border-transparent'
                 }`}
               >

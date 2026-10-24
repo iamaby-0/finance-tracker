@@ -15,13 +15,16 @@ export default function DeleteConfirmModal({
   if (!isOpen || !transaction) return null;
 
   const isIncome = transaction.type === 'Income';
+  const isBudget = transaction.type === 'Budget';
 
   const handleDelete = async () => {
     try {
       setLoading(true);
       setError('');
 
-      if (!isIncome) {
+      if (isBudget) {
+        await api.delete(`/budget/${transaction._id}`);
+      } else if (!isIncome) {
         await api.delete(`/expenses/${transaction._id}`);
       } else {
         await api.delete(`/income/${transaction._id}`);
@@ -51,14 +54,14 @@ export default function DeleteConfirmModal({
 
           <div className="flex-1">
             <h3 className="text-base font-bold text-[#F1F5F4]">
-              Delete Transaction?
+              Delete {isBudget ? 'Budget' : 'Transaction'}?
             </h3>
             <p className="text-xs text-[#A5B4B8] mt-1.5 leading-relaxed">
               Are you sure you want to permanently delete this{' '}
               <span className="font-semibold text-[#F1F5F4]">
                 {transaction.description || transaction.category}
               </span>{' '}
-              record ({isIncome ? '+' : '-'}{formatCurrency(transaction.amount)}) from{' '}
+              record ({isIncome ? '+' : isBudget ? '🎯 ' : '-'}{formatCurrency(transaction.amount)}) from{' '}
               {formatDate(transaction.date)}? This action cannot be undone.
             </p>
 

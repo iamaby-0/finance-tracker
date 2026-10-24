@@ -22,7 +22,8 @@ import {
   Plane,
   Tags,
   Receipt,
-  ArrowUpDown
+  ArrowUpDown,
+  Target
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
@@ -30,6 +31,14 @@ import { formatCurrency, formatDate } from '../../utils/formatters';
 function getMerchantIcon(description = '', category = '') {
   const desc = description.toLowerCase().trim();
   const cat = category.toLowerCase().trim();
+
+  if (desc.includes('budget') || cat.includes('budget') || cat === 'overall') {
+    return (
+      <div className="w-8 h-8 rounded-lg bg-[#2B1B3D] flex items-center justify-center text-[#B18AFF] shrink-0 shadow-xs">
+        <Target className="w-4 h-4" />
+      </div>
+    );
+  }
 
   if (desc.includes('zomato')) {
     return (
@@ -257,6 +266,17 @@ function getCategoryDisplay(category = '') {
     };
   }
 
+  if (lower.includes('overall') || lower.includes('budget')) {
+    return {
+      label: cat || 'Overall',
+      icon: (
+        <div className="w-7 h-7 rounded-lg bg-[#2B1B3D] flex items-center justify-center text-[#B18AFF] shrink-0 shadow-xs">
+          <Target className="w-3.5 h-3.5" />
+        </div>
+      )
+    };
+  }
+
   return {
     label: cat || 'Other',
     icon: (
@@ -371,6 +391,7 @@ export default function TransactionTable({
               // Rendered Transaction Rows
               transactions.map((tx) => {
                 const isIncome = tx.type === 'Income';
+                const isBudget = tx.type === 'Budget';
                 const formattedDate = formatDate(tx.date) || 'Recent';
                 const catDisplay = getCategoryDisplay(tx.category);
                 const isMenuOpen = activeMenuId === tx._id;
@@ -409,10 +430,14 @@ export default function TransactionTable({
                     <td className="py-4 px-6 text-right whitespace-nowrap">
                       <span
                         className={`text-sm font-semibold tracking-tight ${
-                          isIncome ? 'text-[#35E9A0]' : 'text-[#FF667A]'
+                          isIncome
+                            ? 'text-[#35E9A0]'
+                            : isBudget
+                            ? 'text-[#B18AFF]'
+                            : 'text-[#FF667A]'
                         }`}
                       >
-                        {isIncome ? '+ ' : '- '}
+                        {isIncome ? '+ ' : isBudget ? '🎯 ' : '- '}
                         {formatCurrency(tx.amount)}
                       </span>
                     </td>
@@ -422,6 +447,10 @@ export default function TransactionTable({
                       {isIncome ? (
                         <span className="inline-flex px-3 py-1 rounded-md text-xs font-medium bg-[#123D32] border border-[#35E9A0]/30 text-[#35E9A0]">
                           Income
+                        </span>
+                      ) : isBudget ? (
+                        <span className="inline-flex px-3 py-1 rounded-md text-xs font-medium bg-[#2B1B3D] border border-[#B18AFF]/30 text-[#B18AFF]">
+                          Budget
                         </span>
                       ) : (
                         <span className="inline-flex px-3 py-1 rounded-md text-xs font-medium bg-[#3D1A22] border border-[#FF667A]/30 text-[#FF667A]">
