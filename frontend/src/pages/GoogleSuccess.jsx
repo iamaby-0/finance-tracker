@@ -55,10 +55,10 @@ const GoogleSuccess = () => {
     }, [navigate, searchParams, login]);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-[#0B1114] text-[#F1F5F4] p-4">
             <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-3 border-gray-300 border-t-black rounded-full animate-spin" />
-                <p className="text-sm font-medium text-gray-700">
+                <div className="w-8 h-8 border-2 border-[#24363B] border-t-[#35E9A0] rounded-full animate-spin" />
+                <p className="text-sm font-medium text-[#A5B4B8]">
                     Signing you in with Google...
                 </p>
             </div>

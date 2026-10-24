@@ -144,7 +144,7 @@ export default function AddCategoryForm({ onCategoryCreated }) {
           <label className="block text-xs font-semibold text-[#A5B4B8] mb-1.5">
             Icon
           </label>
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
+          <div className="flex flex-wrap items-center gap-2 pb-1">
             {AVAILABLE_ICONS.map((item) => {
               const Icon = item.icon;
               const isSelected = selectedIcon === item.id;
@@ -153,7 +153,7 @@ export default function AddCategoryForm({ onCategoryCreated }) {
                   key={item.id}
                   type="button"
                   onClick={() => setSelectedIcon(item.id)}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center border transition flex-shrink-0 cursor-pointer ${
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center border transition cursor-pointer min-w-[32px] min-h-[32px] ${
                     isSelected
                       ? 'bg-[#15372F] border-[#35E9A0] text-[#35E9A0] shadow-xs scale-105'
                       : 'bg-[#18272C] border-[#24363B] text-[#71848A] hover:text-[#A5B4B8]'
@@ -172,7 +172,7 @@ export default function AddCategoryForm({ onCategoryCreated }) {
           <label className="block text-xs font-semibold text-[#A5B4B8] mb-1.5">
             Color
           </label>
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1">
+          <div className="flex flex-wrap items-center gap-2.5 pb-1">
             {COLOR_SWATCHES.map((color) => {
               const isSelected = selectedColor === color;
               return (
@@ -180,7 +180,7 @@ export default function AddCategoryForm({ onCategoryCreated }) {
                   key={color}
                   type="button"
                   onClick={() => setSelectedColor(color)}
-                  className={`w-6 h-6 rounded-full transition-transform cursor-pointer flex-shrink-0 ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full transition-transform cursor-pointer min-w-[24px] min-h-[24px] ${
                     isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#121E22] scale-110' : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: color }}

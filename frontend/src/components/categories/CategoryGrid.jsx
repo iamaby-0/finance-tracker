@@ -86,9 +86,9 @@ export default function CategoryGrid({
         </div>
       </div>
 
-      {/* 4-Column Category Grid */}
+      {/* Category Grid */}
       {filtered.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 my-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 my-auto">
           {filtered.map((cat) => (
             <CategoryCard
               key={cat.id || cat._id || cat.name}

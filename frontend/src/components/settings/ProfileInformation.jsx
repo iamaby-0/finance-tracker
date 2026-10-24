@@ -538,8 +538,8 @@ export default function ProfileInformation({
 
       {/* Update Profile Picture Modal */}
       {showAvatarModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in">
-          <div className="bg-[#121E22] border border-[#24363B] rounded-2xl p-5 sm:p-6 max-w-md w-[92%] sm:w-full shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-3 sm:p-4 animate-in fade-in overflow-y-auto">
+          <div className="bg-[#121E22] border border-[#24363B] rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[calc(100dvh-1.5rem)] shadow-2xl relative my-auto overflow-y-auto">
             <div className="flex items-center justify-between pb-3.5 border-b border-[#24363B]">
               <h4 className="text-sm font-bold text-[#F1F5F4] flex items-center gap-2">
                 <Camera className="w-4 h-4 text-[#35E9A0]" />

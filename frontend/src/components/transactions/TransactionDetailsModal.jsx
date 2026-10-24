@@ -14,13 +14,13 @@ export default function TransactionDetailsModal({
   const isIncome = transaction.type === 'Income';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] flex flex-col bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl my-auto">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#24363B] flex items-center justify-between">
+        <div className="px-5 sm:px-6 py-4 border-b border-[#24363B] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div
-              className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                 isIncome
                   ? 'bg-[#123D32] border border-[#35E9A0]/30 text-[#35E9A0]'
                   : 'bg-[#3D1A22] border border-[#FF667A]/30 text-[#FF667A]'
@@ -33,7 +33,7 @@ export default function TransactionDetailsModal({
               )}
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#F1F5F4]">
+              <h3 className="text-base font-bold text-[#F1F5F4] truncate">
                 Transaction Details
               </h3>
               <p className="text-xs text-[#71848A]">
@@ -43,7 +43,7 @@ export default function TransactionDetailsModal({
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
+            className="p-1.5 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -51,7 +51,7 @@ export default function TransactionDetailsModal({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-5">
+        <div className="p-5 sm:p-6 space-y-4 overflow-y-auto pr-2">
           {/* Amount Card */}
           <div className="p-4 rounded-xl bg-[#18272C] border border-[#24363B] text-center">
             <span className="text-xs text-[#71848A] uppercase font-semibold tracking-wider">

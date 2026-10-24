@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import {
   Sparkles,
   Send,
@@ -6,17 +8,157 @@ import {
   MoreVertical,
   RotateCcw,
   Trash2,
+  Copy,
+  Check,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
 import api from '../../services/api';
+
+/**
+ * Sanitizes and cleans AI output so raw JSON wrappers, escaped newlines,
+ * or truncated JSON strings never leak to the UI.
+ */
+export function cleanMessageContent(raw) {
+  if (!raw || typeof raw !== 'string') return '';
+  let text = raw.trim();
+
+  // 1. Wrapped in markdown code fence ```json ... ```
+  const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch) {
+    try {
+      const parsed = JSON.parse(codeBlockMatch[1]);
+      if (parsed && typeof parsed.message === 'string') {
+        text = parsed.message;
+      }
+    } catch (_) {}
+  }
+
+  // 2. Valid full JSON
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed.message === 'string') {
+      text = parsed.message;
+    }
+  } catch (_) {
+    // 3. Truncated or malformed JSON with "message": "..."
+    const messageMatch = text.match(/"message"\s*:\s*"([\s\S]*)/i);
+    if (messageMatch) {
+      let content = messageMatch[1];
+      const endMatch = content.match(/^([\s\S]*?)(?:"\s*,\s*"suggestedQuestions"|"\s*\}|\s*"$)/i);
+      if (endMatch) {
+        content = endMatch[1];
+      } else {
+        content = content.replace(/(?:",?\s*\}?|\s*"\}?|\s*")$/, '');
+      }
+      content = content
+        .replace(/\\n/g, '\n')
+        .replace(/\\"/g, '"')
+        .replace(/\\\\/g, '\\')
+        .replace(/\\t/g, '\t');
+      text = content;
+    }
+  }
+
+  // 4. Handle plain text with literal escaped newlines
+  if (text.includes('\\n') && !text.includes('\n')) {
+    text = text.replace(/\\n/g, '\n').replace(/\\"/g, '"');
+  }
+
+  // 5. Clean any trailing SUGGESTIONS marker if leaked into message
+  const suggMatch = text.match(/(?:---|###|\*\*|\n)?\s*(?:SUGGESTIONS|RECOMMENDED QUESTIONS):?\s*([\s\S]*)$/i);
+  if (suggMatch) {
+    text = text.substring(0, suggMatch.index).trim();
+  }
+
+  return text.trim();
+}
+
+/**
+ * Renders rich conversational markdown: styled tables, headers, lists, code, and badges
+ */
+function ChatMarkdownRenderer({ content }) {
+  const sanitized = cleanMessageContent(content);
+
+  return (
+    <div className="prose prose-invert max-w-none text-xs leading-relaxed text-[#F1F5F4] break-words">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          h1: ({ node, ...props }) => (
+            <h1 className="text-sm sm:text-base font-bold text-[#35E9A0] flex items-center gap-1.5 mt-2 mb-2 pb-1 border-b border-[#24363B]" {...props} />
+          ),
+          h2: ({ node, ...props }) => (
+            <h2 className="text-xs sm:text-sm font-bold text-[#35E9A0] flex items-center gap-1.5 mt-2.5 mb-1.5 pb-1 border-b border-[#24363B]/60" {...props} />
+          ),
+          h3: ({ node, ...props }) => (
+            <h3 className="text-xs sm:text-xs font-semibold text-[#E2E8F0] mt-2 mb-1" {...props} />
+          ),
+          p: ({ node, ...props }) => (
+            <p className="text-xs leading-relaxed text-[#DDE5E7] mb-2 last:mb-0" {...props} />
+          ),
+          ul: ({ node, ...props }) => (
+            <ul className="space-y-1.5 my-2 pl-1 list-none" {...props} />
+          ),
+          ol: ({ node, ...props }) => (
+            <ol className="space-y-1.5 my-2 pl-4 list-decimal list-outside text-xs text-[#DDE5E7]" {...props} />
+          ),
+          li: ({ node, children, ...props }) => (
+            <li className="flex items-start gap-2 text-xs leading-relaxed text-[#DDE5E7] my-0.5" {...props}>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#35E9A0] mt-1.5 shrink-0" />
+              <div className="flex-1 min-w-0">{children}</div>
+            </li>
+          ),
+          strong: ({ node, ...props }) => (
+            <strong className="font-semibold text-white" {...props} />
+          ),
+          table: ({ node, ...props }) => (
+            <div className="my-2.5 overflow-x-auto rounded-xl border border-[#24363B] bg-[#0E1619] shadow-inner max-w-full">
+              <table className="w-full text-left border-collapse text-[11px]" {...props} />
+            </div>
+          ),
+          thead: ({ node, ...props }) => (
+            <thead className="bg-[#18272C] text-[#35E9A0] font-semibold border-b border-[#24363B]" {...props} />
+          ),
+          th: ({ node, ...props }) => (
+            <th className="px-3 py-2 font-medium tracking-wide whitespace-nowrap" {...props} />
+          ),
+          tbody: ({ node, ...props }) => (
+            <tbody className="divide-y divide-[#203238] text-[#DDE5E7]" {...props} />
+          ),
+          tr: ({ node, ...props }) => (
+            <tr className="hover:bg-[#18272C]/50 transition-colors" {...props} />
+          ),
+          td: ({ node, ...props }) => (
+            <td className="px-3 py-1.5 whitespace-nowrap text-[#F1F5F4]" {...props} />
+          ),
+          code: ({ node, inline, ...props }) => (
+            <code className="px-1.5 py-0.5 rounded bg-[#101A1D] border border-[#24363B] text-[11px] font-mono text-[#35E9A0]" {...props} />
+          ),
+          blockquote: ({ node, ...props }) => (
+            <blockquote className="border-l-2 border-[#35E9A0] bg-[#121E22]/60 pl-2.5 py-1 my-1.5 text-xs text-[#A5B4B8] rounded-r" {...props} />
+          )
+        }}
+      >
+        {sanitized}
+      </ReactMarkdown>
+    </div>
+  );
+}
 
 export default function FinanceAIChat({ period = 'This Month', financialContext }) {
   const [messages, setMessages] = useState(() => {
     const saved = localStorage.getItem('mft_ai_chat_history');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          // Automatically sanitize stored messages so existing raw JSON is cleaned immediately
+          return parsed.map((m) => ({
+            ...m,
+            content: m.role === 'assistant' ? cleanMessageContent(m.content) : m.content
+          }));
+        }
       } catch (e) {
         // ignore
       }
@@ -53,12 +195,13 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
   const [conversationId, setConversationId] = useState(() => {
     return localStorage.getItem('mft_ai_conversation_id') || `conv_${Date.now()}`;
   });
   const [suggestedQuestions, setSuggestedQuestions] = useState([
     'Show me my spending trends',
-    'Suggest a budget',
+    'Suggest a budget plan',
     'How can I improve my savings?'
   ]);
 
@@ -97,6 +240,13 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
     return `${hours}:${minutes} ${ampm}`;
   };
 
+  const handleCopyMessage = (id, text) => {
+    const clean = cleanMessageContent(text);
+    navigator.clipboard.writeText(clean);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const handleSendMessage = async (textToSend) => {
     const query = typeof textToSend === 'string' ? textToSend.trim() : inputMessage.trim();
     if (!query || isLoading) return;
@@ -122,10 +272,11 @@ You can reduce these expenses by setting a monthly budget, limiting non-essentia
 
       if (response.data && response.data.success) {
         const aiData = response.data.data;
+        const cleanContent = cleanMessageContent(aiData.message);
         const aiMsg = {
           id: `msg_ai_${Date.now()}`,
           role: 'assistant',
-          content: aiData.message,
+          content: cleanContent,
           timestamp: formatCurrentTime()
         };
         setMessages((prev) => [...prev, aiMsg]);
@@ -172,7 +323,7 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
       const aiMsg = {
         id: `msg_ai_${Date.now()}`,
         role: 'assistant',
-        content: fallbackText,
+        content: cleanMessageContent(fallbackText),
         timestamp: formatCurrentTime()
       };
       setMessages((prev) => [...prev, aiMsg]);
@@ -221,48 +372,8 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
     setMenuOpen(false);
   };
 
-  // Helper to render formatted AI response text
-  const renderMessageContent = (content) => {
-    if (!content) return null;
-
-    // Split paragraphs
-    const paragraphs = content.split('\n\n');
-    return (
-      <div className="space-y-2 text-xs leading-relaxed text-[#F1F5F4]">
-        {paragraphs.map((p, idx) => {
-          // Check for numbered lists or bullets
-          if (p.includes('\n1.') || p.startsWith('1.') || p.includes('\n•') || p.startsWith('•')) {
-            const lines = p.split('\n');
-            return (
-              <div key={idx} className="space-y-1 my-1.5">
-                {lines.map((line, lIdx) => {
-                  const formatted = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                  return (
-                    <p
-                      key={lIdx}
-                      className="text-xs leading-relaxed text-[#F1F5F4]"
-                      dangerouslySetInnerHTML={{ __html: formatted }}
-                    />
-                  );
-                })}
-              </div>
-            );
-          }
-          const formatted = p.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-          return (
-            <p
-              key={idx}
-              className="text-xs leading-relaxed text-[#F1F5F4]"
-              dangerouslySetInnerHTML={{ __html: formatted }}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
   return (
-    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[calc(100vh-100px)] min-h-[640px] sticky top-[82px] shadow-xl overflow-hidden">
+    <div className="rounded-2xl bg-[#101A1D] border border-[#24363B] flex flex-col h-[520px] sm:h-[580px] xl:h-[calc(100vh-100px)] xl:min-h-[580px] xl:sticky xl:top-[82px] shadow-xl overflow-hidden">
       {/* Top Header */}
       <div className="p-4 sm:p-4.5 border-b border-[#24363B] bg-[#121E22] flex items-center justify-between shrink-0">
         <div>
@@ -371,8 +482,8 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
 
           if (msg.role === 'user') {
             return (
-              <div key={msg.id} className="flex flex-col items-end space-y-1">
-                <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#35E9A0] text-[#0B1114] px-4 py-2.5 shadow-sm font-medium text-xs leading-relaxed">
+              <div key={msg.id} className="flex flex-col items-end space-y-1 min-w-0">
+                <div className="max-w-[85%] rounded-2xl rounded-tr-xs bg-[#35E9A0] text-[#0B1114] px-4 py-2.5 shadow-sm font-medium text-xs leading-relaxed break-words">
                   {msg.content}
                 </div>
                 <span className="text-[10px] text-[#71848A] pr-1">{msg.timestamp}</span>
@@ -381,14 +492,39 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
           }
 
           return (
-            <div key={msg.id} className="space-y-1">
-              <div className="flex items-start gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0 mt-0.5">
+            <div key={msg.id} className="space-y-1 min-w-0 group">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0 mt-0.5 shadow-sm">
                   <Sparkles className="w-3.5 h-3.5" />
                 </div>
 
-                <div className="flex-1 rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] p-3.5 shadow-sm text-xs text-[#F1F5F4]">
-                  {renderMessageContent(msg.content)}
+                <div className="flex-1 rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] p-3.5 shadow-sm text-xs text-[#F1F5F4] break-words min-w-0 relative">
+                  <ChatMarkdownRenderer content={msg.content} />
+
+                  {/* Message actions footer */}
+                  <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#24363B]/50 text-[10px] text-[#71848A]">
+                    <span className="flex items-center gap-1 text-[#A5B4B8]/70">
+                      <Sparkles className="w-2.5 h-2.5 text-[#B18AFF]" />
+                      <span>Finance AI</span>
+                    </span>
+                    <button
+                      onClick={() => handleCopyMessage(msg.id, msg.content)}
+                      className="flex items-center gap-1 hover:text-[#35E9A0] transition px-1.5 py-0.5 rounded hover:bg-[#203238] cursor-pointer"
+                      title="Copy response"
+                    >
+                      {copiedId === msg.id ? (
+                        <>
+                          <Check className="w-3 h-3 text-[#35E9A0]" />
+                          <span className="text-[#35E9A0]">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3" />
+                          <span>Copy</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
               <span className="text-[10px] text-[#71848A] pl-10 block">{msg.timestamp}</span>
@@ -402,10 +538,11 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
             <div className="w-7 h-7 rounded-lg bg-[#2A1A40] border border-[#B18AFF]/30 flex items-center justify-center text-[#B18AFF] shrink-0">
               <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             </div>
-            <div className="rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] px-4 py-3 flex items-center gap-1.5 shadow-sm">
+            <div className="rounded-2xl rounded-tl-xs bg-[#18272C] border border-[#24363B] px-4 py-3 flex items-center gap-2 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="w-2 h-2 rounded-full bg-[#35E9A0] animate-bounce" style={{ animationDelay: '300ms' }} />
+              <span className="text-[11px] text-[#A5B4B8] ml-1.5 font-medium">Analyzing your finances...</span>
             </div>
           </div>
         )}
@@ -420,9 +557,9 @@ You are on track with 5 out of 8 budget categories and progressing smoothly towa
             <button
               key={idx}
               onClick={() => handleSendMessage(q)}
-              className="px-2.5 py-1 rounded-full bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/40 text-[10px] text-[#A5B4B8] hover:text-[#F1F5F4] transition shrink-0 cursor-pointer"
+              className="px-2.5 py-1 rounded-full bg-[#18272C] hover:bg-[#203238] border border-[#24363B] hover:border-[#35E9A0]/40 text-[10px] text-[#A5B4B8] hover:text-[#F1F5F4] transition shrink-0 cursor-pointer flex items-center gap-1"
             >
-              {q}
+              <span>{q}</span>
             </button>
           ))}
         </div>

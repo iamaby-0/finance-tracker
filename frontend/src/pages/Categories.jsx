@@ -329,8 +329,8 @@ export function Categories() {
 
           {/* 4. Primary Content Row: All Categories (~70%) & Add New Category (~30%) */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~70%): All Categories */}
-            <div className="lg:col-span-8 h-full">
+            {/* Left: All Categories */}
+            <div className="lg:col-span-7 xl:col-span-8 h-full min-w-0">
               <CategoryGrid
                 categories={enrichedCategories}
                 activeTab={activeTab}
@@ -341,24 +341,24 @@ export function Categories() {
               />
             </div>
 
-            {/* Right (~30%): Add New Category Form */}
-            <div className="lg:col-span-4 h-full">
+            {/* Right: Add New Category Form */}
+            <div className="lg:col-span-5 xl:col-span-4 h-full min-w-0">
               <AddCategoryForm onCategoryCreated={handleCreateCategory} />
             </div>
           </div>
 
-          {/* 5. Bottom Row: Category Spending Trend (~45%) & Recent Transactions by Category (~55%) */}
+          {/* 5. Bottom Row: Category Spending Trend & Recent Transactions by Category */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Left (~45%): Category Spending Trend */}
-            <div className="lg:col-span-5 h-full">
+            {/* Left: Category Spending Trend */}
+            <div className="lg:col-span-5 h-full min-w-0">
               <CategorySpendingTrend
                 selectedPeriod={trendPeriod}
                 onPeriodChange={setTrendPeriod}
               />
             </div>
 
-            {/* Right (~55%): Recent Transactions by Category */}
-            <div className="lg:col-span-7 h-full">
+            {/* Right: Recent Transactions by Category */}
+            <div className="lg:col-span-7 h-full min-w-0">
               <RecentCategoryTransactions
                 transactions={recentTransactionsData}
                 onViewAll={() => {

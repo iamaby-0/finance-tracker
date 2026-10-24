@@ -69,28 +69,28 @@ export default function Navbar({
   const initials = getInitials(displayName);
 
   return (
-    <header className="h-[70px] bg-[#0B1114] border-b border-[#24363B] px-4 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md bg-[#0B1114]/95">
+    <header className="h-[70px] bg-[#0B1114] border-b border-[#24363B] px-3 sm:px-6 lg:px-8 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md bg-[#0B1114]/95">
       {/* Left: Mobile Toggle & Search Input */}
-      <div className="flex items-center gap-3 flex-1 max-w-xl">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 max-w-xl min-w-0">
         {/* Mobile menu toggle */}
         <button
           onClick={onOpenMobileMenu}
-          className="lg:hidden p-2 rounded-xl bg-[#121E22] border border-[#24363B] text-[#A5B4B8] hover:text-[#F1F5F4] hover:border-[#35E9A0]/40 transition"
+          className="lg:hidden p-2 rounded-xl bg-[#121E22] border border-[#24363B] text-[#A5B4B8] hover:text-[#F1F5F4] hover:border-[#35E9A0]/40 transition shrink-0"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
         {/* Search Bar */}
-        <div className="relative w-full max-w-md">
-          <Search className="w-4 h-4 text-[#71848A] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="relative w-full max-w-md min-w-0">
+          <Search className="w-4 h-4 text-[#71848A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery || ''}
             onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full h-10 pl-10 pr-16 bg-[#121E22] border border-[#24363B] rounded-xl text-xs text-[#F1F5F4] placeholder-[#71848A] focus:outline-none focus:border-[#35E9A0] focus:ring-1 focus:ring-[#35E9A0]/30 transition"
+            className="w-full h-10 pl-9 sm:pl-10 pr-3 sm:pr-16 bg-[#121E22] border border-[#24363B] rounded-xl text-xs text-[#F1F5F4] placeholder-[#71848A] focus:outline-none focus:border-[#35E9A0] focus:ring-1 focus:ring-[#35E9A0]/30 transition truncate"
           />
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-[#18272C] border border-[#24363B] text-[10px] font-medium text-[#71848A] pointer-events-none">
             <span>Ctrl</span>
@@ -100,23 +100,23 @@ export default function Navbar({
       </div>
 
       {/* Right: Notifications, Secondary Icon & User Profile */}
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         {/* Notifications Button */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setNotifOpen(!notifOpen)}
-            className="w-10 h-10 rounded-full border border-[#24363B] bg-[#121E22] hover:bg-[#18272C] flex items-center justify-center text-[#A5B4B8] hover:text-[#F1F5F4] hover:border-[#35E9A0]/40 transition relative cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#24363B] bg-[#121E22] hover:bg-[#18272C] flex items-center justify-center text-[#A5B4B8] hover:text-[#F1F5F4] hover:border-[#35E9A0]/40 transition relative cursor-pointer"
             aria-label="View notifications"
           >
             <Bell className="w-4 h-4" />
             {notificationCount > 0 && (
-              <span className="w-2 h-2 rounded-full bg-[#FF667A] absolute top-2.5 right-2.5 ring-2 ring-[#0B1114]" />
+              <span className="w-2 h-2 rounded-full bg-[#FF667A] absolute top-2 sm:top-2.5 right-2 sm:right-2.5 ring-2 ring-[#0B1114]" />
             )}
           </button>
 
           {/* Notifications Dropdown */}
           {notifOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
               <div className="flex items-center justify-between pb-2 border-b border-[#24363B]">
                 <span className="text-xs font-semibold text-[#F1F5F4]">Notifications</span>
                 <span className="text-[10px] bg-[#123D32] text-[#35E9A0] px-2 py-0.5 rounded-full font-medium">
@@ -193,7 +193,7 @@ export default function Navbar({
 
           {/* Profile Dropdown Menu */}
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 mt-2 w-64 max-w-[calc(100vw-1.5rem)] bg-[#121E22] border border-[#24363B] rounded-xl shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
               {/* User Details Header */}
               <div className="p-3 border-b border-[#24363B]">
                 <p className="text-xs font-semibold text-[#F1F5F4]">{displayName}</p>

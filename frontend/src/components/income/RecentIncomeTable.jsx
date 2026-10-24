@@ -240,7 +240,7 @@ export default function RecentIncomeTable({
 
       {/* Table Container */}
       <div className="overflow-x-auto scrollbar-none">
-        <table className="w-full text-left text-xs">
+        <table className="w-full min-w-[480px] text-left text-xs">
           <thead>
             <tr className="text-[#71848A] border-b border-[#24363B]/60 pb-2">
               <th className="font-medium pb-2.5 pl-1 w-24 sm:w-28">Date</th>

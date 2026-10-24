@@ -107,7 +107,7 @@ export default function IncomeSourcesChart({
       {/* Donut Chart & Legend List */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-1">
         {/* Donut Chart */}
-        <div className="relative w-44 h-44 sm:w-48 sm:h-48 flex-shrink-0 flex items-center justify-center">
+        <div className="relative w-36 h-36 sm:w-40 sm:h-40 xl:w-44 xl:h-44 shrink-0 flex items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<CustomTooltip />} />
@@ -115,8 +115,8 @@ export default function IncomeSourcesChart({
                 data={chartItems.length > 0 ? chartItems : [{ name: 'Income', value: 1, color: '#35E9A0' }]}
                 cx="50%"
                 cy="50%"
-                innerRadius={52}
-                outerRadius={78}
+                innerRadius={44}
+                outerRadius={68}
                 paddingAngle={2.5}
                 dataKey="value"
                 stroke="none"

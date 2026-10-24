@@ -108,8 +108,8 @@ export default function EditGoalModal({ goal, isOpen, onClose, onSave, loading }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#121E22] border border-[#24363B] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto scrollbar-thin">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#121E22] border border-[#24363B] p-5 sm:p-6 shadow-2xl space-y-4 max-h-[calc(100dvh-1.5rem)] my-auto overflow-y-auto scrollbar-thin">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[#24363B]">
           <div className="flex items-center gap-2.5">

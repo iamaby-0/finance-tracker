@@ -41,30 +41,31 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-      <div className="relative w-full max-w-md bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-6">
-        <div className="flex items-center justify-between pb-4 border-b border-[#24363B]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] flex flex-col bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-5 sm:p-6 my-auto">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#24363B] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#3D1A22] text-[#FF667A] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#3D1A22] text-[#FF667A] flex items-center justify-center shrink-0">
               <TrendingDown className="w-4 h-4 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-[#F1F5F4]">Add New Expense</h3>
+            <h3 className="text-base font-bold text-[#F1F5F4] truncate">Add New Expense</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
+            aria-label="Close add expense modal"
+            className="p-1.5 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A]">
+          <div className="mt-3 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A] shrink-0">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 overflow-y-auto pr-1">
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
               Amount (₹)
@@ -194,30 +195,31 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-      <div className="relative w-full max-w-md bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-6">
-        <div className="flex items-center justify-between pb-4 border-b border-[#24363B]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] flex flex-col bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-5 sm:p-6 my-auto">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#24363B] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#123D32] text-[#35E9A0] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#123D32] text-[#35E9A0] flex items-center justify-center shrink-0">
               <TrendingUp className="w-4 h-4 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-[#F1F5F4]">Add New Income</h3>
+            <h3 className="text-base font-bold text-[#F1F5F4] truncate">Add New Income</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
+            aria-label="Close add income modal"
+            className="p-1.5 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A]">
+          <div className="mt-3 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A] shrink-0">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 overflow-y-auto pr-1">
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
               Amount (₹)
@@ -328,30 +330,31 @@ export function SetBudgetModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-      <div className="relative w-full max-w-md bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-6">
-        <div className="flex items-center justify-between pb-4 border-b border-[#24363B]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] flex flex-col bg-[#121E22] border border-[#24363B] rounded-2xl shadow-2xl p-5 sm:p-6 my-auto">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-[#24363B] shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#2B1B3D] text-[#B18AFF] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#2B1B3D] text-[#B18AFF] flex items-center justify-center shrink-0">
               <Target className="w-4 h-4 stroke-[2.5]" />
             </div>
-            <h3 className="text-base font-bold text-[#F1F5F4]">Set Category Budget</h3>
+            <h3 className="text-base font-bold text-[#F1F5F4] truncate">Set Category Budget</h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer"
+            aria-label="Close set budget modal"
+            className="p-1.5 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {error && (
-          <div className="mt-4 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A]">
+          <div className="mt-3 p-2.5 rounded-lg bg-[#3D1A22]/60 border border-[#FF667A]/30 text-xs text-[#FF667A] shrink-0">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3.5 overflow-y-auto pr-1">
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
               Category

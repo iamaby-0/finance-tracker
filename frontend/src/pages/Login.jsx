@@ -116,7 +116,7 @@ function Login() {
         {/* ========================================================= */}
         {/* LEFT PANEL: BRANDING, HERO & DECORATIVE DASHBOARD PREVIEW */}
         {/* ========================================================= */}
-        <div className="lg:col-span-6 xl:col-span-7 space-y-7">
+        <div className="lg:col-span-6 xl:col-span-7 space-y-7 min-w-0">
           
           {/* Brand Header */}
           <Link to="/" className="inline-flex items-center gap-3 group">
@@ -316,9 +316,9 @@ function Login() {
         {/* ========================================================= */}
         {/* RIGHT PANEL: CENTERED LOGIN CARD */}
         {/* ========================================================= */}
-        <div className="lg:col-span-6 xl:col-span-5 flex justify-center">
+        <div className="lg:col-span-6 xl:col-span-5 flex justify-center w-full min-w-0">
           
-          <div className="w-full max-w-[500px] bg-[#121E22] border border-[#24363B] rounded-[20px] p-7 sm:p-9 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(53,233,160,0.08)] relative">
+          <div className="w-full max-w-[500px] bg-[#121E22] border border-[#24363B] rounded-[20px] p-5 sm:p-8 md:p-9 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(53,233,160,0.08)] relative">
 
             {/* Header: Logo and Application Name */}
             <div className="text-center mb-6">

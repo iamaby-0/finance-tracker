@@ -11,7 +11,7 @@ const generateAIResponse = async (messages, options = {}) => {
             model: options.model || "openai/gpt-oss-120b",
             messages: messages,
             temperature: options.temperature ?? 0.2,
-            max_completion_tokens: options.max_completion_tokens ?? 600
+            max_completion_tokens: options.max_completion_tokens ?? 1500
         });
 
         return response.choices[0].message.content;
@@ -28,7 +28,7 @@ const generateAIResponse = async (messages, options = {}) => {
                 model: "llama-3.3-70b-versatile",
                 messages: messages,
                 temperature: options.temperature ?? 0.2,
-                max_completion_tokens: options.max_completion_tokens ?? 600
+                max_completion_tokens: options.max_completion_tokens ?? 1500
             });
             return fallback.choices[0].message.content;
         } catch (fallbackErr) {

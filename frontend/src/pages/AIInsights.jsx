@@ -145,8 +145,8 @@ export function AIInsights() {
 
           {/* Unified Two-Column Dashboard Layout */}
           <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
-            {/* Left Column: Analytics & Insights Dashboard (~63% on desktop / 7-8 cols of 12) */}
-            <div className="xl:col-span-8 space-y-5">
+            {/* Left Column: Analytics & Insights Dashboard */}
+            <div className="xl:col-span-8 space-y-5 min-w-0">
               {/* 1. Four Financial Summary Cards */}
               <AISummaryCards summary={insightsData?.summaryCards} loading={loading} />
 
@@ -170,8 +170,8 @@ export function AIInsights() {
               </div>
             </div>
 
-            {/* Right Column: Finance AI Assistant Chat Panel (~37% on desktop / 4 cols of 12) */}
-            <div className="xl:col-span-4 w-full">
+            {/* Right Column: Finance AI Assistant Chat Panel */}
+            <div className="xl:col-span-4 w-full min-w-0">
               <FinanceAIChat period={period} financialContext={insightsData} />
             </div>
           </div>

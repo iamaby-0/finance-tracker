@@ -54,6 +54,23 @@ export default function Sidebar({
     }
   };
 
+  // Close mobile drawer on Escape and lock body scroll when open
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen, onClose]);
+
   const getInitials = (name) => {
     if (!name) return 'AA';
     const parts = name.trim().split(/\s+/);
@@ -93,7 +110,7 @@ export default function Sidebar({
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden p-1 rounded-lg text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition"
+            className="lg:hidden p-2 rounded-xl text-[#71848A] hover:text-[#F1F5F4] hover:bg-[#18272C] transition cursor-pointer min-w-[40px] min-h-[40px] flex items-center justify-center shrink-0"
             aria-label="Close sidebar"
           >
             <X className="w-5 h-5" />
@@ -163,123 +180,123 @@ export default function Sidebar({
           <LogOut className="w-4 h-4 text-[#71848A] group-hover:text-[#FF667A] transition-colors" />
           <span>Logout</span>
         </button>
-      </nav>
 
-      {/* Promotional Card at bottom (consistent across all pages) */}
-      <div className="p-4 pt-2">
-        <div
-          onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' })}
-          className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300 cursor-pointer"
-        >
-          {/* Subtle Glow Backdrop */}
-          <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#35E9A0]/10 rounded-full blur-2xl pointer-events-none" />
+        {/* Promotional Card inside scroll container so short screens don't clip nav */}
+        <div className="pt-2 pb-2">
+          <div
+            onClick={() => handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' })}
+            className="relative rounded-2xl bg-[#121E22] border border-[#24363B] p-4 overflow-hidden shadow-lg group hover:border-[#35E9A0]/40 transition duration-300 cursor-pointer"
+          >
+            {/* Subtle Glow Backdrop */}
+            <div className="absolute -top-10 -right-10 w-28 h-28 bg-[#35E9A0]/10 rounded-full blur-2xl pointer-events-none" />
 
-          {/* Crown Icon */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-6 h-6 rounded-md bg-[#252317] border border-[#F6C85F]/30 flex items-center justify-center text-[#F6C85F]">
-              <Crown className="w-3.5 h-3.5" />
+            {/* Crown Icon */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-6 h-6 rounded-md bg-[#252317] border border-[#F6C85F]/30 flex items-center justify-center text-[#F6C85F]">
+                <Crown className="w-3.5 h-3.5" />
+              </div>
             </div>
-          </div>
 
-          {/* Card Text */}
-          <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
-            {activeItem === 'Settings'
-              ? 'Unlock More Financial Insights'
-              : activeItem === 'Goals'
-              ? 'Achieve Your Financial Goals'
-              : activeItem === 'AI Insights'
-              ? 'Unlock the Power of AI Insights'
-              : activeItem === 'Budgets'
-              ? 'Stay on Budget'
-              : activeItem === 'Expenses'
-              ? 'Control Your Spending Better'
-              : activeItem === 'Analytics'
-              ? 'Unlock Deeper Financial Insights'
-              : activeItem === 'Reports'
-              ? 'Generate Detailed Financial Reports'
-              : activeItem === 'Categories'
-              ? 'Organize Your Finances Better'
-              : 'Track Smarter'}
-            <span className="block font-semibold text-[#A5B4B8] text-xs">
+            {/* Card Text */}
+            <h4 className="text-sm font-bold text-[#F1F5F4] leading-tight">
               {activeItem === 'Settings'
-                ? ''
+                ? 'Unlock More Financial Insights'
                 : activeItem === 'Goals'
-                ? ''
+                ? 'Achieve Your Financial Goals'
                 : activeItem === 'AI Insights'
-                ? ''
+                ? 'Unlock the Power of AI Insights'
                 : activeItem === 'Budgets'
-                ? 'Build Your Future'
+                ? 'Stay on Budget'
                 : activeItem === 'Expenses'
-                ? ''
+                ? 'Control Your Spending Better'
                 : activeItem === 'Analytics'
-                ? ''
+                ? 'Unlock Deeper Financial Insights'
                 : activeItem === 'Reports'
-                ? ''
+                ? 'Generate Detailed Financial Reports'
                 : activeItem === 'Categories'
-                ? ''
-                : 'Live Better'}
-            </span>
-          </h4>
-          <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
-            {activeItem === 'Settings'
-              ? 'Get AI-powered insights, advanced analytics and more features.'
-              : activeItem === 'Goals'
-              ? 'Set goals, track progress and get AI powered recommendations to reach them faster.'
-              : activeItem === 'AI Insights'
-              ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
-              : activeItem === 'Budgets'
-              ? 'Create smart budgets and achieve your goals.'
-              : activeItem === 'Expenses'
-              ? 'Track expenses, find insights and save more.'
-              : activeItem === 'Analytics'
-              ? 'Get detailed analytics and personalized reports.'
-              : activeItem === 'Reports'
-              ? 'Analyze your spending, income and savings with beautiful reports.'
-              : activeItem === 'Categories'
-              ? 'Create and manage custom categories for better tracking.'
-              : 'Get AI insights and better financial control.'}
-          </p>
+                ? 'Organize Your Finances Better'
+                : 'Track Smarter'}
+              <span className="block font-semibold text-[#A5B4B8] text-xs">
+                {activeItem === 'Settings'
+                  ? ''
+                  : activeItem === 'Goals'
+                  ? ''
+                  : activeItem === 'AI Insights'
+                  ? ''
+                  : activeItem === 'Budgets'
+                  ? 'Build Your Future'
+                  : activeItem === 'Expenses'
+                  ? ''
+                  : activeItem === 'Analytics'
+                  ? ''
+                  : activeItem === 'Reports'
+                  ? ''
+                  : activeItem === 'Categories'
+                  ? ''
+                  : 'Live Better'}
+              </span>
+            </h4>
+            <p className="text-[11px] text-[#71848A] mt-1.5 leading-snug">
+              {activeItem === 'Settings'
+                ? 'Get AI-powered insights, advanced analytics and more features.'
+                : activeItem === 'Goals'
+                ? 'Set goals, track progress and get AI powered recommendations to reach them faster.'
+                : activeItem === 'AI Insights'
+                ? 'Get personalized recommendations, smarter analysis and achieve your financial goals faster.'
+                : activeItem === 'Budgets'
+                ? 'Create smart budgets and achieve your goals.'
+                : activeItem === 'Expenses'
+                ? 'Track expenses, find insights and save more.'
+                : activeItem === 'Analytics'
+                ? 'Get detailed analytics and personalized reports.'
+                : activeItem === 'Reports'
+                ? 'Analyze your spending, income and savings with beautiful reports.'
+                : activeItem === 'Categories'
+                ? 'Create and manage custom categories for better tracking.'
+                : 'Get AI insights and better financial control.'}
+            </p>
 
-          {/* Decorative Mini Trend Chart & Arrow Button */}
-          <div className="mt-3 pt-2 border-t border-[#24363B]/50 flex items-center justify-between">
-            {/* Mini SVG Trend Line */}
-            <div className="w-20 h-6">
-              <svg viewBox="0 0 80 24" className="w-full h-full overflow-visible">
-                <defs>
-                  <linearGradient id="promoGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#35E9A0" stopOpacity="0.4" />
-                    <stop offset="100%" stopColor="#35E9A0" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M0,20 Q20,18 35,12 T65,6 T80,2 L80,24 L0,24 Z"
-                  fill="url(#promoGrad)"
-                />
-                <path
-                  d="M0,20 Q20,18 35,12 T65,6 T80,2"
-                  fill="none"
-                  stroke="#35E9A0"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                />
-                <circle cx="80" cy="2" r="2.5" fill="#4FFFB0" />
-              </svg>
+            {/* Decorative Mini Trend Chart & Arrow Button */}
+            <div className="mt-3 pt-2 border-t border-[#24363B]/50 flex items-center justify-between">
+              {/* Mini SVG Trend Line */}
+              <div className="w-20 h-6">
+                <svg viewBox="0 0 80 24" className="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="promoGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#35E9A0" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#35E9A0" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M0,20 Q20,18 35,12 T65,6 T80,2 L80,24 L0,24 Z"
+                    fill="url(#promoGrad)"
+                  />
+                  <path
+                    d="M0,20 Q20,18 35,12 T65,6 T80,2"
+                    fill="none"
+                    stroke="#35E9A0"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="80" cy="2" r="2.5" fill="#4FFFB0" />
+                </svg>
+              </div>
+
+              {/* Circular Arrow Button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' });
+                }}
+                className="w-7 h-7 rounded-full bg-[#35E9A0] hover:bg-[#4FFFB0] text-[#0B1114] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                aria-label="Explore AI Insights"
+              >
+                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+              </button>
             </div>
-
-            {/* Circular Arrow Button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleItemClick({ id: 'AI Insights', label: 'AI Insights', path: '/ai-insights' });
-              }}
-              className="w-7 h-7 rounded-full bg-[#35E9A0] hover:bg-[#4FFFB0] text-[#0B1114] flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
-              aria-label="Explore AI Insights"
-            >
-              <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
-            </button>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   );
 
@@ -300,7 +317,7 @@ export default function Sidebar({
           />
 
           {/* Slide-out Sidebar Panel */}
-          <div className="relative z-10 h-full w-[266px] shadow-2xl animate-in slide-in-from-left duration-300">
+          <div className="relative z-10 h-full w-[266px] max-w-[85vw] shadow-2xl animate-in slide-in-from-left duration-300">
             {sidebarContent}
           </div>
         </div>

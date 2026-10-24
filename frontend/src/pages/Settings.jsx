@@ -183,7 +183,7 @@ export function Settings() {
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Navbar */}
         <Navbar
           user={user || profile}
@@ -195,7 +195,7 @@ export function Settings() {
         />
 
         {/* Scrollable Page Body */}
-        <main ref={mainRef} className="flex-1 overflow-y-auto px-3 sm:px-5 md:px-6 py-3.5 sm:py-4.5 scrollbar-thin">
+        <main ref={mainRef} className="flex-1 px-3 sm:px-5 md:px-6 py-3.5 sm:py-4.5">
           <div className="max-w-[1400px] mx-auto space-y-3.5 sm:space-y-4">
             {/* Header: Settings Title + Cog Icon + Subtitle */}
             <div className="flex flex-col gap-0.5">
