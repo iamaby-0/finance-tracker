@@ -101,7 +101,13 @@ export function Dashboard() {
 
       const allIncomes =
         incomeRes.status === 'fulfilled' && incomeRes.value.data?.data
-          ? incomeRes.value.data.data.map((item) => ({ ...item, type: 'income' }))
+          ? incomeRes.value.data.data.map((item) => ({
+              ...item,
+              type: 'income',
+              name: item.source || item.description || 'Income',
+              category: item.source || item.category || 'Income',
+              description: item.description || item.source || 'Income'
+            }))
           : [];
 
       const mergedTransactions = [...allExpenses, ...allIncomes].sort(

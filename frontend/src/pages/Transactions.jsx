@@ -168,8 +168,10 @@ export function Transactions() {
       _id: inc._id,
       type: 'Income',
       amount: Number(inc.amount) || 0,
+      name: inc.source || inc.description || 'Income',
       description: inc.description || inc.source || 'Income',
       category: inc.source || 'Salary',
+      source: inc.source || 'Salary',
       date: inc.date || inc.createdAt,
       notes: inc.notes || '',
       raw: inc

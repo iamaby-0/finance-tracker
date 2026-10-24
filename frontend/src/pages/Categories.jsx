@@ -171,7 +171,7 @@ export function Categories() {
 
     const incMap = {};
     filteredIncomes.forEach((i) => {
-      const s = i.source || 'Other';
+      const s = i.source || i.name || 'Other';
       incMap[s] = (incMap[s] || 0) + Number(i.amount || 0);
     });
 
@@ -183,6 +183,7 @@ export function Categories() {
         else if (cat.name === 'Health & Fitness' && expMap['Health']) amount = expMap['Health'];
       } else {
         if (incMap[cat.name] !== undefined) amount = incMap[cat.name];
+        else if (cat.name === 'Side Income' && incMap['Business']) amount = incMap['Business'];
       }
 
       const total = cat.type === 'Expense' ? totalExp : totalInc;

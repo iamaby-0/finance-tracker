@@ -86,7 +86,7 @@ export function Income() {
         totalEntries: entries,
         averageIncome: avg,
         highestIncome: highest?.amount || 0,
-        highestSource: highest?.source || 'Income',
+        highestSource: highest?.source || highest?.name || 'Income',
         highestDate: highest?.date ? formatDate(highest.date) : 'Recently',
         incomeChange: '+8.2%'
       };
@@ -135,7 +135,7 @@ export function Income() {
     if (hasLiveIncomes) {
       const catMap = {};
       incomes.forEach((item) => {
-        const cat = item.source || item.category || 'Other';
+        const cat = item.source || item.name || item.category || 'Other';
         catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
       });
 
@@ -164,7 +164,7 @@ export function Income() {
       const total = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
       const catMap = {};
       incomes.forEach((item) => {
-        const cat = item.source || item.category || 'Other';
+        const cat = item.source || item.name || item.category || 'Other';
         catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
       });
 

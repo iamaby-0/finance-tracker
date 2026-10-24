@@ -171,8 +171,10 @@ export default function RecentIncomeTable({
       return {
         _id: item._id,
         date: item.date,
+        name: item.source || item.description || 'Income',
         source: item.source || 'Income',
         category: item.source || item.category || 'Income',
+        description: item.description || item.source || 'Income',
         amount: item.amount,
         notes: item.notes || item.description || '-',
         isReal: true,
@@ -188,9 +190,11 @@ export default function RecentIncomeTable({
     const q = searchQuery.toLowerCase();
     displayList = displayList.filter(
       (item) =>
-        item.source.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
+        (item.source && item.source.toLowerCase().includes(q)) ||
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        (item.category && item.category.toLowerCase().includes(q)) ||
         (item.notes && item.notes.toLowerCase().includes(q)) ||
+        (item.description && item.description.toLowerCase().includes(q)) ||
         formatDate(item.date).toLowerCase().includes(q)
     );
   }

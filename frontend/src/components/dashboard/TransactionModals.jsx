@@ -2,6 +2,28 @@ import React, { useState } from 'react';
 import { X, Plus, TrendingDown, TrendingUp, Target, Loader2 } from 'lucide-react';
 import api from '../../services/api';
 
+const getErrorMessage = (err, fallback) => {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  if (typeof err.response?.data?.message === 'string') return err.response.data.message;
+  if (typeof err.response?.data?.error === 'string') return err.response.data.error;
+  if (typeof err.response?.data?.error?.message === 'string') return err.response.data.error.message;
+  if (typeof err.message === 'string') return err.message;
+  return fallback;
+};
+
+const INCOME_SOURCES = [
+  'Salary',
+  'Freelance',
+  'Business',
+  'Investment',
+  'Dividends',
+  'Rental',
+  'Parents',
+  'Gift',
+  'Other'
+];
+
 export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
@@ -34,7 +56,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       console.error('Error adding expense:', err);
-      setError(err.response?.data?.error || 'Failed to add expense');
+      setError(getErrorMessage(err, 'Failed to add expense'));
     } finally {
       setLoading(false);
     }
@@ -160,8 +182,8 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
 
 export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
   const [amount, setAmount] = useState('');
-  const [source, setSource] = useState('');
-  const [category, setCategory] = useState('Salary');
+  const [source, setSource] = useState('Salary');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -170,8 +192,9 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || !source) {
-      setError('Please fill in amount and source');
+    const numAmount = Number(amount);
+    if (!amount || isNaN(numAmount) || numAmount <= 0) {
+      setError('Please enter a valid positive amount');
       return;
     }
 
@@ -179,16 +202,17 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
       setLoading(true);
       setError('');
       await api.post('/income', {
-        amount: Number(amount),
+        amount: numAmount,
         source,
-        category,
+        description: description.trim() || source,
+        notes: description.trim() || source,
         date
       });
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error('Error adding income:', err);
-      setError(err.response?.data?.error || 'Failed to add income');
+      setError(getErrorMessage(err, 'Failed to add income'));
     } finally {
       setLoading(false);
     }
@@ -236,33 +260,32 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
-              Source / Description
+              Source / Category
             </label>
-            <input
-              type="text"
-              placeholder="e.g. Monthly Salary, Freelance project"
+            <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              className="w-full h-10 px-3 rounded-xl bg-[#18272C] border border-[#24363B] text-sm text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
-              required
-            />
+              className="w-full h-10 px-2.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
+            >
+              {INCOME_SOURCES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
-              Category
+              Description / Name <span className="text-[#71848A] font-normal">(Optional)</span>
             </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full h-10 px-2.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
-            >
-              <option value="Salary">Salary</option>
-              <option value="Freelancing">Freelancing</option>
-              <option value="Investment">Investment Returns</option>
-              <option value="Bonus">Bonus</option>
-              <option value="Other">Other</option>
-            </select>
+            <input
+              type="text"
+              placeholder="e.g. YouTube, AdSense, Client payment"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full h-10 px-3 rounded-xl bg-[#18272C] border border-[#24363B] text-sm text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
+            />
           </div>
 
           <div>
@@ -323,7 +346,7 @@ export function SetBudgetModal({ isOpen, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       console.error('Error setting budget:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to set budget');
+      setError(getErrorMessage(err, 'Failed to set budget'));
     } finally {
       setLoading(false);
     }
