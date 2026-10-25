@@ -7,7 +7,7 @@ const config = {
     db_url: process.env.DB_URL,
 
     jwtSecret: process.env.JWT_SECRET,
-    frontendUrl: process.env.FRONTEND_URL || "http://localhost:5173",
+    frontendUrl: process.env.FRONTEND_URL || "https://my-finance-tracker-omega-ten-32.vercel.app",
 
     groqApiKey: process.env.GROQ_API_KEY
 }
