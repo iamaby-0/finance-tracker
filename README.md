@@ -7,7 +7,7 @@
 
 <p align="center">
   <a href="https://my-finance-tracker-omega-ten-32.vercel.app/"><img src="https://img.shields.io/badge/Live%20Demo-Vercel-35E9A0?style=for-the-badge&logo=vercel&logoColor=black" alt="Live Demo" /></a>
-  <a href="https://finance-tracker-m46z.onrender.com"><img src="https://img.shields.io/badge/API%20Server-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="API Server" /></a>
+  <img src="https://img.shields.io/badge/API%20Server-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white" alt="API Server" /></a>
   <a href="https://github.com/iamaby-0/finance-tracker"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo" /></a>
 </p>
 
@@ -27,7 +27,6 @@
 ## 🌟 Live Links
 
 - 🌐 **Web Application:** [https://my-finance-tracker-omega-ten-32.vercel.app/](https://my-finance-tracker-omega-ten-32.vercel.app/)
-- ⚙️ **Backend API Base:** [https://finance-tracker-m46z.onrender.com/aft/api/v1](https://finance-tracker-m46z.onrender.com/aft/api/v1)
 - 📦 **Source Code:** [https://github.com/iamaby-0/finance-tracker](https://github.com/iamaby-0/finance-tracker)
 
 ---
