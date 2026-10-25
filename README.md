@@ -24,6 +24,12 @@
 
 ---
 
+<p align="center">
+  <img src="screenshots/01-dashboard.png" alt="My Finance Track Dashboard" width="100%" />
+</p>
+
+---
+
 ## 🌟 Live Links
 
 - 🌐 **Web Application:** [https://my-finance-tracker-omega-ten-32.vercel.app/](https://my-finance-tracker-omega-ten-32.vercel.app/)
@@ -34,6 +40,7 @@
 ## 📖 Table of Contents
 
 - [Overview](#-overview)
+- [Application Previews & Screenshots](#-application-previews--screenshots)
 - [Key Features](#-key-features)
 - [Architecture & Tech Stack](#-architecture--tech-stack)
 - [System Architecture Diagram](#-system-architecture-diagram)
@@ -60,6 +67,62 @@
 - 🏆 **Fulfill Savings Goals**: Visualize progress toward big milestones (Emergency Funds, Vacations, Investments) with progress bars and contribution logs.
 - 🤖 **Groq-Powered AI Financial Advisor**: Get instant financial health checks, smart saving tips, and contextual responses from an ultra-fast LLM assistant.
 - 📊 **Visual Analytics & Reporting**: Drill down into cash flows, anomaly spending patterns, and generate exportable PDF and Excel/CSV reports.
+
+---
+
+## 📸 Application Previews & Screenshots
+
+### 📊 1. Executive Dashboard
+> Comprehensive personal wealth hub displaying live net balance, monthly income/expenses, interactive cash flow charts, category breakdown donut, and recent activity logs.
+
+<p align="center">
+  <img src="screenshots/01-dashboard.png" alt="Executive Dashboard" width="100%" />
+</p>
+
+---
+
+### 🤖 2. Groq-Powered AI Financial Advisor
+> Conversational AI advisor powered by Groq's high-speed inference engine. Provides instant audits, spending anomaly detection, and actionable budget recommendations with persistent context memory.
+
+<p align="center">
+  <img src="screenshots/06-ai-insights.png" alt="AI Financial Advisor & Insights" width="100%" />
+</p>
+
+---
+
+### 📈 3. Deep Analytics & Cash Flow Trends
+> Interactive visual metrics featuring longitudinal income vs. expenses curves, category distribution, spending velocity, and monthly comparison heatmaps powered by Chart.js and Recharts.
+
+<p align="center">
+  <img src="screenshots/02-analytics.png" alt="Financial Analytics Hub" width="100%" />
+</p>
+
+---
+
+### 🎯 4. Smart Category Budgets & Limit Alerts
+> Create custom monthly spending caps with live visual progress bars (Safe 🟢, Near Limit 🟡, Exceeded 🔴) to keep discretionary spending in check.
+
+<p align="center">
+  <img src="screenshots/03-budgets.png" alt="Budget Management & Limits" width="100%" />
+</p>
+
+---
+
+### 📄 5. Financial Reports & Multi-Format Exports
+> In-depth breakdown by month, category, and payment method with one-click export to PDF and Excel/CSV, plus scheduled delivery cadence.
+
+<p align="center">
+  <img src="screenshots/05-reports.png" alt="Reports & Export Suite" width="100%" />
+</p>
+
+---
+
+### 🌐 6. Modern Landing Page & 🔐 Dual Authentication
+> Sleek glassmorphic dark-theme marketing showcase and secure sign-in portal supporting both Google OAuth 2.0 and JWT credentials.
+
+| 🌐 Modern Landing Page | 🔐 Dual Authentication Portal |
+|:---:|:---:|
+| <img src="screenshots/landing-hero.png" width="100%" alt="Landing Page Hero" /> | <img src="screenshots/auth-login.png" width="100%" alt="Login Portal" /> |
 
 ---
 
