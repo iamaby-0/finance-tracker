@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, Tag, CreditCard, FileText, ArrowUpRight, ArrowDownLeft, Pencil, Trash2 } from 'lucide-react';
+import { X, Calendar, Tag, CreditCard, FileText, ArrowUpRight, ArrowDownLeft, Target, Pencil, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export default function TransactionDetailsModal({
@@ -12,6 +12,7 @@ export default function TransactionDetailsModal({
   if (!isOpen || !transaction) return null;
 
   const isIncome = transaction.type === 'Income';
+  const isBudget = transaction.type === 'Budget';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-200 overflow-y-auto">
@@ -23,11 +24,15 @@ export default function TransactionDetailsModal({
               className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
                 isIncome
                   ? 'bg-[#123D32] border border-[#35E9A0]/30 text-[#35E9A0]'
+                  : isBudget
+                  ? 'bg-[#2B1B3D] border border-[#B18AFF]/30 text-[#B18AFF]'
                   : 'bg-[#3D1A22] border border-[#FF667A]/30 text-[#FF667A]'
               }`}
             >
               {isIncome ? (
                 <ArrowDownLeft className="w-4 h-4" />
+              ) : isBudget ? (
+                <Target className="w-4 h-4" />
               ) : (
                 <ArrowUpRight className="w-4 h-4" />
               )}
@@ -37,7 +42,7 @@ export default function TransactionDetailsModal({
                 Transaction Details
               </h3>
               <p className="text-xs text-[#71848A]">
-                {isIncome ? 'Income' : 'Expense'} Record
+                {isBudget ? 'Budget Limit' : isIncome ? 'Income' : 'Expense'} Record
               </p>
             </div>
           </div>
@@ -59,10 +64,14 @@ export default function TransactionDetailsModal({
             </span>
             <div
               className={`text-2xl font-bold mt-1 tracking-tight ${
-                isIncome ? 'text-[#35E9A0]' : 'text-[#FF667A]'
+                isIncome
+                  ? 'text-[#35E9A0]'
+                  : isBudget
+                  ? 'text-[#B18AFF]'
+                  : 'text-[#FF667A]'
               }`}
             >
-              {isIncome ? '+ ' : '- '}
+              {isIncome ? '+ ' : isBudget ? '🎯 ' : '- '}
               {formatCurrency(transaction.amount)}
             </div>
             <div className="mt-2 inline-flex">
@@ -70,6 +79,8 @@ export default function TransactionDetailsModal({
                 className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
                   isIncome
                     ? 'bg-[#123D32] text-[#35E9A0] border-[#35E9A0]/30'
+                    : isBudget
+                    ? 'bg-[#2B1B3D] text-[#B18AFF] border-[#B18AFF]/30'
                     : 'bg-[#3D1A22] text-[#FF667A] border-[#FF667A]/30'
                 }`}
               >

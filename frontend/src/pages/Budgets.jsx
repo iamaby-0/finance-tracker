@@ -12,6 +12,7 @@ import RecentBudgetActivity from '../components/budgets/RecentBudgetActivity';
 import BudgetInsights from '../components/budgets/BudgetInsights';
 import EditBudgetModal from '../components/budgets/EditBudgetModal';
 import { Target, Calendar, ChevronDown } from 'lucide-react';
+import { compareLatestFirst } from '../utils/formatters';
 
 export function Budgets() {
   const { user, logout } = useAuth();
@@ -59,7 +60,8 @@ export function Budgets() {
       }
 
       if (expenseRes.status === 'fulfilled' && expenseRes.value.data?.data) {
-        setExpenses(Array.isArray(expenseRes.value.data.data) ? expenseRes.value.data.data : []);
+        const expData = Array.isArray(expenseRes.value.data.data) ? expenseRes.value.data.data : [];
+        setExpenses([...expData].sort(compareLatestFirst));
       }
     } catch (err) {
       console.warn('Budget data fetch notice:', err);

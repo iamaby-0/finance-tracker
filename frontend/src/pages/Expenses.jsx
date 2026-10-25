@@ -16,7 +16,7 @@ import CategoryLimits from '../components/expenses/CategoryLimits';
 import EditExpenseModal from '../components/expenses/EditExpenseModal';
 import DeleteExpenseModal from '../components/expenses/DeleteExpenseModal';
 import { Calendar, ChevronDown, TrendingDown } from 'lucide-react';
-import { formatDate } from '../utils/formatters';
+import { formatDate, compareLatestFirst } from '../utils/formatters';
 
 export function Expenses() {
   const { user, logout } = useAuth();
@@ -61,7 +61,7 @@ export function Expenses() {
       ]);
 
       if (expensesRes.status === 'fulfilled' && Array.isArray(expensesRes.value?.data?.data)) {
-        setExpenses(expensesRes.value.data.data);
+        setExpenses([...expensesRes.value.data.data].sort(compareLatestFirst));
       }
       if (budgetsRes.status === 'fulfilled' && Array.isArray(budgetsRes.value?.data?.data)) {
         setBudgets(budgetsRes.value.data.data);
@@ -105,7 +105,7 @@ export function Expenses() {
         return expYear === nowYear;
       }
       return true;
-    });
+    }).sort(compareLatestFirst);
   }, [expenses, selectedPeriod]);
 
   // Search filtered expenses if user enters search in top bar

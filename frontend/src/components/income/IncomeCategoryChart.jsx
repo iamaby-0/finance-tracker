@@ -120,7 +120,7 @@ export default function IncomeCategoryChart({
       {/* Header */}
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight">
-          Income by Category
+          Income by Source
         </h3>
 
         {/* Dropdown */}

@@ -10,7 +10,7 @@ import {
   ArrowDownLeft,
   DollarSign
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 
 const DEFAULT_TRANSACTIONS = [
   {
@@ -167,14 +167,17 @@ export default function RecentTransactions({
   let displayList = [];
 
   if (transactions && transactions.length > 0) {
-    displayList = transactions.slice(0, 5).map((tx, idx) => {
+    const sorted = [...transactions].sort(compareLatestFirst);
+    displayList = sorted.slice(0, 5).map((tx, idx) => {
       const isIncome = tx.type === 'income' || Boolean(tx.source);
-      const style = getCategoryStyle(tx.category || (isIncome ? 'Income' : 'General'), isIncome ? 'income' : 'expense');
+      const style = getCategoryStyle(tx.category || tx.source || (isIncome ? 'Income' : 'General'), isIncome ? 'income' : 'expense');
       return {
         id: tx._id || `live-tx-${idx}`,
         date: tx.date || new Date().toISOString(),
+        name: tx.source || tx.description || 'Income',
         description: tx.description || tx.source || 'Transaction',
-        category: tx.category || (isIncome ? 'Income' : 'General'),
+        category: tx.category || tx.source || (isIncome ? 'Income' : 'General'),
+        source: tx.source || (isIncome ? 'Salary' : undefined),
         type: isIncome ? 'income' : 'expense',
         amount: tx.amount,
         ...style

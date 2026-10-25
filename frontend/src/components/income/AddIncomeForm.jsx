@@ -14,8 +14,12 @@ export default function AddIncomeForm({ onSuccess }) {
   const sources = [
     { value: 'Salary', label: 'Salary' },
     { value: 'Freelance', label: 'Freelance' },
+    { value: 'Business', label: 'Business' },
     { value: 'Investment', label: 'Investment' },
-    { value: 'Business', label: 'Side Income' },
+    { value: 'Dividends', label: 'Dividends' },
+    { value: 'Rental', label: 'Rental' },
+    { value: 'Parents', label: 'Parents' },
+    { value: 'Gift', label: 'Gift' },
     { value: 'Other', label: 'Other' },
   ];
 
@@ -49,12 +53,13 @@ export default function AddIncomeForm({ onSuccess }) {
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (err) {
       console.error('Error adding income:', err);
-      setError(
-        err.response?.data?.error?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        'Failed to add income'
-      );
+      const msg =
+        (typeof err.response?.data?.message === 'string' && err.response.data.message) ||
+        (typeof err.response?.data?.error === 'string' && err.response.data.error) ||
+        (typeof err.response?.data?.error?.message === 'string' && err.response.data.error.message) ||
+        (typeof err.message === 'string' && err.message) ||
+        'Failed to add income';
+      setError(msg);
     } finally {
       setLoading(false);
     }

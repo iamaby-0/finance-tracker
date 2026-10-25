@@ -17,10 +17,16 @@ const passport = require('./config/passport');
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 app.use(cors({
-    origin: "http://localhost:5173", // Replace with your frontend URL
-    credentials: true, // Allow cookies to be sent
-}))
+    origin: [
+        "https://my-finance-tracker-omega-ten-32.vercel.app",
+        "http://localhost:5173"
+    ],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(passport.initialize());
 authRoutes(app); // invoking auth routes
 expenseRoutes(app) // calling expense routes
@@ -34,7 +40,7 @@ goalRoutes(app) // calling goal routes
 userRoutes(app); // calling user routes
 
 
-app.listen(env.port, ()=>{
+app.listen(env.port, () => {
     console.log("Server running on " + env.port);
     connectDB();
 })

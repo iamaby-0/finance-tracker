@@ -11,7 +11,7 @@ import {
   AlertTriangle,
   Loader2
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 import api from '../../services/api';
 
 const YoutubeIcon = ({ className = "w-3.5 h-3.5" }) => (
@@ -166,13 +166,16 @@ export default function RecentIncomeTable({
   let displayList = [];
 
   if (incomes && incomes.length > 0) {
-    displayList = incomes.map((item) => {
+    const sorted = [...incomes].sort(compareLatestFirst);
+    displayList = sorted.map((item) => {
       const style = getSourceStyle(item.source, item.category);
       return {
         _id: item._id,
         date: item.date,
+        name: item.source || item.description || 'Income',
         source: item.source || 'Income',
         category: item.source || item.category || 'Income',
+        description: item.description || item.source || 'Income',
         amount: item.amount,
         notes: item.notes || item.description || '-',
         isReal: true,
@@ -188,9 +191,11 @@ export default function RecentIncomeTable({
     const q = searchQuery.toLowerCase();
     displayList = displayList.filter(
       (item) =>
-        item.source.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
+        (item.source && item.source.toLowerCase().includes(q)) ||
+        (item.name && item.name.toLowerCase().includes(q)) ||
+        (item.category && item.category.toLowerCase().includes(q)) ||
         (item.notes && item.notes.toLowerCase().includes(q)) ||
+        (item.description && item.description.toLowerCase().includes(q)) ||
         formatDate(item.date).toLowerCase().includes(q)
     );
   }
@@ -245,7 +250,6 @@ export default function RecentIncomeTable({
             <tr className="text-[#71848A] border-b border-[#24363B]/60 pb-2">
               <th className="font-medium pb-2.5 pl-1 w-24 sm:w-28">Date</th>
               <th className="font-medium pb-2.5">Source</th>
-              <th className="font-medium pb-2.5">Category</th>
               <th className="font-medium pb-2.5 text-right">Amount</th>
               <th className="font-medium pb-2.5 pl-4 hidden md:table-cell">Notes</th>
               <th className="font-medium pb-2.5 text-right pr-1">Actions</th>
@@ -254,7 +258,7 @@ export default function RecentIncomeTable({
           <tbody className="divide-y divide-[#24363B]/40">
             {displayList.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-6 text-center text-[#71848A]">
+                <td colSpan={5} className="py-6 text-center text-[#71848A]">
                   No income entries found.
                 </td>
               </tr>
@@ -280,19 +284,10 @@ export default function RecentIncomeTable({
                         >
                           <IconComponent className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-medium text-[#F1F5F4] text-[12px] truncate max-w-[110px]">
+                        <span className="font-medium text-[#F1F5F4] text-[12px] truncate max-w-[120px]">
                           {row.source}
                         </span>
                       </div>
-                    </td>
-
-                    {/* Category Badge */}
-                    <td className="py-2.5 pr-2 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-medium border ${row.badgeBg} ${row.badgeBorder} ${row.badgeText}`}
-                      >
-                        {row.category}
-                      </span>
                     </td>
 
                     {/* Amount */}

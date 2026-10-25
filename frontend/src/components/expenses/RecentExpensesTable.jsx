@@ -12,7 +12,7 @@ import {
   Tags,
   Receipt
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
 
 // Merchant icon resolver
 function getMerchantIcon(description = '', category = '') {
@@ -216,7 +216,7 @@ export default function RecentExpensesTable({
 
   const displayList =
     expenses && expenses.length > 0
-      ? expenses.slice(0, 5)
+      ? [...expenses].sort(compareLatestFirst).slice(0, 5)
       : DEFAULT_RECENT_EXPENSES;
 
   return (

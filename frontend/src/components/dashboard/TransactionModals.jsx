@@ -1,6 +1,51 @@
 import React, { useState } from 'react';
-import { X, Plus, TrendingDown, TrendingUp, Target, Loader2 } from 'lucide-react';
+import { TrendingDown, TrendingUp, Target, X, Loader2 } from 'lucide-react';
 import api from '../../services/api';
+
+const getErrorMessage = (err, fallback) => {
+  if (!err) return fallback;
+  if (typeof err === 'string') return err;
+  if (typeof err.response?.data?.error?.message === 'string') return err.response.data.error.message;
+  if (typeof err.response?.data?.error === 'string') return err.response.data.error;
+  if (err.response?.data?.error && typeof err.response.data.error === 'object') {
+    const firstKey = Object.keys(err.response.data.error)[0];
+    if (firstKey && typeof err.response.data.error[firstKey] === 'string') {
+      return err.response.data.error[firstKey];
+    }
+  }
+  if (typeof err.response?.data?.message === 'string' && err.response.data.message !== 'Something went wrong') {
+    return err.response.data.message;
+  }
+  if (typeof err.message === 'string') return err.message;
+  return fallback;
+};
+
+const INCOME_SOURCES = [
+  'Salary',
+  'Freelance',
+  'Business',
+  'Investment',
+  'Dividends',
+  'Rental',
+  'Parents',
+  'Gift',
+  'Other'
+];
+
+const BUDGET_CATEGORIES = [
+  { value: 'Overall', label: 'Overall Monthly Budget' },
+  { value: 'Food', label: 'Food & Dining' },
+  { value: 'Shopping', label: 'Shopping' },
+  { value: 'Transport', label: 'Transport' },
+  { value: 'Bills', label: 'Bills & Utilities' },
+  { value: 'Entertainment', label: 'Entertainment' },
+  { value: 'Health', label: 'Health & Fitness' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Travel', label: 'Travel' },
+  { value: 'Rent', label: 'Rent' },
+  { value: 'Investment', label: 'Investment' },
+  { value: 'Other', label: 'Other' }
+];
 
 export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
   const [amount, setAmount] = useState('');
@@ -34,7 +79,7 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
       onClose();
     } catch (err) {
       console.error('Error adding expense:', err);
-      setError(err.response?.data?.error || 'Failed to add expense');
+      setError(getErrorMessage(err, 'Failed to add expense'));
     } finally {
       setLoading(false);
     }
@@ -160,8 +205,8 @@ export function AddExpenseModal({ isOpen, onClose, onSuccess }) {
 
 export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
   const [amount, setAmount] = useState('');
-  const [source, setSource] = useState('');
-  const [category, setCategory] = useState('Salary');
+  const [source, setSource] = useState('Salary');
+  const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -170,8 +215,9 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount || !source) {
-      setError('Please fill in amount and source');
+    const numAmount = Number(amount);
+    if (!amount || isNaN(numAmount) || numAmount <= 0) {
+      setError('Please enter a valid positive amount');
       return;
     }
 
@@ -179,16 +225,17 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
       setLoading(true);
       setError('');
       await api.post('/income', {
-        amount: Number(amount),
+        amount: numAmount,
         source,
-        category,
+        description: description.trim() || source,
+        notes: description.trim() || source,
         date
       });
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error('Error adding income:', err);
-      setError(err.response?.data?.error || 'Failed to add income');
+      setError(getErrorMessage(err, 'Failed to add income'));
     } finally {
       setLoading(false);
     }
@@ -236,33 +283,32 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
 
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
-              Source / Description
+              Source / Category
             </label>
-            <input
-              type="text"
-              placeholder="e.g. Monthly Salary, Freelance project"
+            <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              className="w-full h-10 px-3 rounded-xl bg-[#18272C] border border-[#24363B] text-sm text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
-              required
-            />
+              className="w-full h-10 px-2.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
+            >
+              {INCOME_SOURCES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[#A5B4B8] mb-1">
-              Category
+              Description / Name <span className="text-[#71848A] font-normal">(Optional)</span>
             </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full h-10 px-2.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
-            >
-              <option value="Salary">Salary</option>
-              <option value="Freelancing">Freelancing</option>
-              <option value="Investment">Investment Returns</option>
-              <option value="Bonus">Bonus</option>
-              <option value="Other">Other</option>
-            </select>
+            <input
+              type="text"
+              placeholder="e.g. YouTube, AdSense, Client payment"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full h-10 px-3 rounded-xl bg-[#18272C] border border-[#24363B] text-sm text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
+            />
           </div>
 
           <div>
@@ -293,7 +339,7 @@ export function AddIncomeModal({ isOpen, onClose, onSuccess }) {
 }
 
 export function SetBudgetModal({ isOpen, onClose, onSuccess }) {
-  const [category, setCategory] = useState('Food & Dining');
+  const [category, setCategory] = useState('Overall');
   const [amount, setAmount] = useState('');
   const now = new Date();
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -305,25 +351,68 @@ export function SetBudgetModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!amount) {
-      setError('Please provide a budget amount');
+    const numAmount = Number(amount);
+    if (!amount || isNaN(numAmount) || numAmount <= 0) {
+      setError('Please provide a valid positive budget amount');
       return;
     }
 
     try {
       setLoading(true);
       setError('');
-      await api.post('/budget', {
-        category,
-        amount: Number(amount),
-        month: Number(month),
-        year: Number(year)
-      });
+      const parsedMonth = Number(month);
+      const parsedYear = Number(year);
+
+      // Check if a budget already exists for this category, month, and year
+      let existingBudget = null;
+      try {
+        const checkRes = await api.get('/budget', {
+          params: { category, month: parsedMonth, year: parsedYear }
+        });
+        if (checkRes.data?.data && Array.isArray(checkRes.data.data) && checkRes.data.data.length > 0) {
+          existingBudget = checkRes.data.data.find(
+            (b) => b.category === category && Number(b.month) === parsedMonth && Number(b.year) === parsedYear
+          );
+        }
+      } catch {
+        // Continue to create or handle
+      }
+
+      if (existingBudget && existingBudget._id) {
+        await api.patch(`/budget/${existingBudget._id}`, {
+          amount: numAmount
+        });
+      } else {
+        try {
+          await api.post('/budget', {
+            category,
+            amount: numAmount,
+            month: parsedMonth,
+            year: parsedYear
+          });
+        } catch (postErr) {
+          // If already exists (409 conflict), fetch and update it
+          if (postErr.response?.status === 409 || postErr.response?.data?.code === 409) {
+            const listRes = await api.get('/budget');
+            const match = listRes.data?.data?.find(
+              (b) => b.category === category && Number(b.month) === parsedMonth && Number(b.year) === parsedYear
+            );
+            if (match && match._id) {
+              await api.patch(`/budget/${match._id}`, { amount: numAmount });
+            } else {
+              throw postErr;
+            }
+          } else {
+            throw postErr;
+          }
+        }
+      }
+
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error('Error setting budget:', err);
-      setError(err.response?.data?.error || err.message || 'Failed to set budget');
+      setError(getErrorMessage(err, 'Failed to set budget'));
     } finally {
       setLoading(false);
     }
@@ -364,13 +453,11 @@ export function SetBudgetModal({ isOpen, onClose, onSuccess }) {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full h-10 px-2.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] focus:outline-none focus:border-[#35E9A0]"
             >
-              <option value="Food & Dining">Food & Dining</option>
-              <option value="Shopping">Shopping</option>
-              <option value="Transport">Transport</option>
-              <option value="Bills & Utilities">Bills & Utilities</option>
-              <option value="Entertainment">Entertainment</option>
-              <option value="Health & Fitness">Health & Fitness</option>
-              <option value="Overall">Overall Monthly Budget</option>
+              {BUDGET_CATEGORIES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
             </select>
           </div>
 
