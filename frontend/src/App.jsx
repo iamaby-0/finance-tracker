@@ -16,9 +16,11 @@ import { Settings } from './pages/Settings'
 import Signup from './pages/Signup'
 import GoogleSuccess from './pages/GoogleSuccess'
 import useAuth from './hooks/useAuth'
+import { getStoreUser } from './services/authService'
 
 function HomeRoute() {
   const { user, loading } = useAuth();
+  const storedUser = user || getStoreUser();
 
   if (loading) {
     return (
@@ -29,7 +31,7 @@ function HomeRoute() {
   }
 
   // If already logged in, redirect to dashboard
-  if (user) {
+  if (storedUser) {
     return <Navigate to="/dashboard" replace />;
   }
 

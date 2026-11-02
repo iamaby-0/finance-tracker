@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { 
   Mail, 
   Lock, 
@@ -19,6 +19,7 @@ import { loginUser } from "../services/authService";
 
 function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -30,6 +31,19 @@ function Login() {
   const [formErrors, setFormErrors] = useState({ email: "", password: "" });
   const [serverError, setServerError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const errorParam = searchParams.get("error");
+    if (errorParam) {
+      if (errorParam === "GoogleAuthFailed") {
+        setServerError("Google authentication failed. Please try again.");
+      } else if (errorParam === "UserNotFound") {
+        setServerError("Google account not found or could not be verified.");
+      } else {
+        setServerError(decodeURIComponent(errorParam));
+      }
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,7 +111,9 @@ function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    const rawApiUrl = import.meta.env.VITE_API_URL || "https://finance-tracker-m46z.onrender.com/aft/api/v1";
+    const apiUrl = rawApiUrl.replace(/\/+$/, "");
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   return (
