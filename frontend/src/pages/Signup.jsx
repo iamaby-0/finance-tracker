@@ -143,7 +143,9 @@ function Signup() {
   };
 
   const handleGoogleSignup = () => {
-    window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
+    const rawApiUrl = import.meta.env.VITE_API_URL || "https://finance-tracker-m46z.onrender.com/aft/api/v1";
+    const apiUrl = rawApiUrl.replace(/\/+$/, "");
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   return (

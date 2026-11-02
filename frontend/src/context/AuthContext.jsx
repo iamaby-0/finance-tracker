@@ -1,49 +1,59 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
 import { getStoreUser, logoutUser } from "../services/authService";
-
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Initialize synchronously from localStorage so there is zero latency/unauthenticated flicker
+    const [user, setUser] = useState(() => getStoreUser());
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        const storeUser = getStoreUser();
+        // Sync state if another tab modifies storage or on re-mount
+        const handleStorageChange = (e) => {
+            if (e.key === "user") {
+                try {
+                    setUser(e.newValue ? JSON.parse(e.newValue) : null);
+                } catch {
+                    setUser(null);
+                }
+            } else if (e.key === "token" && !e.newValue) {
+                setUser(null);
+            }
+        };
 
-        if (storeUser) {
-            setUser(storeUser);
-        }
-
-        setLoading(false);
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
     }, []);
 
-    const login = (userData, token) => {
+    const login = useCallback((userData, token) => {
+        if (!userData || !token) {
+            console.error("login called with invalid userData or token", { userData, hasToken: !!token });
+            return;
+        }
         localStorage.setItem("token", token);
-
-
         localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+    }, []);
 
-        setUser(userData)
-    }
+    const updateUser = useCallback((newUserData) => {
+        setUser((prevUser) => {
+            const merged = { ...prevUser, ...newUserData };
+            localStorage.setItem("user", JSON.stringify(merged));
+            return merged;
+        });
+    }, []);
 
-
-    const updateUser = (newUserData) => {
-        const merged = { ...user, ...newUserData };
-        localStorage.setItem("user", JSON.stringify(merged));
-        setUser(merged);
-    };
-
-    const logout = () => {
+    const logout = useCallback(() => {
         logoutUser();
         setUser(null);
-    }
+    }, []);
 
     return (
         <AuthContext.Provider
-            value={{ user, login, logout, updateUser, loading }}
+            value={{ user, login, logout, updateUser, loading, isAuthenticated: !!user }}
         >
             {children}
         </AuthContext.Provider>
-    )
-}
+    );
+};

@@ -1,19 +1,16 @@
-const authService = require("../services/auth.service")
-const { errorResponseBody, successResponseBody } = require("../utils/responseBody")
-const jwt = require("jsonwebtoken")
-
+const authService = require("../services/auth.service");
+const { errorResponseBody, successResponseBody } = require("../utils/responseBody");
+const jwt = require("jsonwebtoken");
+const env = require("../config/env");
 
 const normalizeErrorPayload = (error) => {
     if (typeof error === "string") return error;
-
     if (Array.isArray(error)) return error.join(", ");
-
     if (error && typeof error === "object") {
         const values = Object.values(error);
         if (values.length) return values.join(", ");
         return "Registration failed";
     }
-
     return "Registration failed";
 };
 
@@ -22,19 +19,19 @@ const signup = async (req, res) => {
         const response = await authService.userResistration(req.body);
 
         if (response.error) {
-            return res.status(response.code).json({
+            return res.status(response.code || 400).json({
                 success: false,
                 error: normalizeErrorPayload(response.error),
                 message: response.message || normalizeErrorPayload(response.error),
                 data: {}
-            })
+            });
         }
 
-        res.status(201).json({
+        return res.status(201).json({
             success: true,
             message: "User created successfully",
             data: response
-        })
+        });
     }
     catch (error) {
         const status = error?.code || 500;
@@ -45,94 +42,133 @@ const signup = async (req, res) => {
             error: payloadError,
             message: error?.message || payloadError,
             data: {}
-        })
+        });
     }
-}
+};
 
 const signin = async (req, res) => {
     try {
-        const response = await authService.loginUser(req.body)
+        const response = await authService.loginUser(req.body);
         return res.status(200).json({
             success: true,
-            messsage: "Login Successful",
+            message: "Login Successful",
             token: response.token,
             data: response.user
-        })
-
+        });
     }
     catch (error) {
-        errorResponseBody.error = error;
-
-        return res.status(500).json(errorResponseBody)
+        console.error("Signin error:", error);
+        return res.status(error.code || 500).json({
+            success: false,
+            error: error.message || error.error || "Login failed",
+            message: error.message || "Invalid email or password",
+            data: {}
+        });
     }
-}
+};
 
 const getUserById = async (req, res) => {
     try {
-        const response = await authService.findUserById(req.user.id)
+        const response = await authService.findUserById(req.user.id);
 
         if (response.error) {
-            errorResponseBody.error = response.error;
-            return res.status(response.code).json(errorResponseBody)
+            return res.status(response.code || 404).json({
+                success: false,
+                message: response.error,
+                error: response.error,
+                data: {}
+            });
         }
 
-        successResponseBody.data = response;
-        successResponseBody.message = "User fetched successfully by id"
-        return res.status(200).json(successResponseBody)
+        return res.status(200).json({
+            success: true,
+            message: "User fetched successfully by id",
+            data: response
+        });
     }
     catch (error) {
-        errorResponseBody.error = error;
-
-        return res.status(500).json(errorResponseBody)
+        console.error("getUserById error:", error);
+        return res.status(error.code || 500).json({
+            success: false,
+            message: error.message || error.error || "Failed to fetch user by id",
+            error: error.message || error.error || error,
+            data: {}
+        });
     }
-}
+};
 
 const getUserByEmail = async (req, res) => {
     try {
-        const response = await authService.findUserByEmail(req.body.email)
+        const email = req.body?.email;
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required",
+                error: "Email is required",
+                data: {}
+            });
+        }
+
+        const response = await authService.findUserByEmail(email);
 
         if (response.error) {
-            errorResponseBody.error = response.error;
-            return res.status(response.code).json(errorResponseBody)
+            return res.status(response.code || 404).json({
+                success: false,
+                message: response.error,
+                error: response.error,
+                data: {}
+            });
         }
-        successResponseBody.data = response;
-        successResponseBody.message = "User fetched successfully by email"
-        return res.status(200).json(successResponseBody)
+
+        return res.status(200).json({
+            success: true,
+            message: "User fetched successfully by email",
+            data: response
+        });
     }
     catch (error) {
-        errorResponseBody.error = error;
-
-        return res.status(500).json(errorResponseBody)
+        console.error("getUserByEmail error:", error);
+        return res.status(error.code || 500).json({
+            success: false,
+            message: error.message || error.error || "Failed to fetch user by email",
+            error: error.message || error.error || error,
+            data: {}
+        });
     }
-}
+};
 
 const updateUser = async (req, res) => {
     try {
-        const response = await authService.update(req.params.id, req.body)
-
+        const response = await authService.update(req.params.id, req.body);
+        return res.status(200).json({
+            success: true,
+            message: "User updated successfully",
+            data: response
+        });
     }
     catch (error) {
-        errorResponseBody.error = error;
-
-        return res.status(500).json(errorResponseBody)
+        console.error("updateUser error:", error);
+        return res.status(error.code || 500).json({
+            success: false,
+            message: error.message || error.error || "Failed to update user",
+            error: error.message || error.error || error,
+            data: {}
+        });
     }
-}
-
-const env = require("../config/env");
+};
 
 const googleAuthCallback = async (req, res) => {
+    const frontendUrl = env.frontendUrl || process.env.FRONTEND_URL || "https://my-finance-tracker-omega-ten-32.vercel.app";
     try {
         const user = req.user;
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
         if (!user) {
-            return res.redirect(
-                `${frontendUrl}/signin?error=UserNotFound`
-            );
+            console.error("Google auth callback: No user found on req");
+            return res.redirect(`${frontendUrl}/signin?error=UserNotFound`);
         }
 
         const token = jwt.sign(
-            { id: user._id, email: user.email },
+            { id: user._id || user.id, email: user.email },
             env.jwtSecret,
             { expiresIn: '7d' }
         );
@@ -145,11 +181,9 @@ const googleAuthCallback = async (req, res) => {
     }
     catch (error) {
         console.error("Google auth callback error:", error);
-        errorResponseBody.error = error;
-        const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-        return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message)}`);
+        return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message || "GoogleAuthFailed")}`);
     }
-}
+};
 
 module.exports = {
     signup,
@@ -158,4 +192,4 @@ module.exports = {
     getUserByEmail,
     updateUser,
     googleAuthCallback
-}
+};

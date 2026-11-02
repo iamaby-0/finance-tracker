@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../services/api";
 
 const GoogleSuccess = () => {
@@ -8,25 +8,42 @@ const GoogleSuccess = () => {
     const [searchParams] = useSearchParams();
     const { login } = useAuth();
     const processedRef = useRef(false);
+    const [statusText, setStatusText] = useState("Signing you in with Google...");
+    const [isError, setIsError] = useState(false);
 
     useEffect(() => {
         if (processedRef.current) return;
         processedRef.current = true;
 
         const finishGoogleLogin = async () => {
+            const errorParam = searchParams.get('error');
+            if (errorParam) {
+                console.error("Google login error param:", errorParam);
+                setIsError(true);
+                setStatusText(decodeURIComponent(errorParam));
+                setTimeout(() => {
+                    navigate('/signin', { replace: true });
+                }, 2000);
+                return;
+            }
+
             const token = searchParams.get('token');
             const email = searchParams.get('email');
 
             if (!token || !email) {
                 console.error("Missing token or email in Google callback params");
-                navigate('/signin', { replace: true });
+                setIsError(true);
+                setStatusText("Missing authentication parameters. Redirecting to sign in...");
+                setTimeout(() => {
+                    navigate('/signin', { replace: true });
+                }, 1500);
                 return;
             }
 
             try {
                 const response = await api.post(
                     '/user/email',
-                    { email },
+                    { email: email.toLowerCase().trim() },
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -42,12 +59,17 @@ const GoogleSuccess = () => {
                 }
 
                 login(userData, token);
-                navigate("/", { replace: true });
+                navigate("/dashboard", { replace: true });
             } catch (error) {
                 console.error("Google login failed:", error);
+                const msg = error.response?.data?.message || error.response?.data?.error || error.message || "Authentication failed";
+                setIsError(true);
+                setStatusText(`Google Sign-In failed: ${typeof msg === 'string' ? msg : 'Please try again'}`);
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
-                navigate("/signin", { replace: true });
+                setTimeout(() => {
+                    navigate("/signin", { replace: true });
+                }, 2000);
             }
         };
 
@@ -56,11 +78,27 @@ const GoogleSuccess = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[#0B1114] text-[#F1F5F4] p-4">
-            <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-2 border-[#24363B] border-t-[#35E9A0] rounded-full animate-spin" />
-                <p className="text-sm font-medium text-[#A5B4B8]">
-                    Signing you in with Google...
-                </p>
+            <div className="flex flex-col items-center gap-3 text-center max-w-sm">
+                {!isError ? (
+                    <>
+                        <div className="w-8 h-8 border-2 border-[#24363B] border-t-[#35E9A0] rounded-full animate-spin" />
+                        <p className="text-sm font-medium text-[#A5B4B8]">
+                            {statusText}
+                        </p>
+                    </>
+                ) : (
+                    <>
+                        <div className="w-10 h-10 rounded-full bg-[#FF667A]/20 text-[#FF667A] flex items-center justify-center font-bold text-lg">
+                            !
+                        </div>
+                        <p className="text-sm font-semibold text-[#FF667A]">
+                            {statusText}
+                        </p>
+                        <p className="text-xs text-[#71848A]">
+                            Redirecting to sign in...
+                        </p>
+                    </>
+                )}
             </div>
         </div>
     );

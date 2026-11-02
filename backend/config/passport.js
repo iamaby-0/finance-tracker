@@ -1,64 +1,73 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const User = require('../models/user.model')
+const User = require('../models/user.model');
 
 passport.use(new GoogleStrategy(
     {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL,
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || "https://finance-tracker-m46z.onrender.com/aft/api/v1/auth/google/callback",
+        proxy: true
     },
 
-    async(accessToken, refreshToken, profile, done) => {
-        try{
+    async (accessToken, refreshToken, profile, done) => {
+        try {
             const googleId = profile.id;
-            const email = profile.emails[0]?.value;
-            const name = (profile.displayName || profile.name?.givenName || "Google User").slice(0, 50);
+            const email = profile.emails?.[0]?.value;
+            const rawName = (profile.displayName || profile.name?.givenName || (email ? email.split('@')[0] : "Google User")).trim();
+            const name = (rawName.length >= 2 ? rawName : `${rawName || "User"} User`).slice(0, 50);
             const profilePicture = profile.photos?.[0]?.value;
 
-            if(!email){
+            if (!email) {
                 return done(
                     new Error("Email not found in Google profile"),
                     null
-                )
+                );
             }
+
+            const normalizedEmail = email.toLowerCase().trim();
 
             let user = await User.findOne({ googleId });
 
-            if(user){
+            if (user) {
+                if (!user.profilePicture && profilePicture) {
+                    user.profilePicture = profilePicture;
+                    await user.save();
+                }
                 return done(null, user);
             }
 
-            user = await User.findOne({email : email.toLowerCase()});
+            user = await User.findOne({ email: normalizedEmail });
 
-            if(user){
+            if (user) {
                 user.googleId = googleId;
-
                 user.authProvider = "google";
-                user.profilePicture = profilePicture;
+                if (!user.profilePicture && profilePicture) {
+                    user.profilePicture = profilePicture;
+                }
 
                 await user.save();
 
                 return done(null, user);
             }
 
-
-            // Create a new user if not found'
+            // Create a new user if not found
             user = await User.create({
                 name,
-                email : email.toLowerCase(),
+                email: normalizedEmail,
                 googleId,
-                authProvider : "google",
+                authProvider: "google",
                 profilePicture,
-                occupation : "student",
+                occupation: "student",
             });
 
             return done(null, user);
         }
-        catch(err){
+        catch (err) {
+            console.error("Passport Google Strategy error:", err);
             return done(err, null);
         }
     }
-))
+));
 
 module.exports = passport;
