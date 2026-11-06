@@ -1,66 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ShoppingBag,
-  Fuel,
-  Film,
-  Smartphone,
-  Utensils,
   ChevronDown
 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
-
-const DEFAULT_MERCHANTS = [
-  {
-    id: 1,
-    name: 'Zomato',
-    amount: 3240,
-    percentage: 15,
-    icon: Utensils,
-    iconBg: 'bg-[#2A161B]',
-    iconColor: 'text-[#FF667A]',
-    barColor: 'bg-[#FF667A]'
-  },
-  {
-    id: 2,
-    name: 'Amazon',
-    amount: 2199,
-    percentage: 10,
-    icon: ShoppingBag,
-    iconBg: 'bg-[#2A2315]',
-    iconColor: 'text-[#F6C85F]',
-    barColor: 'bg-[#B18AFF]'
-  },
-  {
-    id: 3,
-    name: 'IndianOil',
-    amount: 1980,
-    percentage: 9,
-    icon: Fuel,
-    iconBg: 'bg-[#152538]',
-    iconColor: 'text-[#45B7F5]',
-    barColor: 'bg-[#45B7F5]'
-  },
-  {
-    id: 4,
-    name: 'Jio',
-    amount: 1230,
-    percentage: 6,
-    icon: Smartphone,
-    iconBg: 'bg-[#123832]',
-    iconColor: 'text-[#20D6C7]',
-    barColor: 'bg-[#20D6C7]'
-  },
-  {
-    id: 5,
-    name: 'PVR Cinemas',
-    amount: 850,
-    percentage: 4,
-    icon: Film,
-    iconBg: 'bg-[#2E2012]',
-    iconColor: 'text-[#FF8A48]',
-    barColor: 'bg-[#F6C85F]'
-  }
-];
 
 export default function TopMerchants({
   merchants = null,
@@ -80,7 +23,7 @@ export default function TopMerchants({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const items = merchants && merchants.length > 0 ? merchants : DEFAULT_MERCHANTS;
+  const items = Array.isArray(merchants) ? merchants : [];
 
   return (
     <div className="rounded-2xl bg-[#121E22] border border-[#24363B] p-5 flex flex-col justify-between h-full shadow-sm">
@@ -133,50 +76,56 @@ export default function TopMerchants({
         </div>
       </div>
 
-      {/* Merchant Rows */}
-      <div className="space-y-3.5 my-auto">
-        {items.map((m) => {
-          const Icon = m.icon || ShoppingBag;
+      {/* Merchant Rows or Empty state */}
+      {items.length === 0 ? (
+        <div className="py-8 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No merchant spending recorded for this period.</p>
+        </div>
+      ) : (
+        <div className="space-y-3.5 my-auto">
+          {items.map((m) => {
+            const Icon = m.icon || ShoppingBag;
 
-          return (
-            <div key={m.id || m.name} className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 border border-[#24363B]/60 ${
-                      m.iconBg || 'bg-[#18272C]'
-                    } ${m.iconColor || 'text-[#35E9A0]'}`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
+            return (
+              <div key={m.id || m.name} className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div
+                      className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 border border-[#24363B]/60 ${
+                        m.iconBg || 'bg-[#18272C]'
+                      } ${m.iconColor || 'text-[#35E9A0]'}`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-semibold text-[#F1F5F4] truncate">
+                      {m.name}
+                    </span>
                   </div>
-                  <span className="font-semibold text-[#F1F5F4] truncate">
-                    {m.name}
-                  </span>
+
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="font-bold text-[#F1F5F4]">
+                      {formatCurrency(m.amount)}
+                    </span>
+                    <span className="text-[11px] text-[#71848A] w-7 text-right">
+                      {m.percentage}%
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="font-bold text-[#F1F5F4]">
-                    {formatCurrency(m.amount)}
-                  </span>
-                  <span className="text-[11px] text-[#71848A] w-7 text-right">
-                    {m.percentage}%
-                  </span>
+                {/* Horizontal Progress Bar */}
+                <div className="h-1.5 w-full bg-[#18272C] rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${
+                      m.barColor || 'bg-[#35E9A0]'
+                    }`}
+                    style={{ width: `${Math.min(100, Math.max(5, m.percentage * 3.5))}%` }}
+                  />
                 </div>
               </div>
-
-              {/* Horizontal Progress Bar */}
-              <div className="h-1.5 w-full bg-[#18272C] rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    m.barColor || 'bg-[#35E9A0]'
-                  }`}
-                  style={{ width: `${Math.min(100, Math.max(5, m.percentage * 3.5))}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

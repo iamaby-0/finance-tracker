@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
@@ -17,7 +17,7 @@ import {
   AddIncomeModal,
   SetBudgetModal
 } from '../components/dashboard/TransactionModals';
-import { Calendar, ChevronDown, RefreshCw } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 import { compareLatestFirst } from '../utils/formatters';
 
 export function Dashboard() {
@@ -54,223 +54,215 @@ export function Dashboard() {
 
   // Live Backend Data States
   const [loading, setLoading] = useState(true);
-  const [summaryData, setSummaryData] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+  const [incomes, setIncomes] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [categoriesData, setCategoriesData] = useState([]);
-  const [trendData, setTrendData] = useState([]);
   const [budgetList, setBudgetList] = useState([]);
-  const [totalSpentMonth, setTotalSpentMonth] = useState(42350);
+  const [goalsList, setGoalsList] = useState([]);
 
   // Parse current month and year
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
   const currentYear = currentDate.getFullYear();
 
-  // Data fetching handler
+  // Data fetching handler - fetch strictly from database
   const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Fetch expenses, income, budgets, analytics in parallel
       const [
         expensesRes,
         incomeRes,
         budgetRes,
-        summaryRes,
-        categoriesRes,
-        trendsRes
+        goalsRes
       ] = await Promise.allSettled([
         api.get('/expenses'),
         api.get('/income'),
         api.get('/budget'),
-        api.get('/analytics/summary', {
-          params: { month: currentMonth, year: currentYear }
-        }),
-        api.get('/analytics/categories', {
-          params: { month: currentMonth, year: currentYear }
-        }),
-        api.get('/analytics/trends', {
-          params: { year: currentYear }
-        })
+        api.get('/goals')
       ]);
 
-      // 1. Process Expenses & Incomes into unified Recent Transactions
-      const allExpenses =
-        expensesRes.status === 'fulfilled' && expensesRes.value.data?.data
-          ? expensesRes.value.data.data.map((item) => ({ ...item, type: 'expense' }))
+      const rawExpenses =
+        expensesRes.status === 'fulfilled' && Array.isArray(expensesRes.value.data?.data)
+          ? expensesRes.value.data.data
           : [];
+      setExpenses(rawExpenses);
 
-      const allIncomes =
-        incomeRes.status === 'fulfilled' && incomeRes.value.data?.data
-          ? incomeRes.value.data.data.map((item) => ({
-              ...item,
-              type: 'income',
-              name: item.source || item.description || 'Income',
-              category: item.source || item.category || 'Income',
-              description: item.description || item.source || 'Income'
-            }))
+      const rawIncomes =
+        incomeRes.status === 'fulfilled' && Array.isArray(incomeRes.value.data?.data)
+          ? incomeRes.value.data.data
           : [];
+      setIncomes(rawIncomes);
+
+      const allExpenses = rawExpenses.map((item) => ({ ...item, type: 'expense' }));
+      const allIncomes = rawIncomes.map((item) => ({
+        ...item,
+        type: 'income',
+        name: item.source || item.description || 'Income',
+        category: item.source || item.category || 'Income',
+        description: item.description || item.source || 'Income'
+      }));
 
       const mergedTransactions = [...allExpenses, ...allIncomes].sort(compareLatestFirst);
+      setTransactions(mergedTransactions);
 
-      if (mergedTransactions.length > 0) {
-        setTransactions(mergedTransactions);
-      }
-
-      // 2. Process Summary (Total Balance, Total Income, Total Expenses)
-      if (summaryRes.status === 'fulfilled' && summaryRes.value.data?.data) {
-        const sum = summaryRes.value.data.data;
-        setSummaryData(sum);
-        if (sum.totalExpenses) {
-          setTotalSpentMonth(sum.totalExpenses);
-        }
-      } else if (allExpenses.length > 0 || allIncomes.length > 0) {
-        // Fallback calculation from transactions
-        const sumIncome = allIncomes.reduce((acc, cur) => acc + (cur.amount || 0), 0);
-        const sumExpense = allExpenses.reduce((acc, cur) => acc + (cur.amount || 0), 0);
-        setSummaryData({
-          totalIncome: sumIncome,
-          totalExpenses: sumExpense,
-          savings: sumIncome - sumExpense
-        });
-        setTotalSpentMonth(sumExpense);
-      }
-
-      // 3. Process Categories
-      if (
-        categoriesRes.status === 'fulfilled' &&
-        Array.isArray(categoriesRes.value.data?.data) &&
-        categoriesRes.value.data.data.length > 0
-      ) {
-        const rawCats = categoriesRes.value.data.data;
-        const totalAmount = rawCats.reduce((sum, item) => sum + (item.amount || 0), 0);
-        const colorPalette = [
-          '#FF667A',
-          '#FF8A48',
-          '#F6C85F',
-          '#20D6C7',
-          '#45B7F5',
-          '#FF6EA7',
-          '#B18AFF'
-        ];
-        const formattedCats = rawCats.map((item, idx) => ({
-          name: item.category || 'Other',
-          value: item.amount || 0,
-          percentage: totalAmount > 0 ? Math.round((item.amount / totalAmount) * 100) : 0,
-          color: colorPalette[idx % colorPalette.length]
-        }));
-        setCategoriesData(formattedCats);
-      }
-
-      // 4. Process Monthly Trends
-      if (
-        trendsRes.status === 'fulfilled' &&
-        Array.isArray(trendsRes.value.data?.data) &&
-        trendsRes.value.data.data.length > 0
-      ) {
-        const monthsNames = [
-          'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-        ];
-        const rawTrends = trendsRes.value.data.data;
-        const trendMap = {};
-        rawTrends.forEach((item) => {
-          trendMap[item.month] = item.amount;
-        });
-        const mappedTrends = monthsNames.map((name, i) => ({
-          month: name,
-          expenses: trendMap[i + 1] || 0,
-          income: (trendMap[i + 1] || 0) * 1.5 // estimated or fetched income
-        }));
-        setTrendData(mappedTrends);
-      }
-
-      // 5. Process Budgets
-      if (
-        budgetRes.status === 'fulfilled' &&
-        Array.isArray(budgetRes.value.data?.data) &&
-        budgetRes.value.data.data.length > 0
-      ) {
+      if (budgetRes.status === 'fulfilled' && Array.isArray(budgetRes.value.data?.data)) {
         setBudgetList(budgetRes.value.data.data);
+      } else {
+        setBudgetList([]);
+      }
+
+      if (goalsRes.status === 'fulfilled' && Array.isArray(goalsRes.value.data?.data)) {
+        setGoalsList(goalsRes.value.data.data);
+      } else {
+        setGoalsList([]);
       }
     } catch (err) {
-      console.warn('Dashboard fetch notice (using seamless preview data):', err);
+      console.warn('Dashboard fetch notice:', err);
     } finally {
       setLoading(false);
     }
-  }, [currentMonth, currentYear]);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
   // Authenticated user greeting name with proper capitalization
-  const rawName = user?.name ? user.name.split(' ')[0] : 'Abrar';
+  const rawName = user?.name ? user.name.split(' ')[0] : 'User';
   const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
 
-  // Check if live data is present
-  const hasLiveRecords =
-    (summaryData && (summaryData.totalIncome > 0 || summaryData.totalExpenses > 0)) ||
-    transactions.length > 0;
+  // Filter transactions based on selected date range
+  const filteredData = useMemo(() => {
+    const now = new Date();
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
 
-  // Dynamic summary metrics based on selected date filter
-  const getSummaryMetrics = () => {
-    if (hasLiveRecords) {
-      return {
-        balance: summaryData?.savings ?? 0,
-        income: summaryData?.totalIncome ?? 0,
-        expenses: summaryData?.totalExpenses ?? 0,
-        spent: totalSpentMonth ?? 0,
-        budget: 70000,
-        balanceChange: '+12.5%',
-        incomeChange: '+8.2%',
-        expenseChange: '+3.1%'
-      };
-    }
+    const filterByDate = (items) => {
+      if (selectedDateRange === 'All Time') return items;
+      return items.filter((item) => {
+        if (!item.date) return true;
+        const d = new Date(item.date);
+        if (isNaN(d.getTime())) return true;
+        const y = d.getFullYear();
+        const m = d.getMonth();
 
-    if (selectedDateRange === 'Last Month') {
-      return {
-        balance: 110680,
-        income: 78000,
-        expenses: 38900,
-        spent: 38900,
-        budget: 70000,
-        balanceChange: '+10.2%',
-        incomeChange: '+6.5%',
-        expenseChange: '-2.4%'
-      };
-    }
+        if (selectedDateRange === 'This Month') {
+          return y === nowYear && m === nowMonth;
+        }
+        if (selectedDateRange === 'Last Month') {
+          const lastMonth = nowMonth === 0 ? 11 : nowMonth - 1;
+          const lastYear = nowMonth === 0 ? nowYear - 1 : nowYear;
+          return y === lastYear && m === lastMonth;
+        }
+        if (selectedDateRange === 'This Year') {
+          return y === nowYear;
+        }
+        return true;
+      });
+    };
 
-    if (selectedDateRange === 'This Year') {
-      return {
-        balance: 285000,
-        income: 640000,
-        expenses: 318500,
-        spent: 318500,
-        budget: 440000,
-        balanceChange: '+24.8%',
-        incomeChange: '+18.4%',
-        expenseChange: '+8.7%'
-      };
-    }
+    const periodExpenses = filterByDate(expenses);
+    const periodIncomes = filterByDate(incomes);
+
+    const totalIncome = periodIncomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const totalExpenses = periodExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const totalAllIncomes = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const totalAllExpenses = expenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const cumulativeBalance = totalAllIncomes - totalAllExpenses;
+
+    const totalBudget = budgetList.reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
 
     return {
-      balance: 124520,
-      income: 85000,
-      expenses: 42350,
-      spent: 47650,
-      budget: 70000,
-      balanceChange: '+12.5%',
-      incomeChange: '+8.2%',
-      expenseChange: '+3.1%'
+      periodExpenses,
+      periodIncomes,
+      totalIncome,
+      totalExpenses,
+      cumulativeBalance,
+      totalBudget
     };
-  };
+  }, [expenses, incomes, budgetList, selectedDateRange]);
 
-  const metrics = getSummaryMetrics();
+  // Dynamic summary metrics based strictly on database records
+  const metrics = useMemo(() => {
+    return {
+      balance: filteredData.cumulativeBalance,
+      income: filteredData.totalIncome,
+      expenses: filteredData.totalExpenses,
+      spent: filteredData.totalExpenses,
+      budget: filteredData.totalBudget,
+      balanceChange: transactions.length > 0 ? '+100%' : '0%',
+      incomeChange: filteredData.periodIncomes.length > 0 ? '+100%' : '0%',
+      expenseChange: filteredData.periodExpenses.length > 0 ? '+100%' : '0%'
+    };
+  }, [filteredData, transactions.length]);
+
+  // Dynamic Category Breakdown computed from real expenses
+  const categoriesData = useMemo(() => {
+    if (filteredData.periodExpenses.length === 0) return [];
+
+    const catMap = {};
+    filteredData.periodExpenses.forEach((exp) => {
+      const cat = exp.category || 'Other';
+      catMap[cat] = (catMap[cat] || 0) + (Number(exp.amount) || 0);
+    });
+
+    const totalAmount = Object.values(catMap).reduce((s, v) => s + v, 0);
+    const colorPalette = [
+      '#FF667A',
+      '#FF8A48',
+      '#F6C85F',
+      '#20D6C7',
+      '#45B7F5',
+      '#FF6EA7',
+      '#B18AFF'
+    ];
+
+    return Object.entries(catMap).map(([name, value], idx) => ({
+      name,
+      value,
+      percentage: totalAmount > 0 ? Math.round((value / totalAmount) * 100) : 0,
+      color: colorPalette[idx % colorPalette.length]
+    }));
+  }, [filteredData.periodExpenses]);
+
+  // Dynamic Monthly Trends computed from real database data for the current year
+  const trendData = useMemo(() => {
+    const monthsNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    const expMap = Array(12).fill(0);
+    const incMap = Array(12).fill(0);
+
+    expenses.forEach((exp) => {
+      if (exp.date) {
+        const d = new Date(exp.date);
+        if (!isNaN(d.getTime()) && d.getFullYear() === currentYear) {
+          expMap[d.getMonth()] += Number(exp.amount || 0);
+        }
+      }
+    });
+
+    incomes.forEach((inc) => {
+      if (inc.date) {
+        const d = new Date(inc.date);
+        if (!isNaN(d.getTime()) && d.getFullYear() === currentYear) {
+          incMap[d.getMonth()] += Number(inc.amount || 0);
+        }
+      }
+    });
+
+    return monthsNames.map((name, i) => ({
+      month: name,
+      expenses: expMap[i],
+      income: incMap[i]
+    }));
+  }, [expenses, incomes, currentYear]);
 
   return (
     <div className="min-h-screen bg-[#0B1114] text-[#F1F5F4] flex">
-      {/* 1. Left Sidebar (Fixed 266px width) */}
+      {/* 1. Left Sidebar */}
       <Sidebar
         activeItem={activeNav}
         onNavigate={(item) => setActiveNav(item.id)}
@@ -299,7 +291,7 @@ export function Dashboard() {
                 Hello, {userName} 👋
               </h1>
               <p className="text-xs sm:text-sm text-[#A5B4B8] mt-0.5">
-                Here's your financial overview for this month.
+                Here's your financial overview for {selectedDateRange.toLowerCase()}.
               </p>
             </div>
 
@@ -321,7 +313,7 @@ export function Dashboard() {
 
               {dateDropdownOpen && (
                 <div className="absolute right-0 mt-1 w-36 bg-[#18272C] border border-[#24363B] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                  {['This Month', 'Last Month', 'This Year'].map((range) => (
+                  {['This Month', 'Last Month', 'This Year', 'All Time'].map((range) => (
                     <button
                       key={range}
                       type="button"
@@ -348,39 +340,38 @@ export function Dashboard() {
             totalBalance={metrics.balance}
             totalIncome={metrics.income}
             totalExpenses={metrics.expenses}
-            budgetSpent={metrics.spent}
-            budgetTotal={metrics.budget}
+            totalSpent={metrics.spent}
+            budgetAmount={metrics.budget}
             balanceChange={metrics.balanceChange}
             incomeChange={metrics.incomeChange}
             expenseChange={metrics.expenseChange}
           />
 
-          {/* 4. Main Charts Row (~60% / ~40% Split) */}
+          {/* 4. Middle Row: 2 Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
-            {/* Left 60%: Income vs Expenses Grouped Bar Chart */}
-            <div className="lg:col-span-7 xl:col-span-7 min-w-0">
+            {/* Left 60%: Income vs Expense Chart */}
+            <div className="lg:col-span-7">
               <IncomeExpenseChart
-                data={trendData.length > 0 ? trendData : null}
+                data={trendData}
                 selectedPeriod="This Year"
               />
             </div>
 
             {/* Right 40%: Spending by Category Donut Chart */}
-            <div className="lg:col-span-5 xl:col-span-5 min-w-0">
+            <div className="lg:col-span-5">
               <SpendingCategoryChart
-                categories={categoriesData.length > 0 ? categoriesData : null}
-                totalSpent={metrics.expenses}
+                categories={categoriesData}
+                totalSpent={metrics.spent}
                 selectedPeriod={selectedDateRange}
-                onPeriodChange={setSelectedDateRange}
               />
             </div>
           </div>
 
-          {/* 5. Recent Transactions and AI Financial Insights Row (~50% / ~50% Split) */}
+          {/* 5. Second Row: Recent Transactions + AI Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
             {/* Left 50%: Recent Transactions */}
             <RecentTransactions
-              transactions={transactions.length > 0 ? transactions : null}
+              transactions={transactions}
               searchQuery={searchQuery}
               onViewAll={() => navigate('/transactions')}
               onAddTransaction={() => setAddExpenseOpen(true)}
@@ -388,24 +379,26 @@ export function Dashboard() {
 
             {/* Right 50%: AI Financial Insights */}
             <AIInsights
+              totalIncome={metrics.income}
+              totalExpenses={metrics.expenses}
+              transactionCount={transactions.length}
               onViewAll={() => navigate('/ai-insights')}
-              onActionClick={(insight) => {
-                alert(`AI Insight detail: ${insight.title}`);
-              }}
             />
           </div>
 
-          {/* 6. Bottom Row: Three Compact Cards (~32% / ~32% / ~36% Split) */}
+          {/* 6. Bottom Row: Three Compact Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-5 pb-6">
-            {/* Card A: Monthly Budget Progress (~32%) */}
+            {/* Card A: Monthly Budget Progress */}
             <div className="lg:col-span-4">
               <BudgetProgress
-                budgets={budgetList.length > 0 ? budgetList : null}
+                budgets={budgetList}
+                expenses={expenses}
                 onViewAll={() => navigate('/budgets')}
+                onSetBudget={() => setSetBudgetOpen(true)}
               />
             </div>
 
-            {/* Card B: Quick Actions (~32%) */}
+            {/* Card B: Quick Actions */}
             <div className="lg:col-span-4">
               <QuickActions
                 onAddExpense={() => setAddExpenseOpen(true)}
@@ -415,9 +408,10 @@ export function Dashboard() {
               />
             </div>
 
-            {/* Card C: Financial Goals (~36%) */}
+            {/* Card C: Financial Goals */}
             <div className="lg:col-span-4 md:col-span-2">
               <FinancialGoals
+                goals={goalsList}
                 onViewAll={() => navigate('/goals')}
                 onAddGoal={() => navigate('/goals')}
               />

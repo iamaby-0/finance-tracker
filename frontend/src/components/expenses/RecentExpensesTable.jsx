@@ -217,7 +217,7 @@ export default function RecentExpensesTable({
   const displayList =
     expenses && expenses.length > 0
       ? [...expenses].sort(compareLatestFirst).slice(0, 5)
-      : DEFAULT_RECENT_EXPENSES;
+      : [];
 
   return (
     <div className="rounded-2xl bg-[#121E22] border border-[#24363B] p-5 shadow-lg flex flex-col justify-between h-full">
@@ -270,6 +270,12 @@ export default function RecentExpensesTable({
                   <td className="py-3 px-3 text-right"><div className="h-4 w-10 bg-[#18272C] rounded ml-auto" /></td>
                 </tr>
               ))
+            ) : displayList.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#71848A]">
+                  No expenses recorded for this period.
+                </td>
+              </tr>
             ) : (
               displayList.map((item) => {
                 const badge = getCategoryBadge(item.category);

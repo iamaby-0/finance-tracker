@@ -158,13 +158,19 @@ const updateUser = async (req, res) => {
 };
 
 const googleAuthCallback = async (req, res) => {
-    const frontendUrl = env.frontendUrl || process.env.FRONTEND_URL || "https://my-finance-tracker-omega-ten-32.vercel.app";
+    let clientUrl = req.query.state || env.frontendUrl || process.env.FRONTEND_URL || "https://my-finance-tracker-omega-ten-32.vercel.app";
+    try {
+        clientUrl = new URL(clientUrl).origin;
+    } catch {
+        clientUrl = env.frontendUrl || "https://my-finance-tracker-omega-ten-32.vercel.app";
+    }
+
     try {
         const user = req.user;
 
         if (!user) {
             console.error("Google auth callback: No user found on req");
-            return res.redirect(`${frontendUrl}/signin?error=UserNotFound`);
+            return res.redirect(`${clientUrl}/signin?error=UserNotFound`);
         }
 
         const token = jwt.sign(
@@ -173,15 +179,29 @@ const googleAuthCallback = async (req, res) => {
             { expiresIn: '7d' }
         );
 
-        const redirectUrl = new URL(`${frontendUrl}/google-success`);
+        const safeUser = {
+            _id: user._id || user.id,
+            id: user._id || user.id,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture || "",
+            occupation: user.occupation || "student",
+            currency: user.currency || "INR",
+            authProvider: user.authProvider || "google",
+            theme: user.theme || "dark",
+            notifications: user.notifications
+        };
+
+        const redirectUrl = new URL(`${clientUrl}/google-success`);
         redirectUrl.searchParams.set("token", token);
         redirectUrl.searchParams.set("email", user.email);
+        redirectUrl.searchParams.set("user", Buffer.from(JSON.stringify(safeUser)).toString("base64"));
 
         return res.redirect(redirectUrl.toString());
     }
     catch (error) {
         console.error("Google auth callback error:", error);
-        return res.redirect(`${frontendUrl}/signin?error=${encodeURIComponent(error.message || "GoogleAuthFailed")}`);
+        return res.redirect(`${clientUrl}/signin?error=${encodeURIComponent(error.message || "GoogleAuthFailed")}`);
     }
 };
 

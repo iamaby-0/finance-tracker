@@ -11,13 +11,13 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_OVERVIEW = [
-  { month: 'May', income: 72000, expenses: 32000, savings: 40000 },
-  { month: 'Jun', income: 68000, expenses: 48000, savings: 20000 },
-  { month: 'Jul', income: 84000, expenses: 36000, savings: 48000 },
-  { month: 'Aug', income: 78000, expenses: 40000, savings: 38000 },
-  { month: 'Sep', income: 82000, expenses: 44000, savings: 38000 },
-  { month: 'Oct', income: 96000, expenses: 42350, savings: 53650 }
+const ZERO_OVERVIEW = [
+  { month: 'Month 1', income: 0, expenses: 0, savings: 0 },
+  { month: 'Month 2', income: 0, expenses: 0, savings: 0 },
+  { month: 'Month 3', income: 0, expenses: 0, savings: 0 },
+  { month: 'Month 4', income: 0, expenses: 0, savings: 0 },
+  { month: 'Month 5', income: 0, expenses: 0, savings: 0 },
+  { month: 'Month 6', income: 0, expenses: 0, savings: 0 }
 ];
 
 export default function MonthlyFinancialOverview({
@@ -38,7 +38,7 @@ export default function MonthlyFinancialOverview({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = data && data.length > 0 ? data : DEFAULT_OVERVIEW;
+  const chartData = data && data.length > 0 ? data : ZERO_OVERVIEW;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

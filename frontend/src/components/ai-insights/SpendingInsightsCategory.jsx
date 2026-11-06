@@ -15,40 +15,21 @@ import { ChevronDown } from 'lucide-react';
 export default function SpendingInsightsCategory({
   expenseCategories,
   incomeCategories,
-  totalExpenses = 42350,
-  totalIncome = 85000,
+  totalExpenses = 0,
+  totalIncome = 0,
   period = 'This Month',
   onPeriodChange
 }) {
   const [mode, setMode] = useState('Expenses'); // 'Expenses' | 'Income'
 
-  const defaultExpenseData = [
-    { name: 'Food & Dining', amount: 15200, percentage: 28, color: '#FF5268' },
-    { name: 'Shopping', amount: 9800, percentage: 18, color: '#A855F7' },
-    { name: 'Transport', amount: 7600, percentage: 14, color: '#06B6D4' },
-    { name: 'Bills & Utilities', amount: 6500, percentage: 12, color: '#F59E0B' },
-    { name: 'Entertainment', amount: 5400, percentage: 10, color: '#3B82F6' },
-    { name: 'Health & Fitness', amount: 4300, percentage: 8, color: '#EC4899' },
-    { name: 'Others', amount: 5400, percentage: 10, color: '#64748B' }
-  ];
-
-  const defaultIncomeData = [
-    { name: 'Salary', amount: 70000, percentage: 82, color: '#35E9A0' },
-    { name: 'Freelance', amount: 15000, percentage: 18, color: '#45B7F5' }
-  ];
-
   const currentData =
     mode === 'Expenses'
-      ? expenseCategories && expenseCategories.length > 0
-        ? expenseCategories
-        : defaultExpenseData
-      : incomeCategories && incomeCategories.length > 0
-      ? incomeCategories
-      : defaultIncomeData;
+      ? Array.isArray(expenseCategories) ? expenseCategories : []
+      : Array.isArray(incomeCategories) ? incomeCategories : [];
 
   const currentTotal = mode === 'Expenses' ? totalExpenses : totalIncome;
 
-  const formatINR = (val) => `₹${Number(val).toLocaleString('en-IN')}`;
+  const formatINR = (val) => `₹${Number(val || 0).toLocaleString('en-IN')}`;
 
   const formatYAxis = (val) => {
     if (val >= 1000) return `${val / 1000}K`;
@@ -112,92 +93,98 @@ export default function SpendingInsightsCategory({
         </div>
       </div>
 
-      {/* Charts Row: Side-by-side (Bar Chart + Donut Chart) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center min-h-[220px]">
-        {/* Left: Bar Chart (~55%) */}
-        <div className="lg:col-span-7 h-[220px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={currentData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#71848A', fontSize: 10 }}
-                interval={0}
-                tickFormatter={(val) => {
-                  if (val.length > 10) return val.split(' ')[0];
-                  return val;
-                }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: '#71848A', fontSize: 10 }}
-                tickFormatter={formatYAxis}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={32}>
-                {currentData.map((entry, index) => (
-                  <Cell key={`bar-${index}`} fill={entry.color || '#35E9A0'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Charts Row: Side-by-side (Bar Chart + Donut Chart) or Empty State */}
+      {currentData.length === 0 ? (
+        <div className="flex items-center justify-center min-h-[180px] text-xs text-[#71848A]">
+          No {mode.toLowerCase()} recorded for {period.toLowerCase()}.
         </div>
-
-        {/* Right: Donut Chart + Legend (~45%) */}
-        <div className="lg:col-span-5 flex flex-col sm:flex-row items-center justify-center gap-3">
-          {/* Donut Chart with Center Text */}
-          <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center min-h-[220px]">
+          {/* Left: Bar Chart (~55%) */}
+          <div className="lg:col-span-7 h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={currentData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={46}
-                  outerRadius={65}
-                  paddingAngle={3}
-                  dataKey="amount"
-                >
-                  {currentData.map((entry, index) => (
-                    <Cell key={`pie-${index}`} fill={entry.color || '#35E9A0'} stroke="#121E22" strokeWidth={2} />
-                  ))}
-                </Pie>
+              <BarChart data={currentData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#71848A', fontSize: 10 }}
+                  interval={0}
+                  tickFormatter={(val) => {
+                    if (val.length > 10) return val.split(' ')[0];
+                    return val;
+                  }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#71848A', fontSize: 10 }}
+                  tickFormatter={formatYAxis}
+                />
                 <Tooltip content={<CustomTooltip />} />
-              </PieChart>
+                <Bar dataKey="amount" radius={[6, 6, 0, 0]} maxBarSize={32}>
+                  {currentData.map((entry, index) => (
+                    <Cell key={`bar-${index}`} fill={entry.color || '#35E9A0'} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
-
-            {/* Donut Center Overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
-              <span className="text-xs font-bold text-[#F1F5F4] leading-tight">
-                {formatINR(currentTotal)}
-              </span>
-              <span className="text-[9px] text-[#71848A] leading-tight">
-                {mode === 'Expenses' ? 'Total Expenses' : 'Total Income'}
-              </span>
-            </div>
           </div>
 
-          {/* Legend on Right */}
-          <div className="flex-1 space-y-1.5 w-full max-h-[190px] overflow-y-auto scrollbar-thin pr-1">
-            {currentData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-[11px]">
-                <div className="flex items-center gap-2 truncate">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: item.color || '#35E9A0' }}
-                  />
-                  <span className="text-[#A5B4B8] truncate">{item.name}</span>
-                </div>
-                <span className="text-[#F1F5F4] font-medium shrink-0 ml-2">
-                  {item.percentage}%
+          {/* Right: Donut Chart + Legend (~45%) */}
+          <div className="lg:col-span-5 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {/* Donut Chart with Center Text */}
+            <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={currentData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={46}
+                    outerRadius={65}
+                    paddingAngle={3}
+                    dataKey="amount"
+                  >
+                    {currentData.map((entry, index) => (
+                      <Cell key={`pie-${index}`} fill={entry.color || '#35E9A0'} stroke="#121E22" strokeWidth={2} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Donut Center Overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-xs font-bold text-[#F1F5F4] leading-tight">
+                  {formatINR(currentTotal)}
+                </span>
+                <span className="text-[9px] text-[#71848A] leading-tight">
+                  {mode === 'Expenses' ? 'Total Expenses' : 'Total Income'}
                 </span>
               </div>
-            ))}
+            </div>
+
+            {/* Legend on Right */}
+            <div className="flex-1 space-y-1.5 w-full max-h-[190px] overflow-y-auto scrollbar-thin pr-1">
+              {currentData.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center gap-2 truncate">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: item.color || '#35E9A0' }}
+                    />
+                    <span className="text-[#A5B4B8] truncate">{item.name}</span>
+                  </div>
+                  <span className="text-[#F1F5F4] font-medium shrink-0 ml-2">
+                    {item.percentage}%
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

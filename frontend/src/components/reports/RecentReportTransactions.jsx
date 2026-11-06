@@ -11,59 +11,11 @@ import {
 } from 'lucide-react';
 import { formatDate, formatCurrency, compareLatestFirst } from '../../utils/formatters';
 
-const DEFAULT_TRANSACTIONS = [
-  {
-    id: 1,
-    date: '2026-10-20',
-    description: 'Zomato Order',
-    category: 'Food & Dining',
-    categoryKey: 'Food',
-    amount: 480,
-    paymentMethod: 'UPI'
-  },
-  {
-    id: 2,
-    date: '2026-10-19',
-    description: 'Amazon Purchase',
-    category: 'Shopping',
-    categoryKey: 'Shopping',
-    amount: 2199,
-    paymentMethod: 'Credit Card'
-  },
-  {
-    id: 3,
-    date: '2026-10-18',
-    description: 'Diesel',
-    category: 'Transport',
-    categoryKey: 'Transport',
-    amount: 1200,
-    paymentMethod: 'Debit Card'
-  },
-  {
-    id: 4,
-    date: '2026-10-17',
-    description: 'Electricity Bill',
-    category: 'Bills & Utilities',
-    categoryKey: 'Bills',
-    amount: 1230,
-    paymentMethod: 'UPI'
-  },
-  {
-    id: 5,
-    date: '2026-10-16',
-    description: 'Movie Tickets',
-    category: 'Entertainment',
-    categoryKey: 'Entertainment',
-    amount: 650,
-    paymentMethod: 'Credit Card'
-  }
-];
-
 export default function RecentReportTransactions({ transactions = null }) {
   const items =
     transactions && transactions.length > 0
       ? [...transactions].sort(compareLatestFirst).slice(0, 5)
-      : DEFAULT_TRANSACTIONS;
+      : [];
 
   const getCategoryBadge = (cat) => {
     switch (cat) {
@@ -162,7 +114,14 @@ export default function RecentReportTransactions({ transactions = null }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#24363B]/40 text-xs">
-            {items.slice(0, 5).map((tx) => {
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#71848A]">
+                  No transactions recorded for this report period.
+                </td>
+              </tr>
+            ) : (
+              items.slice(0, 5).map((tx) => {
               const catBadge = getCategoryBadge(tx.category || tx.categoryKey);
               const CatIcon = catBadge.icon;
               const payBadge = getPaymentMethodBadge(tx.paymentMethod);
@@ -207,7 +166,8 @@ export default function RecentReportTransactions({ transactions = null }) {
                   </td>
                 </tr>
               );
-            })}
+            })
+          )}
           </tbody>
         </table>
       </div>

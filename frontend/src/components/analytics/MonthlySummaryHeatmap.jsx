@@ -6,48 +6,9 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 // Baseline normalized sample/default intensity matrices
 const DEFAULT_HEATMAP = {
-  expenses: [
-    { month: 'Jan', amount: 14000, level: 1 },
-    { month: 'Feb', amount: 16000, level: 2 },
-    { month: 'Mar', amount: 18000, level: 2 },
-    { month: 'Apr', amount: 20000, level: 3 },
-    { month: 'May', amount: 19000, level: 2 },
-    { month: 'Jun', amount: 22000, level: 3 },
-    { month: 'Jul', amount: 21000, level: 3 },
-    { month: 'Aug', amount: 24000, level: 4 },
-    { month: 'Sep', amount: 23000, level: 3 },
-    { month: 'Oct', amount: 22000, level: 3 },
-    { month: 'Nov', amount: 21000, level: 3 },
-    { month: 'Dec', amount: 20000, level: 2 }
-  ],
-  income: [
-    { month: 'Jan', amount: 24000, level: 1 },
-    { month: 'Feb', amount: 30000, level: 2 },
-    { month: 'Mar', amount: 27000, level: 2 },
-    { month: 'Apr', amount: 32000, level: 3 },
-    { month: 'May', amount: 34000, level: 3 },
-    { month: 'Jun', amount: 38000, level: 3 },
-    { month: 'Jul', amount: 36000, level: 3 },
-    { month: 'Aug', amount: 45000, level: 4 },
-    { month: 'Sep', amount: 39000, level: 3 },
-    { month: 'Oct', amount: 44000, level: 4 },
-    { month: 'Nov', amount: 38000, level: 3 },
-    { month: 'Dec', amount: 32000, level: 2 }
-  ],
-  savings: [
-    { month: 'Jan', amount: 10000, level: 1 },
-    { month: 'Feb', amount: 14000, level: 2 },
-    { month: 'Mar', amount: 9000, level: 1 },
-    { month: 'Apr', amount: 12000, level: 2 },
-    { month: 'May', amount: 15000, level: 3 },
-    { month: 'Jun', amount: 16000, level: 3 },
-    { month: 'Jul', amount: 15000, level: 3 },
-    { month: 'Aug', amount: 21000, level: 4 },
-    { month: 'Sep', amount: 16000, level: 3 },
-    { month: 'Oct', amount: 22000, level: 4 },
-    { month: 'Nov', amount: 17000, level: 3 },
-    { month: 'Dec', amount: 12000, level: 2 }
-  ]
+  expenses: MONTHS.map((m) => ({ month: m, amount: 0, level: 0 })),
+  income: MONTHS.map((m) => ({ month: m, amount: 0, level: 0 })),
+  savings: MONTHS.map((m) => ({ month: m, amount: 0, level: 0 }))
 };
 
 export default function MonthlySummaryHeatmap({
@@ -73,6 +34,9 @@ export default function MonthlySummaryHeatmap({
 
   // Background intensity mapping
   const getCellColor = (metric, level) => {
+    if (!level || level === 0) {
+      return 'bg-[#18272C] border-[#24363B] text-[#71848A]';
+    }
     if (metric === 'Expenses') {
       switch (level) {
         case 4:

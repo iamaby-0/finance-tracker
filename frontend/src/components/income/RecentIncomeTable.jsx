@@ -24,79 +24,6 @@ const YoutubeIcon = ({ className = "w-3.5 h-3.5" }) => (
   </svg>
 );
 
-const DEFAULT_INCOME_ROWS = [
-  {
-    _id: 'mock-1',
-    date: '2026-10-19',
-    source: 'Salary',
-    category: 'Salary',
-    amount: 70000,
-    notes: 'Monthly salary',
-    icon: Landmark,
-    iconBg: 'bg-[#123D32]',
-    iconColor: 'text-[#35E9A0]',
-    badgeBg: 'bg-[#123D32]/60',
-    badgeBorder: 'border-[#35E9A0]/30',
-    badgeText: 'text-[#35E9A0]'
-  },
-  {
-    _id: 'mock-2',
-    date: '2026-10-12',
-    source: 'Freelance',
-    category: 'Freelance',
-    amount: 8500,
-    notes: 'Client project',
-    icon: Laptop,
-    iconBg: 'bg-[#2B1B3D]',
-    iconColor: 'text-[#B18AFF]',
-    badgeBg: 'bg-[#2B1B3D]/60',
-    badgeBorder: 'border-[#B18AFF]/30',
-    badgeText: 'text-[#B18AFF]'
-  },
-  {
-    _id: 'mock-3',
-    date: '2026-10-05',
-    source: 'Investment',
-    category: 'Investment',
-    amount: 4200,
-    notes: 'Dividends',
-    icon: TrendingUp,
-    iconBg: 'bg-[#182C3D]',
-    iconColor: 'text-[#45B7F5]',
-    badgeBg: 'bg-[#182C3D]/60',
-    badgeBorder: 'border-[#45B7F5]/30',
-    badgeText: 'text-[#45B7F5]'
-  },
-  {
-    _id: 'mock-4',
-    date: '2026-09-28',
-    source: 'Other',
-    category: 'Other',
-    amount: 2300,
-    notes: 'Cashback',
-    icon: MoreHorizontal,
-    iconBg: 'bg-[#382818]',
-    iconColor: 'text-[#F6C85F]',
-    badgeBg: 'bg-[#382818]/60',
-    badgeBorder: 'border-[#F6C85F]/30',
-    badgeText: 'text-[#F6C85F]'
-  },
-  {
-    _id: 'mock-5',
-    date: '2026-09-15',
-    source: 'YouTube',
-    category: 'Side Income',
-    amount: 6000,
-    notes: 'Ad revenue',
-    icon: YoutubeIcon,
-    iconBg: 'bg-[#3D1A22]',
-    iconColor: 'text-[#FF667A]',
-    badgeBg: 'bg-[#3D1A22]/60',
-    badgeBorder: 'border-[#FF667A]/30',
-    badgeText: 'text-[#FF667A]'
-  }
-];
-
 const getSourceStyle = (source = '', category = '') => {
   const s = (source || '').toLowerCase();
   const c = (category || '').toLowerCase();
@@ -183,7 +110,7 @@ export default function RecentIncomeTable({
       };
     });
   } else {
-    displayList = DEFAULT_INCOME_ROWS;
+    displayList = [];
   }
 
   // Filter if search query exists
@@ -200,13 +127,7 @@ export default function RecentIncomeTable({
     );
   }
 
-  const handleDelete = async (id, isReal) => {
-    if (!isReal) {
-      alert('This is a preview demonstration record.');
-      setDeleteId(null);
-      return;
-    }
-
+  const handleDelete = async (id) => {
     try {
       setIsDeleting(true);
       await api.delete(`/income/${id}`);
@@ -350,8 +271,7 @@ export default function RecentIncomeTable({
                 type="button"
                 disabled={isDeleting}
                 onClick={() => {
-                  const targetRow = displayList.find((r) => r._id === deleteId);
-                  handleDelete(deleteId, targetRow?.isReal);
+                  handleDelete(deleteId);
                 }}
                 className="px-4 py-1.5 rounded-lg bg-[#FF667A] hover:bg-[#ff7d8f] text-[#0B1114] text-xs font-bold transition flex items-center gap-1.5"
               >

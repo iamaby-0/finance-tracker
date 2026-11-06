@@ -11,10 +11,10 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_COMPARISON = [
-  { month: 'Aug', income: 82000, expenses: 38000 },
-  { month: 'Sep', income: 76000, expenses: 40000 },
-  { month: 'Oct', income: 85000, expenses: 42350 }
+const ZERO_COMPARISON = [
+  { month: 'Month 1', income: 0, expenses: 0 },
+  { month: 'Month 2', income: 0, expenses: 0 },
+  { month: 'Month 3', income: 0, expenses: 0 }
 ];
 
 export default function ExpenseComparisonChart({
@@ -35,7 +35,7 @@ export default function ExpenseComparisonChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = data && data.length > 0 ? data : DEFAULT_COMPARISON;
+  const chartData = data && data.length > 0 ? data : ZERO_COMPARISON;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

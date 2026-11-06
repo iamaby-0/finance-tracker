@@ -8,27 +8,9 @@ import {
   Tooltip,
   CartesianGrid
 } from 'recharts';
-import { ChevronDown } from 'lucide-react';
 
 export default function SavingsProgressChart({ data }) {
-  const [period, setPeriod] = useState('Last 12 Months');
-
-  const defaultData = [
-    { month: 'Jan', totalSaved: 100000, targetLine: 200000 },
-    { month: 'Feb', totalSaved: 180000, targetLine: 350000 },
-    { month: 'Mar', totalSaved: 260000, targetLine: 500000 },
-    { month: 'Apr', totalSaved: 340000, targetLine: 650000 },
-    { month: 'May', totalSaved: 420000, targetLine: 800000 },
-    { month: 'Jun', totalSaved: 510000, targetLine: 950000 },
-    { month: 'Jul', totalSaved: 590000, targetLine: 1100000 },
-    { month: 'Aug', totalSaved: 680000, targetLine: 1250000 },
-    { month: 'Sep', totalSaved: 700000, targetLine: 1400000 },
-    { month: 'Oct', totalSaved: 725000, targetLine: 1550000 },
-    { month: 'Nov', totalSaved: 780000, targetLine: 1700000 },
-    { month: 'Dec', totalSaved: 850000, targetLine: 1850000 }
-  ];
-
-  const chartData = data && data.length > 0 ? data : defaultData;
+  const chartData = Array.isArray(data) ? data : [];
 
   const formatYAxis = (val) => {
     if (val >= 100000) return `${val / 100000}L`;
@@ -63,18 +45,13 @@ export default function SavingsProgressChart({ data }) {
             Savings Progress Over Time
           </h3>
           <p className="text-[11px] text-[#71848A]">
-            Track your goal savings growth
+            Cumulative savings across goals
           </p>
-        </div>
-
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4]">
-          <span>{period}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-[#71848A]" />
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-[11px]">
+      <div className="flex items-center gap-3 text-[11px]">
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#35E9A0]" />
           <span className="text-[#A5B4B8]">Total Saved</span>
@@ -85,45 +62,51 @@ export default function SavingsProgressChart({ data }) {
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="h-[200px] w-full pt-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#24363B" opacity={0.4} vertical={false} />
-            <XAxis
-              dataKey="month"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 10 }}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 10 }}
-              tickFormatter={formatYAxis}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Line
-              type="monotone"
-              dataKey="totalSaved"
-              name="Total Saved"
-              stroke="#35E9A0"
-              strokeWidth={2.5}
-              dot={{ r: 3, fill: '#35E9A0', strokeWidth: 1, stroke: '#121E22' }}
-              activeDot={{ r: 5, fill: '#4FFFB0' }}
-            />
-            <Line
-              type="monotone"
-              dataKey="targetLine"
-              name="Target Line"
-              stroke="#71848A"
-              strokeDasharray="4 4"
-              strokeWidth={1.5}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Chart or Empty state */}
+      {chartData.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No savings progress data yet.</p>
+        </div>
+      ) : (
+        <div className="h-[200px] w-full pt-1">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#24363B" opacity={0.4} vertical={false} />
+              <XAxis
+                dataKey="month"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 10 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 10 }}
+                tickFormatter={formatYAxis}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="totalSaved"
+                name="Total Saved"
+                stroke="#35E9A0"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: '#35E9A0', strokeWidth: 1, stroke: '#121E22' }}
+                activeDot={{ r: 5, fill: '#4FFFB0' }}
+              />
+              <Line
+                type="monotone"
+                dataKey="targetLine"
+                name="Target Line"
+                stroke="#71848A"
+                strokeDasharray="4 4"
+                strokeWidth={1.5}
+                dot={false}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

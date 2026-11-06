@@ -16,8 +16,8 @@ export default function AISummaryCards({ summary, loading }) {
     {
       id: 'income',
       label: 'Total Income',
-      value: summary?.totalIncome?.value !== undefined ? formatINR(summary.totalIncome.value) : '₹85,000',
-      change: summary?.totalIncome?.change || '↑ 8.2%',
+      value: summary?.totalIncome?.value !== undefined ? formatINR(summary.totalIncome.value) : '₹0',
+      change: summary?.totalIncome?.change || '0%',
       isPositive: true,
       icon: Wallet,
       iconBg: 'bg-[#123D32]',
@@ -29,8 +29,8 @@ export default function AISummaryCards({ summary, loading }) {
     {
       id: 'expenses',
       label: 'Total Expenses',
-      value: summary?.totalExpenses?.value !== undefined ? formatINR(summary.totalExpenses.value) : '₹42,350',
-      change: summary?.totalExpenses?.change || '↑ 3.1%',
+      value: summary?.totalExpenses?.value !== undefined ? formatINR(summary.totalExpenses.value) : '₹0',
+      change: summary?.totalExpenses?.change || '0%',
       isPositive: false, // Expense increase is styled with coral
       icon: TrendingDown,
       iconBg: 'bg-[#3D1A22]',
@@ -42,8 +42,8 @@ export default function AISummaryCards({ summary, loading }) {
     {
       id: 'savings',
       label: 'Savings Rate',
-      value: summary?.savingsRate?.value || '34%',
-      change: summary?.savingsRate?.change || '↑ 6.4%',
+      value: summary?.savingsRate?.value || '0%',
+      change: summary?.savingsRate?.change || '0%',
       isPositive: true,
       icon: PiggyBank,
       iconBg: 'bg-[#18384D]',
@@ -55,8 +55,8 @@ export default function AISummaryCards({ summary, loading }) {
     {
       id: 'health',
       label: 'Financial Health',
-      value: summary?.financialHealth?.value || '78/100',
-      change: summary?.financialHealth?.change || '↑ 12 points',
+      value: summary?.financialHealth?.value || '0/100',
+      change: summary?.financialHealth?.change || '0 points',
       isPositive: true,
       icon: Target,
       iconBg: 'bg-[#2A1A40]',

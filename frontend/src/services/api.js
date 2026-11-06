@@ -34,7 +34,8 @@ api.interceptors.response.use(
             error.response.status === 401 &&
             !error.config?.url?.includes("/auth/signin") &&
             !error.config?.url?.includes("/auth/signup") &&
-            !error.config?.url?.includes("/auth/google")
+            !error.config?.url?.includes("/auth/google") &&
+            !error.config?.url?.includes("/user/email")
         ) {
             console.warn("Session expired or unauthorized request. Clearing session.");
             localStorage.removeItem("token");

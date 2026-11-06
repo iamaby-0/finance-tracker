@@ -189,10 +189,7 @@ export default function TopMerchants({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const merchantList =
-    merchants && merchants.length > 0
-      ? merchants
-      : DEFAULT_TOP_MERCHANTS[period] || DEFAULT_TOP_MERCHANTS['This Month'];
+  const merchantList = Array.isArray(merchants) ? merchants : [];
 
   const handleSelectPeriod = (p) => {
     setPeriod(p);
@@ -253,7 +250,12 @@ export default function TopMerchants({
 
       {/* Merchants List */}
       <div className="space-y-3 mt-1">
-        {merchantList.map((m) => {
+        {merchantList.length === 0 ? (
+          <div className="py-8 text-center text-xs text-[#71848A]">
+            No merchant spending recorded for this period.
+          </div>
+        ) : (
+          merchantList.map((m) => {
           const Icon = m.icon || Store;
 
           return (
@@ -301,7 +303,8 @@ export default function TopMerchants({
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
     </div>
   );

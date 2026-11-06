@@ -11,16 +11,6 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_CHART_DATA = [
-  { category: 'Food', budget: 15000, spent: 11850 },
-  { category: 'Shoppin...', fullCategory: 'Shopping', budget: 10000, spent: 8500 },
-  { category: 'Transpor...', fullCategory: 'Transport', budget: 8000, spent: 5930 },
-  { category: 'Bills', fullCategory: 'Bills & Utilities', budget: 7000, spent: 6200 },
-  { category: 'Entertai...', fullCategory: 'Entertainment', budget: 5000, spent: 3800 },
-  { category: 'Health', fullCategory: 'Health & Fitness', budget: 4000, spent: 2400 },
-  { category: 'Others', fullCategory: 'Others', budget: 5000, spent: 2970 },
-];
-
 export default function BudgetComparisonChart({
   data = null,
   selectedPeriod: initialPeriod = 'This Month',
@@ -49,7 +39,7 @@ export default function BudgetComparisonChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = (data && data.length > 0) ? data : DEFAULT_CHART_DATA;
+  const chartData = (data && data.length > 0) ? data : [];
 
   const handleSelectPeriod = (newPeriod) => {
     setPeriod(newPeriod);
@@ -63,35 +53,30 @@ export default function BudgetComparisonChart({
     if (active && payload && payload.length) {
       const budgetVal = payload.find((p) => p.dataKey === 'budget')?.value || 0;
       const spentVal = payload.find((p) => p.dataKey === 'spent')?.value || 0;
-      const remainingVal = Math.max(budgetVal - spentVal, 0);
-      const fullName = payload[0]?.payload?.fullCategory || label;
+      const fullCategory = payload[0]?.payload?.fullCategory || label;
 
       return (
-        <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-3 shadow-xl backdrop-blur-md z-50">
-          <p className="text-xs font-semibold text-[#F1F5F4] mb-2">{fullName}</p>
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 text-[#A5B4B8]">
-                <span className="w-2 h-2 rounded-full bg-[#35E9A0]"></span>
+        <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-3 shadow-xl text-xs backdrop-blur-md z-50 min-w-[140px]">
+          <p className="font-semibold text-[#F1F5F4] mb-2 pb-1 border-b border-[#24363B]/60">
+            {fullCategory}
+          </p>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between gap-3 text-[#A5B4B8]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#35E9A0]" />
                 Budget:
               </span>
-              <span className="font-semibold text-[#35E9A0]">
+              <span className="font-medium text-[#F1F5F4]">
                 {formatCurrency(budgetVal)}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <span className="flex items-center gap-1.5 text-[#A5B4B8]">
-                <span className="w-2 h-2 rounded-full bg-[#FF667A]"></span>
+            <div className="flex items-center justify-between gap-3 text-[#A5B4B8]">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-[#FF667A]" />
                 Spent:
               </span>
-              <span className="font-semibold text-[#FF667A]">
+              <span className="font-medium text-[#F1F5F4]">
                 {formatCurrency(spentVal)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-4 pt-1 border-t border-[#24363B]/50">
-              <span className="text-[#71848A]">Remaining:</span>
-              <span className="font-semibold text-[#F1F5F4]">
-                {formatCurrency(remainingVal)}
               </span>
             </div>
           </div>
@@ -105,8 +90,8 @@ export default function BudgetComparisonChart({
     <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-4 sm:p-5 h-full flex flex-col justify-between">
       {/* Header */}
       <div>
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight whitespace-nowrap">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight">
             Budget vs Spending
           </h3>
 
@@ -159,57 +144,61 @@ export default function BudgetComparisonChart({
         </div>
       </div>
 
-      {/* Grouped Bar Chart */}
-      <div className="w-full h-[220px] sm:h-[240px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 8, left: -18, bottom: 0 }}
-            barGap={3}
-            barCategoryGap={10}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#24363B"
-              vertical={false}
-              opacity={0.6}
-            />
-            <XAxis
-              dataKey="category"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 10 }}
-              dy={6}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 10 }}
-              tickFormatter={(v) => (v === 0 ? '0' : `${Math.round(v / 1000)}K`)}
-              domain={[0, 20000]}
-              ticks={[0, 5000, 10000, 15000, 20000]}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }}
-            />
-            <Bar
-              dataKey="budget"
-              fill="#35E9A0"
-              radius={[3, 3, 0, 0]}
-              maxBarSize={12}
-              animationDuration={600}
-            />
-            <Bar
-              dataKey="spent"
-              fill="#FF667A"
-              radius={[3, 3, 0, 0]}
-              maxBarSize={12}
-              animationDuration={600}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Grouped Bar Chart or Empty State */}
+      {chartData.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No budget data available for comparison.</p>
+        </div>
+      ) : (
+        <div className="w-full h-[220px] sm:h-[240px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 8, left: -18, bottom: 0 }}
+              barGap={3}
+              barCategoryGap={10}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#24363B"
+                vertical={false}
+                opacity={0.6}
+              />
+              <XAxis
+                dataKey="category"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 10 }}
+                dy={6}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 10 }}
+                tickFormatter={(v) => (v === 0 ? '0' : `${Math.round(v / 1000)}K`)}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ fill: 'rgba(255, 255, 255, 0.03)' }}
+              />
+              <Bar
+                dataKey="budget"
+                fill="#35E9A0"
+                radius={[3, 3, 0, 0]}
+                maxBarSize={12}
+                animationDuration={600}
+              />
+              <Bar
+                dataKey="spent"
+                fill="#FF667A"
+                radius={[3, 3, 0, 0]}
+                maxBarSize={12}
+                animationDuration={600}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

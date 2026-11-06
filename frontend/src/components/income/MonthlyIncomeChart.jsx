@@ -11,50 +11,20 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_INCOME_TRENDS = {
-  'This Year': [
-    { month: 'Jan', amount: 22000 },
-    { month: 'Feb', amount: 35000 },
-    { month: 'Mar', amount: 68000 },
-    { month: 'Apr', amount: 32000 },
-    { month: 'May', amount: 38000 },
-    { month: 'Jun', amount: 40000 },
-    { month: 'Jul', amount: 80000 },
-    { month: 'Aug', amount: 35000 },
-    { month: 'Sep', amount: 40000 },
-    { month: 'Oct', amount: 75000 },
-    { month: 'Nov', amount: 38000 },
-    { month: 'Dec', amount: 39000 },
-  ],
-  '2026': [
-    { month: 'Jan', amount: 22000 },
-    { month: 'Feb', amount: 35000 },
-    { month: 'Mar', amount: 68000 },
-    { month: 'Apr', amount: 32000 },
-    { month: 'May', amount: 38000 },
-    { month: 'Jun', amount: 40000 },
-    { month: 'Jul', amount: 80000 },
-    { month: 'Aug', amount: 35000 },
-    { month: 'Sep', amount: 40000 },
-    { month: 'Oct', amount: 75000 },
-    { month: 'Nov', amount: 38000 },
-    { month: 'Dec', amount: 39000 },
-  ],
-  '2025': [
-    { month: 'Jan', amount: 18000 },
-    { month: 'Feb', amount: 25000 },
-    { month: 'Mar', amount: 50000 },
-    { month: 'Apr', amount: 28000 },
-    { month: 'May', amount: 30000 },
-    { month: 'Jun', amount: 34000 },
-    { month: 'Jul', amount: 65000 },
-    { month: 'Aug', amount: 31000 },
-    { month: 'Sep', amount: 35000 },
-    { month: 'Oct', amount: 60000 },
-    { month: 'Nov', amount: 32000 },
-    { month: 'Dec', amount: 33000 },
-  ]
-};
+const ZERO_MONTHS = [
+  { month: 'Jan', amount: 0 },
+  { month: 'Feb', amount: 0 },
+  { month: 'Mar', amount: 0 },
+  { month: 'Apr', amount: 0 },
+  { month: 'May', amount: 0 },
+  { month: 'Jun', amount: 0 },
+  { month: 'Jul', amount: 0 },
+  { month: 'Aug', amount: 0 },
+  { month: 'Sep', amount: 0 },
+  { month: 'Oct', amount: 0 },
+  { month: 'Nov', amount: 0 },
+  { month: 'Dec', amount: 0 },
+];
 
 export default function MonthlyIncomeChart({
   data = null,
@@ -65,7 +35,7 @@ export default function MonthlyIncomeChart({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const periods = ['This Year', '2026', '2025'];
+  const periods = ['This Year'];
 
   useEffect(() => {
     if (initialPeriod) {
@@ -84,9 +54,7 @@ export default function MonthlyIncomeChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = (data && data.length > 0 && period === 'This Year')
-    ? data
-    : (DEFAULT_INCOME_TRENDS[period] || DEFAULT_INCOME_TRENDS['This Year']);
+  const chartData = (data && data.length > 0) ? data : ZERO_MONTHS;
 
   const handleSelectPeriod = (newPeriod) => {
     setPeriod(newPeriod);

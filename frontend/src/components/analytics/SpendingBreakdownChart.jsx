@@ -3,19 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_CATEGORIES = [
-  { name: 'Food & Dining', value: 11850, percentage: 28, color: '#FF667A' },
-  { name: 'Shopping', value: 7620, percentage: 18, color: '#FF8A48' },
-  { name: 'Transport', value: 5930, percentage: 14, color: '#F6C85F' },
-  { name: 'Bills & Utilities', value: 5120, percentage: 12, color: '#20D6C7' },
-  { name: 'Entertainment', value: 4230, percentage: 10, color: '#45B7F5' },
-  { name: 'Health & Fitness', value: 3400, percentage: 8, color: '#FF6EA7' },
-  { name: 'Others', value: 4200, percentage: 10, color: '#B18AFF' }
-];
-
 export default function SpendingBreakdownChart({
   categories = null,
-  totalExpenses = 42350,
+  totalExpenses = 0,
   selectedPeriod = 'This Month',
   onPeriodChange
 }) {
@@ -32,7 +22,7 @@ export default function SpendingBreakdownChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const items = categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
+  const items = Array.isArray(categories) ? categories : [];
   const totalAmount = totalExpenses || items.reduce((sum, item) => sum + (item.value || 0), 0);
 
   const CustomTooltip = ({ active, payload }) => {
@@ -103,69 +93,75 @@ export default function SpendingBreakdownChart({
         </div>
       </div>
 
-      {/* Donut Chart & Category Legend Grid */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-1">
-        {/* Donut Chart with Center Amount */}
-        <div className="relative w-48 h-48 sm:w-52 sm:h-52 flex-shrink-0 flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip content={<CustomTooltip />} />
-              <Pie
-                data={items}
-                cx="50%"
-                cy="50%"
-                innerRadius={56}
-                outerRadius={84}
-                paddingAngle={2.5}
-                dataKey="value"
-                stroke="none"
-              >
-                {items.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+      {/* Donut Chart & Category Legend Grid or Empty State */}
+      {items.length === 0 || totalAmount === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No spending data available for this period.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-1">
+          {/* Donut Chart with Center Amount */}
+          <div className="relative w-48 h-48 sm:w-52 sm:h-52 flex-shrink-0 flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip content={<CustomTooltip />} />
+                <Pie
+                  data={items}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={56}
+                  outerRadius={84}
+                  paddingAngle={2.5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {items.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
 
-          {/* Centered Total Spent Text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-base sm:text-lg font-bold text-[#F1F5F4] tracking-tight">
-              {formatCurrency(totalAmount)}
-            </span>
-            <span className="text-[11px] text-[#71848A] font-medium tracking-wide">
-              Total Spent
-            </span>
+            {/* Centered Total Spent Text */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-base sm:text-lg font-bold text-[#F1F5F4] tracking-tight">
+                {formatCurrency(totalAmount)}
+              </span>
+              <span className="text-[11px] text-[#71848A] font-medium tracking-wide">
+                Total Spent
+              </span>
+            </div>
+          </div>
+
+          {/* Legend List */}
+          <div className="flex-1 w-full space-y-1.5">
+            {items.map((cat, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between text-xs py-0.5 hover:bg-[#18272C]/40 px-1.5 rounded-md transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <span className="text-[#A5B4B8] truncate text-[12px]">
+                    {cat.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                  <span className="text-[#71848A] text-[11px] w-7 text-right">
+                    {cat.percentage}%
+                  </span>
+                  <span className="font-semibold text-[#F1F5F4] text-[12px] w-14 text-right">
+                    {formatCurrency(cat.value)}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Legend List */}
-        <div className="flex-1 w-full space-y-1.5">
-          {items.map((cat, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between text-xs py-0.5 hover:bg-[#18272C]/40 px-1.5 rounded-md transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: cat.color }}
-                />
-                <span className="text-[#A5B4B8] truncate text-[12px]">
-                  {cat.name}
-                </span>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0 ml-2">
-                <span className="text-[#71848A] text-[11px] w-7 text-right">
-                  {cat.percentage}%
-                </span>
-                <span className="font-semibold text-[#F1F5F4] text-[12px] w-14 text-right">
-                  {formatCurrency(cat.value)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

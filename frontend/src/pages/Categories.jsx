@@ -14,19 +14,19 @@ import { compareLatestFirst } from '../utils/formatters';
 
 const INITIAL_CATEGORIES = [
   // 8 Expense Categories
-  { id: '1', name: 'Food & Dining', type: 'Expense', icon: 'Utensils', color: '#FF667A', amount: 11850, percentage: 28, isCustom: false },
-  { id: '2', name: 'Shopping', type: 'Expense', icon: 'ShoppingBag', color: '#B18AFF', amount: 7620, percentage: 18, isCustom: false },
-  { id: '3', name: 'Transport', type: 'Expense', icon: 'Car', color: '#45B7F5', amount: 5930, percentage: 14, isCustom: false },
-  { id: '4', name: 'Bills & Utilities', type: 'Expense', icon: 'FileText', color: '#F6C85F', amount: 5120, percentage: 12, isCustom: false },
-  { id: '5', name: 'Entertainment', type: 'Expense', icon: 'Gamepad', color: '#FF6EA7', amount: 4230, percentage: 10, isCustom: false },
-  { id: '6', name: 'Health & Fitness', type: 'Expense', icon: 'Heart', color: '#FF8A48', amount: 3400, percentage: 8, isCustom: false },
-  { id: '7', name: 'Others', type: 'Expense', icon: 'MoreHorizontal', color: '#A5B4B8', amount: 4200, percentage: 10, isCustom: false },
-  { id: '8', name: 'Custom Category', type: 'Expense', icon: 'Utensils', color: '#20D6C7', amount: 1100, percentage: 3, isCustom: true },
+  { id: '1', name: 'Food & Dining', type: 'Expense', icon: 'Utensils', color: '#FF667A', amount: 0, percentage: 0, isCustom: false },
+  { id: '2', name: 'Shopping', type: 'Expense', icon: 'ShoppingBag', color: '#B18AFF', amount: 0, percentage: 0, isCustom: false },
+  { id: '3', name: 'Transport', type: 'Expense', icon: 'Car', color: '#45B7F5', amount: 0, percentage: 0, isCustom: false },
+  { id: '4', name: 'Bills & Utilities', type: 'Expense', icon: 'FileText', color: '#F6C85F', amount: 0, percentage: 0, isCustom: false },
+  { id: '5', name: 'Entertainment', type: 'Expense', icon: 'Gamepad', color: '#FF6EA7', amount: 0, percentage: 0, isCustom: false },
+  { id: '6', name: 'Health & Fitness', type: 'Expense', icon: 'Heart', color: '#FF8A48', amount: 0, percentage: 0, isCustom: false },
+  { id: '7', name: 'Others', type: 'Expense', icon: 'MoreHorizontal', color: '#A5B4B8', amount: 0, percentage: 0, isCustom: false },
+  { id: '8', name: 'Custom Category', type: 'Expense', icon: 'Utensils', color: '#20D6C7', amount: 0, percentage: 0, isCustom: true },
   // 4 Income Categories
-  { id: '9', name: 'Salary', type: 'Income', icon: 'Briefcase', color: '#35E9A0', amount: 70000, percentage: 82, isCustom: false },
-  { id: '10', name: 'Freelance', type: 'Income', icon: 'Laptop', color: '#B18AFF', amount: 8500, percentage: 10, isCustom: false },
-  { id: '11', name: 'Investment', type: 'Income', icon: 'TrendingUp', color: '#F6C85F', amount: 4200, percentage: 5, isCustom: false },
-  { id: '12', name: 'Side Income', type: 'Income', icon: 'Coins', color: '#FF8A48', amount: 2300, percentage: 3, isCustom: false }
+  { id: '9', name: 'Salary', type: 'Income', icon: 'Briefcase', color: '#35E9A0', amount: 0, percentage: 0, isCustom: false },
+  { id: '10', name: 'Freelance', type: 'Income', icon: 'Laptop', color: '#B18AFF', amount: 0, percentage: 0, isCustom: false },
+  { id: '11', name: 'Investment', type: 'Income', icon: 'TrendingUp', color: '#F6C85F', amount: 0, percentage: 0, isCustom: false },
+  { id: '12', name: 'Side Income', type: 'Income', icon: 'Coins', color: '#FF8A48', amount: 0, percentage: 0, isCustom: false }
 ];
 
 export function Categories() {
@@ -160,8 +160,8 @@ export function Categories() {
   // Enriched Categories with live amounts and percentages
   const enrichedCategories = useMemo(() => {
     const rawList = backendCategories.length > 0 ? backendCategories : INITIAL_CATEGORIES;
-    const totalExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0) || 42350;
-    const totalInc = filteredIncomes.reduce((s, i) => s + (Number(i.amount) || 0), 0) || 85000;
+    const totalExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+    const totalInc = filteredIncomes.reduce((s, i) => s + (Number(i.amount) || 0), 0);
 
     // Map amounts from filtered records
     const expMap = {};
@@ -177,7 +177,7 @@ export function Categories() {
     });
 
     return rawList.map((cat) => {
-      let amount = cat.amount;
+      let amount = 0;
       if (cat.type === 'Expense') {
         if (expMap[cat.name] !== undefined) amount = expMap[cat.name];
         else if (cat.name === 'Bills & Utilities' && expMap['Bills']) amount = expMap['Bills'];
@@ -188,12 +188,12 @@ export function Categories() {
       }
 
       const total = cat.type === 'Expense' ? totalExp : totalInc;
-      const pct = total > 0 ? Math.round(((amount || 0) / total) * 100) : cat.percentage || 0;
+      const pct = total > 0 ? Math.round(((amount || 0) / total) * 100) : 0;
 
       return {
         ...cat,
-        amount: amount || cat.amount || 0,
-        percentage: pct || cat.percentage || 0
+        amount: amount || 0,
+        percentage: pct
       };
     });
   }, [backendCategories, filteredExpenses, filteredIncomes]);
@@ -203,15 +203,15 @@ export function Categories() {
     const totalCount = enrichedCategories.length;
     const expenseCount = enrichedCategories.filter((c) => c.type === 'Expense').length;
     const incomeCount = enrichedCategories.filter((c) => c.type === 'Income').length;
-    const customCount = enrichedCategories.filter((c) => c.isCustom).length || 3;
+    const customCount = enrichedCategories.filter((c) => c.isCustom).length;
 
-    const totalExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0) || 42350;
+    const totalExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
     // Find most used expense category
-    const expenseCats = enrichedCategories.filter((c) => c.type === 'Expense');
-    let topCat = expenseCats[0] || { name: 'Food & Dining', percentage: 28 };
+    const expenseCats = enrichedCategories.filter((c) => c.type === 'Expense' && (c.amount || 0) > 0);
+    let topCat = null;
     expenseCats.forEach((c) => {
-      if ((c.amount || 0) > (topCat.amount || 0)) topCat = c;
+      if (!topCat || (c.amount || 0) > (topCat.amount || 0)) topCat = c;
     });
 
     return {
@@ -220,8 +220,8 @@ export function Categories() {
       incomeCount,
       customCount,
       totalExpenses: totalExp,
-      mostUsedCategory: topCat?.name || 'Food & Dining',
-      mostUsedPercentage: topCat?.percentage || 28
+      mostUsedCategory: topCat ? topCat.name : 'None',
+      mostUsedPercentage: topCat ? topCat.percentage : 0
     };
   }, [enrichedCategories, filteredExpenses]);
 

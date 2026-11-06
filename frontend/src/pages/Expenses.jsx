@@ -145,42 +145,15 @@ export function Expenses() {
       };
     }
 
-    if (selectedPeriod === 'Last Month') {
-      return {
-        totalExpenses: 38900,
-        totalTransactions: 24,
-        averageExpense: 1620,
-        highestExpense: 4200,
-        highestMerchant: 'Amazon',
-        highestDate: 'Sep 22, 2026',
-        expenseChange: '+8.4%',
-        transactionsChange: '+2'
-      };
-    }
-
-    if (selectedPeriod === 'This Year') {
-      return {
-        totalExpenses: 318500,
-        totalTransactions: 186,
-        averageExpense: 1712,
-        highestExpense: 12500,
-        highestMerchant: 'Flight Booking',
-        highestDate: 'Jun 14, 2026',
-        expenseChange: '+15.2%',
-        transactionsChange: '+28'
-      };
-    }
-
-    // Default 'This Month' reference metrics
     return {
-      totalExpenses: 42350,
-      totalTransactions: 28,
-      averageExpense: 1512,
-      highestExpense: 4850,
-      highestMerchant: 'Amazon',
-      highestDate: 'Oct 18, 2026',
-      expenseChange: '+12.5%',
-      transactionsChange: '+4'
+      totalExpenses: 0,
+      totalTransactions: 0,
+      averageExpense: 0,
+      highestExpense: 0,
+      highestMerchant: 'None',
+      highestDate: '-',
+      expenseChange: '0%',
+      transactionsChange: '0'
     };
   }, [filteredExpenses, selectedPeriod]);
 
