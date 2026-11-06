@@ -12,19 +12,19 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_TREND_DATA = [
-  { month: 'Jan', income: 24000, expenses: 14000, balance: 10000 },
-  { month: 'Feb', income: 30000, expenses: 16000, balance: 14000 },
-  { month: 'Mar', income: 27000, expenses: 18000, balance: 9000 },
-  { month: 'Apr', income: 32000, expenses: 20000, balance: 12000 },
-  { month: 'May', income: 34000, expenses: 19000, balance: 15000 },
-  { month: 'Jun', income: 38000, expenses: 22000, balance: 16000 },
-  { month: 'Jul', income: 36000, expenses: 21000, balance: 15000 },
-  { month: 'Aug', income: 45000, expenses: 24000, balance: 21000 },
-  { month: 'Sep', income: 39000, expenses: 23000, balance: 16000 },
-  { month: 'Oct', income: 44000, expenses: 22000, balance: 22000 },
-  { month: 'Nov', income: 38000, expenses: 21000, balance: 17000 },
-  { month: 'Dec', income: 32000, expenses: 20000, balance: 12000 }
+const ZERO_TREND_DATA = [
+  { month: 'Jan', income: 0, expenses: 0, balance: 0 },
+  { month: 'Feb', income: 0, expenses: 0, balance: 0 },
+  { month: 'Mar', income: 0, expenses: 0, balance: 0 },
+  { month: 'Apr', income: 0, expenses: 0, balance: 0 },
+  { month: 'May', income: 0, expenses: 0, balance: 0 },
+  { month: 'Jun', income: 0, expenses: 0, balance: 0 },
+  { month: 'Jul', income: 0, expenses: 0, balance: 0 },
+  { month: 'Aug', income: 0, expenses: 0, balance: 0 },
+  { month: 'Sep', income: 0, expenses: 0, balance: 0 },
+  { month: 'Oct', income: 0, expenses: 0, balance: 0 },
+  { month: 'Nov', income: 0, expenses: 0, balance: 0 },
+  { month: 'Dec', income: 0, expenses: 0, balance: 0 }
 ];
 
 export default function IncomeExpenseTrendChart({
@@ -45,7 +45,7 @@ export default function IncomeExpenseTrendChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = data && data.length > 0 ? data : DEFAULT_TREND_DATA;
+  const chartData = data && data.length > 0 ? data : ZERO_TREND_DATA;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

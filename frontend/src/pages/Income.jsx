@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import api from '../services/api';
@@ -64,149 +64,167 @@ export function Income() {
     fetchIncomeData();
   }, [fetchIncomeData]);
 
-  // Derived metrics from real data or reference fallbacks
-  const hasLiveIncomes = incomes.length > 0;
+  // Filter incomes according to selected period
+  const filteredIncomes = useMemo(() => {
+    if (!incomes || incomes.length === 0) return [];
+    const now = new Date();
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
 
-  const getMetrics = () => {
-    if (hasLiveIncomes) {
-      const total = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-      const entries = incomes.length;
-      const avg = entries > 0 ? Math.round(total / entries) : 0;
+    return incomes.filter((item) => {
+      if (!item.date) return true;
+      const d = new Date(item.date);
+      if (isNaN(d.getTime())) return true;
+      const itemYear = d.getFullYear();
+      const itemMonth = d.getMonth();
 
-      // Find highest entry
-      let highest = incomes[0];
-      incomes.forEach((item) => {
-        if (Number(item.amount) > Number(highest.amount)) {
-          highest = item;
-        }
-      });
+      if (selectedPeriod === 'This Month') {
+        return itemYear === nowYear && itemMonth === nowMonth;
+      }
+      if (selectedPeriod === 'Last Month') {
+        const lastMonth = nowMonth === 0 ? 11 : nowMonth - 1;
+        const lastMonthYear = nowMonth === 0 ? nowYear - 1 : nowYear;
+        return itemYear === lastMonthYear && itemMonth === lastMonth;
+      }
+      if (selectedPeriod === 'This Year') {
+        return itemYear === nowYear;
+      }
+      return true;
+    });
+  }, [incomes, selectedPeriod]);
 
-      return {
-        totalIncome: total,
-        totalEntries: entries,
-        averageIncome: avg,
-        highestIncome: highest?.amount || 0,
-        highestSource: highest?.source || highest?.name || 'Income',
-        highestDate: highest?.date ? formatDate(highest.date) : 'Recently',
-        incomeChange: '+8.2%'
-      };
-    }
+  // Derived metrics purely from real database records (0 defaults)
+  const metrics = useMemo(() => {
+    const list = filteredIncomes;
+    const total = list.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const entries = list.length;
+    const avg = entries > 0 ? Math.round(total / entries) : 0;
 
-    if (selectedPeriod === 'Last Month') {
-      return {
-        totalIncome: 78000,
-        totalEntries: 4,
-        averageIncome: 19500,
-        highestIncome: 65000,
-        highestSource: 'Salary',
-        highestDate: 'Sep 19, 2026',
-        incomeChange: '+6.5%'
-      };
-    }
+    let highest = null;
+    list.forEach((item) => {
+      if (!highest || Number(item.amount) > Number(highest.amount)) {
+        highest = item;
+      }
+    });
 
-    if (selectedPeriod === 'This Year') {
-      return {
-        totalIncome: 640000,
-        totalEntries: 28,
-        averageIncome: 22857,
-        highestIncome: 75000,
-        highestSource: 'Salary',
-        highestDate: 'Jul 22, 2026',
-        incomeChange: '+18.4%'
-      };
-    }
-
-    // Default 'This Month' reference metrics
     return {
-      totalIncome: 85000,
-      totalEntries: 4,
-      averageIncome: 21250,
-      highestIncome: 70000,
-      highestSource: 'Salary',
-      highestDate: 'Oct 19, 2026',
-      incomeChange: '+8.2%'
+      totalIncome: total,
+      totalEntries: entries,
+      averageIncome: avg,
+      highestIncome: highest ? Number(highest.amount) || 0 : 0,
+      highestSource: highest ? (highest.source || highest.name || 'Income') : 'None',
+      highestDate: highest?.date ? formatDate(highest.date) : '-',
+      incomeChange: '+0.0%'
     };
-  };
+  }, [filteredIncomes]);
 
-  const metrics = getMetrics();
+  // Monthly Trend Data for This Year (12 months)
+  const monthlyTrendData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const nowYear = new Date().getFullYear();
+    const totals = Array(12).fill(0);
+
+    incomes.forEach((item) => {
+      if (item.date) {
+        const d = new Date(item.date);
+        if (!isNaN(d.getTime()) && d.getFullYear() === nowYear) {
+          totals[d.getMonth()] += Number(item.amount || 0);
+        }
+      }
+    });
+
+    return months.map((month, idx) => ({
+      month,
+      amount: totals[idx]
+    }));
+  }, [incomes]);
 
   // Category breakdown for Category Donut Chart
-  const getCategoryData = () => {
-    if (hasLiveIncomes) {
-      const catMap = {};
-      incomes.forEach((item) => {
-        const cat = item.source || item.name || item.category || 'Other';
-        catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
-      });
+  const categoryData = useMemo(() => {
+    if (filteredIncomes.length === 0) return [];
 
-      const colors = {
-        Salary: '#35E9A0',
-        Freelance: '#B18AFF',
-        Investment: '#F6C85F',
-        Business: '#FF667A',
-        Other: '#20D6C7'
-      };
+    const catMap = {};
+    filteredIncomes.forEach((item) => {
+      const cat = item.source || item.name || item.category || 'Other';
+      catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
+    });
 
-      const total = Object.values(catMap).reduce((a, b) => a + b, 0);
+    const colors = {
+      Salary: '#35E9A0',
+      Freelance: '#B18AFF',
+      Investment: '#F6C85F',
+      Business: '#FF667A',
+      Other: '#20D6C7'
+    };
 
-      return Object.keys(catMap).map((key) => ({
-        name: key === 'Business' ? 'Side Income' : key,
-        value: catMap[key],
-        percentage: total > 0 ? Math.round((catMap[key] / total) * 100) : 0,
-        color: colors[key] || '#35E9A0'
-      }));
-    }
-    return null; // Will use DEFAULT_INCOME_CATEGORIES in component
-  };
+    const total = Object.values(catMap).reduce((a, b) => a + b, 0);
 
-  const getDynamicInsights = () => {
-    if (hasLiveIncomes) {
-      const total = incomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-      const catMap = {};
-      incomes.forEach((item) => {
-        const cat = item.source || item.name || item.category || 'Other';
-        catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
-      });
+    return Object.keys(catMap).map((key) => ({
+      name: key === 'Business' ? 'Side Income' : key,
+      value: catMap[key],
+      percentage: total > 0 ? Math.round((catMap[key] / total) * 100) : 0,
+      color: colors[key] || '#35E9A0'
+    }));
+  }, [filteredIncomes]);
 
-      let topSource = 'Salary';
-      let topVal = 0;
-      Object.keys(catMap).forEach((k) => {
-        if (catMap[k] > topVal) {
-          topVal = catMap[k];
-          topSource = k === 'Business' ? 'Side Income' : k;
-        }
-      });
-      const topPct = total > 0 ? Math.round((topVal / total) * 100) : 100;
-
+  const dynamicInsights = useMemo(() => {
+    if (incomes.length === 0) {
       return [
         {
-          id: 'insight-1',
-          title: 'Income increased by 8.2%',
-          description: 'Your income is higher than last month. Keep up the good work!',
+          id: 'insight-empty',
+          title: 'No income recorded yet',
+          description: 'Add your salary, freelance payments, or other earnings to view income insights.',
           iconBg: 'bg-[#123D32]',
           iconColor: 'text-[#35E9A0]',
           hoverBorder: 'hover:border-[#35E9A0]/30'
-        },
-        {
-          id: 'insight-2',
-          title: `${topSource} is your main source`,
-          description: `${topPct}% of your income comes from ${topSource.toLowerCase()}. Consider diversifying your income.`,
-          iconBg: 'bg-[#182C3D]',
-          iconColor: 'text-[#45B7F5]',
-          hoverBorder: 'hover:border-[#45B7F5]/30'
-        },
-        {
-          id: 'insight-3',
-          title: 'Opportunity',
-          description: 'You can explore freelance or side income to increase your earnings.',
-          iconBg: 'bg-[#382F1B]',
-          iconColor: 'text-[#F6C85F]',
-          hoverBorder: 'hover:border-[#F6C85F]/30'
         }
       ];
     }
-    return null;
-  };
+
+    const total = filteredIncomes.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+    const catMap = {};
+    filteredIncomes.forEach((item) => {
+      const cat = item.source || item.name || item.category || 'Other';
+      catMap[cat] = (catMap[cat] || 0) + Number(item.amount || 0);
+    });
+
+    let topSource = 'Income';
+    let topVal = 0;
+    Object.keys(catMap).forEach((k) => {
+      if (catMap[k] > topVal) {
+        topVal = catMap[k];
+        topSource = k === 'Business' ? 'Side Income' : k;
+      }
+    });
+    const topPct = total > 0 ? Math.round((topVal / total) * 100) : 0;
+
+    return [
+      {
+        id: 'insight-1',
+        title: total > 0 ? 'Income Active' : 'No income this period',
+        description: total > 0 ? `You have recorded ${filteredIncomes.length} income entries for this period.` : 'No earnings recorded for this specific time period.',
+        iconBg: 'bg-[#123D32]',
+        iconColor: 'text-[#35E9A0]',
+        hoverBorder: 'hover:border-[#35E9A0]/30'
+      },
+      {
+        id: 'insight-2',
+        title: `${topSource} is your main source`,
+        description: topVal > 0 ? `${topPct}% of your income comes from ${topSource.toLowerCase()}.` : 'Record more sources to see diversification.',
+        iconBg: 'bg-[#182C3D]',
+        iconColor: 'text-[#45B7F5]',
+        hoverBorder: 'hover:border-[#45B7F5]/30'
+      },
+      {
+        id: 'insight-3',
+        title: 'Income Streams',
+        description: 'Track different income sources like salary, investments, and side projects in real time.',
+        iconBg: 'bg-[#382F1B]',
+        iconColor: 'text-[#F6C85F]',
+        hoverBorder: 'hover:border-[#F6C85F]/30'
+      }
+    ];
+  }, [incomes, filteredIncomes]);
 
   return (
     <div className="min-h-screen bg-[#0B1114] text-[#F1F5F4] flex">
@@ -304,6 +322,7 @@ export function Income() {
             {/* Left 60%: Monthly Income Trend */}
             <div className="lg:col-span-7 xl:col-span-7 min-w-0">
               <MonthlyIncomeChart
+                data={monthlyTrendData}
                 selectedPeriod="This Year"
               />
             </div>
@@ -321,7 +340,7 @@ export function Income() {
             {/* Left 60%: Recent Income Table */}
             <div className="lg:col-span-7 xl:col-span-7 min-w-0">
               <RecentIncomeTable
-                incomes={hasLiveIncomes ? incomes : null}
+                incomes={filteredIncomes}
                 onEdit={(row) => setEditingIncome(row)}
                 onRefresh={fetchIncomeData}
                 searchQuery={searchQuery}
@@ -332,7 +351,7 @@ export function Income() {
             {/* Right 40%: Income by Category Donut Chart */}
             <div className="lg:col-span-5 xl:col-span-5 min-w-0">
               <IncomeCategoryChart
-                categories={getCategoryData()}
+                categories={categoryData}
                 totalIncome={metrics.totalIncome}
                 selectedPeriod={selectedPeriod}
                 onPeriodChange={setSelectedPeriod}
@@ -342,7 +361,7 @@ export function Income() {
 
           {/* 6. Bottom Row: Income Insights (Full-Width Card) */}
           <div className="pb-6">
-            <IncomeInsights insights={getDynamicInsights()} />
+            <IncomeInsights insights={dynamicInsights} />
           </div>
         </main>
       </div>

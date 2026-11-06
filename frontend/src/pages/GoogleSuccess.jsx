@@ -29,9 +29,10 @@ const GoogleSuccess = () => {
 
             const token = searchParams.get('token');
             const email = searchParams.get('email');
+            const userParam = searchParams.get('user');
 
-            if (!token || !email) {
-                console.error("Missing token or email in Google callback params");
+            if (!token || (!email && !userParam)) {
+                console.error("Missing token or user credentials in Google callback params");
                 setIsError(true);
                 setStatusText("Missing authentication parameters. Redirecting to sign in...");
                 setTimeout(() => {
@@ -41,24 +42,46 @@ const GoogleSuccess = () => {
             }
 
             try {
-                const response = await api.post(
-                    '/user/email',
-                    { email: email.toLowerCase().trim() },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "x-access-token": token,
-                        },
-                    }
-                );
+                let userData = null;
 
-                const userData = response.data?.data || response.data?.user || response.data;
+                // 1. Instant hydration: parse user payload passed securely from callback
+                if (userParam) {
+                    try {
+                        const decodedJson = atob(userParam);
+                        userData = JSON.parse(decodedJson);
+                    } catch (parseErr) {
+                        console.warn("Could not parse user param, falling back to API fetch:", parseErr);
+                    }
+                }
+
+                // 2. Fallback: Query backend API if userData was not provided in callback query
+                if (!userData || (!userData._id && !userData.id)) {
+                    // Seed token in localStorage so Axios interceptor includes it automatically
+                    localStorage.setItem("token", token);
+
+                    const response = await api.post(
+                        '/user/email',
+                        { email: (email || "").toLowerCase().trim() },
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                "x-access-token": token,
+                            },
+                        }
+                    );
+
+                    userData = response.data?.data || response.data?.user || response.data;
+                }
 
                 if (!userData || (!userData._id && !userData.id)) {
                     throw new Error("User details not found in API response");
                 }
 
+                // Store both user and token in session state
                 login(userData, token);
+                setStatusText("Welcome! Redirecting to dashboard...");
+
+                // Navigate immediately to authenticated dashboard
                 navigate("/dashboard", { replace: true });
             } catch (error) {
                 console.error("Google login failed:", error);

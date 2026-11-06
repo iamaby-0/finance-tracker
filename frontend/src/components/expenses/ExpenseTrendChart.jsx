@@ -84,10 +84,8 @@ export default function ExpenseTrendChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData =
-    data && Array.isArray(data) && data.length > 0
-      ? data
-      : DEFAULT_EXPENSE_TRENDS[period] || DEFAULT_EXPENSE_TRENDS['This Year'];
+  const defaultMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => ({ month: m, amount: 0 }));
+  const chartData = data && Array.isArray(data) && data.length > 0 ? data : defaultMonths;
 
   const handleSelectPeriod = (p) => {
     setPeriod(p);

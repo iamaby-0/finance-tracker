@@ -8,82 +8,10 @@ import {
   Dumbbell,
   ArrowUpRight,
   ArrowDownLeft,
-  DollarSign
+  DollarSign,
+  Plus
 } from 'lucide-react';
 import { formatCurrency, formatDate, compareLatestFirst } from '../../utils/formatters';
-
-const DEFAULT_TRANSACTIONS = [
-  {
-    id: 'tx-1',
-    date: '2026-10-20',
-    description: 'Zomato',
-    category: 'Food & Dining',
-    type: 'expense',
-    amount: 480,
-    icon: Utensils,
-    iconBg: 'bg-[#3D1A22]',
-    iconColor: 'text-[#FF667A]',
-    badgeBg: 'bg-[#3D1A22]/40',
-    badgeBorder: 'border-[#FF667A]/30',
-    badgeText: 'text-[#FF667A]'
-  },
-  {
-    id: 'tx-2',
-    date: '2026-10-19',
-    description: 'Salary',
-    category: 'Income',
-    type: 'income',
-    amount: 70000,
-    icon: Briefcase,
-    iconBg: 'bg-[#123D32]',
-    iconColor: 'text-[#35E9A0]',
-    badgeBg: 'bg-[#123D32]/50',
-    badgeBorder: 'border-[#35E9A0]/30',
-    badgeText: 'text-[#35E9A0]'
-  },
-  {
-    id: 'tx-3',
-    date: '2026-10-18',
-    description: 'Amazon',
-    category: 'Shopping',
-    type: 'expense',
-    amount: 2199,
-    icon: ShoppingBag,
-    iconBg: 'bg-[#382818]',
-    iconColor: 'text-[#FF8A48]',
-    badgeBg: 'bg-[#382818]/40',
-    badgeBorder: 'border-[#FF8A48]/30',
-    badgeText: 'text-[#FF8A48]'
-  },
-  {
-    id: 'tx-4',
-    date: '2026-10-17',
-    description: 'Electricity Bill',
-    category: 'Bills & Utilities',
-    type: 'expense',
-    amount: 1230,
-    icon: Zap,
-    iconBg: 'bg-[#163038]',
-    iconColor: 'text-[#20D6C7]',
-    badgeBg: 'bg-[#163038]/40',
-    badgeBorder: 'border-[#20D6C7]/30',
-    badgeText: 'text-[#20D6C7]'
-  },
-  {
-    id: 'tx-5',
-    date: '2026-10-16',
-    description: 'Gym Membership',
-    category: 'Health & Fitness',
-    type: 'expense',
-    amount: 1500,
-    icon: Dumbbell,
-    iconBg: 'bg-[#381B30]',
-    iconColor: 'text-[#FF6EA7]',
-    badgeBg: 'bg-[#381B30]/40',
-    badgeBorder: 'border-[#FF6EA7]/30',
-    badgeText: 'text-[#FF6EA7]'
-  }
-];
 
 // Helper to determine styling for live backend transactions
 const getCategoryStyle = (category, type) => {
@@ -98,7 +26,8 @@ const getCategoryStyle = (category, type) => {
       badgeText: 'text-[#35E9A0]'
     };
   }
-  if (cat.includes('food') || cat.includes('dining') || cat.includes('restaurant')) {
+
+  if (cat.includes('food') || cat.includes('dining')) {
     return {
       icon: Utensils,
       iconBg: 'bg-[#3D1A22]',
@@ -108,7 +37,8 @@ const getCategoryStyle = (category, type) => {
       badgeText: 'text-[#FF667A]'
     };
   }
-  if (cat.includes('shop') || cat.includes('amazon') || cat.includes('store')) {
+
+  if (cat.includes('shopping')) {
     return {
       icon: ShoppingBag,
       iconBg: 'bg-[#382818]',
@@ -118,7 +48,8 @@ const getCategoryStyle = (category, type) => {
       badgeText: 'text-[#FF8A48]'
     };
   }
-  if (cat.includes('bill') || cat.includes('util') || cat.includes('elect')) {
+
+  if (cat.includes('bill') || cat.includes('utility')) {
     return {
       icon: Zap,
       iconBg: 'bg-[#163038]',
@@ -128,16 +59,7 @@ const getCategoryStyle = (category, type) => {
       badgeText: 'text-[#20D6C7]'
     };
   }
-  if (cat.includes('health') || cat.includes('gym') || cat.includes('fit')) {
-    return {
-      icon: Dumbbell,
-      iconBg: 'bg-[#381B30]',
-      iconColor: 'text-[#FF6EA7]',
-      badgeBg: 'bg-[#381B30]/40',
-      badgeBorder: 'border-[#FF6EA7]/30',
-      badgeText: 'text-[#FF6EA7]'
-    };
-  }
+
   return {
     icon: DollarSign,
     iconBg: 'bg-[#18272C]',
@@ -149,7 +71,7 @@ const getCategoryStyle = (category, type) => {
 };
 
 export default function RecentTransactions({
-  transactions = null,
+  transactions = [],
   onViewAll,
   onAddTransaction,
   searchQuery = ''
@@ -166,7 +88,7 @@ export default function RecentTransactions({
 
   let displayList = [];
 
-  if (transactions && transactions.length > 0) {
+  if (Array.isArray(transactions) && transactions.length > 0) {
     const sorted = [...transactions].sort(compareLatestFirst);
     displayList = sorted.slice(0, 5).map((tx, idx) => {
       const isIncome = tx.type === 'income' || Boolean(tx.source);
@@ -174,8 +96,8 @@ export default function RecentTransactions({
       return {
         id: tx._id || `live-tx-${idx}`,
         date: tx.date || new Date().toISOString(),
-        name: tx.source || tx.description || 'Income',
-        description: tx.description || tx.source || 'Transaction',
+        name: tx.source || tx.description || (isIncome ? 'Income' : 'Expense'),
+        description: tx.description || tx.source || (isIncome ? 'Income' : 'Expense'),
         category: tx.category || tx.source || (isIncome ? 'Income' : 'General'),
         source: tx.source || (isIncome ? 'Salary' : undefined),
         type: isIncome ? 'income' : 'expense',
@@ -183,8 +105,6 @@ export default function RecentTransactions({
         ...style
       };
     });
-  } else {
-    displayList = DEFAULT_TRANSACTIONS;
   }
 
   // Filter with search query if any
@@ -192,9 +112,9 @@ export default function RecentTransactions({
     const q = searchQuery.toLowerCase();
     displayList = displayList.filter(
       (tx) =>
-        tx.description.toLowerCase().includes(q) ||
-        tx.category.toLowerCase().includes(q) ||
-        tx.date.toLowerCase().includes(q)
+        (tx.description || '').toLowerCase().includes(q) ||
+        (tx.category || '').toLowerCase().includes(q) ||
+        (tx.date || '').toLowerCase().includes(q)
     );
   }
 
@@ -214,25 +134,36 @@ export default function RecentTransactions({
       </div>
 
       {/* Table Container */}
-      <div className="overflow-x-auto scrollbar-none">
-        <table className="w-full min-w-[440px] text-left text-xs">
-          <thead>
-            <tr className="text-[#71848A] border-b border-[#24363B]/60 pb-2">
-              <th className="font-medium pb-2.5 pl-1 w-28">Date</th>
-              <th className="font-medium pb-2.5">Description</th>
-              <th className="font-medium pb-2.5">Category</th>
-              <th className="font-medium pb-2.5 text-right pr-1">Amount</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#24363B]/40">
-            {displayList.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="py-6 text-center text-[#71848A]">
-                  No matching transactions found.
-                </td>
+      {displayList.length === 0 ? (
+        <div className="py-10 flex flex-col items-center justify-center text-center">
+          <div className="w-10 h-10 rounded-xl bg-[#18272C] border border-[#24363B] flex items-center justify-center text-[#71848A] mb-2.5">
+            <ArrowDownLeft className="w-5 h-5 text-[#35E9A0]" />
+          </div>
+          <p className="text-sm font-semibold text-[#F1F5F4]">No transactions recorded</p>
+          <p className="text-xs text-[#71848A] mt-1 mb-3">Add an expense or income to see it here.</p>
+          {onAddTransaction && (
+            <button
+              onClick={onAddTransaction}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#35E9A0] text-[#0B1114] text-xs font-semibold hover:bg-[#4FFFB0] transition cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              <span>Add Transaction</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="overflow-x-auto scrollbar-none">
+          <table className="w-full min-w-[440px] text-left text-xs">
+            <thead>
+              <tr className="text-[#71848A] border-b border-[#24363B]/60 pb-2">
+                <th className="font-medium pb-2.5 pl-1 w-28">Date</th>
+                <th className="font-medium pb-2.5">Description</th>
+                <th className="font-medium pb-2.5">Category</th>
+                <th className="font-medium pb-2.5 text-right pr-1">Amount</th>
               </tr>
-            ) : (
-              displayList.map((tx) => {
+            </thead>
+            <tbody className="divide-y divide-[#24363B]/40">
+              {displayList.map((tx) => {
                 const IconComponent = tx.icon;
                 const isIncome = tx.type === 'income';
 
@@ -250,40 +181,49 @@ export default function RecentTransactions({
                     <td className="py-2.5 pr-2">
                       <div className="flex items-center gap-2.5">
                         <div
-                          className={`w-7 h-7 rounded-full ${tx.iconBg} ${tx.iconColor} flex items-center justify-center shrink-0 border border-white/5 shadow-xs`}
+                          className={`w-7 h-7 rounded-lg ${tx.iconBg} ${tx.iconColor} flex items-center justify-center shrink-0 shadow-xs`}
                         >
                           <IconComponent className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-medium text-[#F1F5F4] truncate max-w-[140px] sm:max-w-[180px] text-[12px]">
+                        <span className="font-medium text-[#F1F5F4] truncate max-w-[150px] sm:max-w-[190px]">
                           {tx.description}
                         </span>
                       </div>
                     </td>
 
-                    {/* Category Badge */}
-                    <td className="py-2.5 pr-2 whitespace-nowrap">
+                    {/* Category */}
+                    <td className="py-2.5">
                       <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${tx.badgeBg} ${tx.badgeBorder} ${tx.badgeText}`}
+                        className={`inline-flex px-2 py-0.5 rounded-md text-[11px] font-medium border ${tx.badgeBg} ${tx.badgeBorder} ${tx.badgeText} whitespace-nowrap`}
                       >
-                        <IconComponent className="w-3 h-3" />
-                        <span>{tx.category}</span>
+                        {tx.category}
                       </span>
                     </td>
 
                     {/* Amount */}
-                    <td className="py-2.5 pr-1 text-right whitespace-nowrap font-semibold text-[12px]">
-                      <span className={isIncome ? 'text-[#35E9A0]' : 'text-[#FF667A]'}>
-                        {isIncome ? '+ ' : '- '}
-                        {formatCurrency(tx.amount)}
+                    <td className="py-2.5 pr-1 text-right whitespace-nowrap">
+                      <span
+                        className={`font-bold tracking-tight text-xs flex items-center justify-end gap-1 ${
+                          isIncome ? 'text-[#35E9A0]' : 'text-[#FF667A]'
+                        }`}
+                      >
+                        {isIncome ? (
+                          <ArrowDownLeft className="w-3 h-3 text-[#35E9A0]" />
+                        ) : (
+                          <ArrowUpRight className="w-3 h-3 text-[#FF667A]" />
+                        )}
+                        <span>
+                          {isIncome ? '+' : '-'} {formatCurrency(tx.amount)}
+                        </span>
                       </span>
                     </td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

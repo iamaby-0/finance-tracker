@@ -6,51 +6,12 @@ import {
   Cell,
   Tooltip
 } from 'recharts';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, PieChart as PieIcon } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const PERIOD_DATA = {
-  'This Month': {
-    total: 42350,
-    categories: [
-      { name: 'Food & Dining', value: 11850, percentage: 28, color: '#FF667A' },
-      { name: 'Shopping', value: 7620, percentage: 18, color: '#FF8A48' },
-      { name: 'Transport', value: 5930, percentage: 14, color: '#F6C85F' },
-      { name: 'Bills & Utilities', value: 5120, percentage: 12, color: '#20D6C7' },
-      { name: 'Entertainment', value: 4230, percentage: 10, color: '#45B7F5' },
-      { name: 'Health & Fitness', value: 3400, percentage: 8, color: '#FF6EA7' },
-      { name: 'Others', value: 4200, percentage: 10, color: '#B18AFF' },
-    ]
-  },
-  'Last Month': {
-    total: 38900,
-    categories: [
-      { name: 'Food & Dining', value: 10114, percentage: 26, color: '#FF667A' },
-      { name: 'Shopping', value: 6224, percentage: 16, color: '#FF8A48' },
-      { name: 'Transport', value: 5835, percentage: 15, color: '#F6C85F' },
-      { name: 'Bills & Utilities', value: 5446, percentage: 14, color: '#20D6C7' },
-      { name: 'Entertainment', value: 4279, percentage: 11, color: '#45B7F5' },
-      { name: 'Health & Fitness', value: 3501, percentage: 9, color: '#FF6EA7' },
-      { name: 'Others', value: 3501, percentage: 9, color: '#B18AFF' },
-    ]
-  },
-  'This Year': {
-    total: 318500,
-    categories: [
-      { name: 'Food & Dining', value: 86000, percentage: 27, color: '#FF667A' },
-      { name: 'Shopping', value: 63700, percentage: 20, color: '#FF8A48' },
-      { name: 'Transport', value: 44590, percentage: 14, color: '#F6C85F' },
-      { name: 'Bills & Utilities', value: 41405, percentage: 13, color: '#20D6C7' },
-      { name: 'Entertainment', value: 31850, percentage: 10, color: '#45B7F5' },
-      { name: 'Health & Fitness', value: 25480, percentage: 8, color: '#FF6EA7' },
-      { name: 'Others', value: 25475, percentage: 8, color: '#B18AFF' },
-    ]
-  }
-};
-
 export default function SpendingCategoryChart({
-  categories = null,
-  totalSpent = null,
+  categories = [],
+  totalSpent = 0,
   selectedPeriod: initialPeriod = 'This Month',
   onPeriodChange
 }) {
@@ -78,15 +39,8 @@ export default function SpendingCategoryChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Use period-specific data, or live data if supplied for 'This Month'
-  const activeDataset = PERIOD_DATA[period] || PERIOD_DATA['This Month'];
-  const data = (period === 'This Month' && categories && categories.length > 0)
-    ? categories
-    : activeDataset.categories;
-
-  const currentTotal = (period === 'This Month' && totalSpent)
-    ? totalSpent
-    : activeDataset.total;
+  const data = Array.isArray(categories) ? categories : [];
+  const currentTotal = totalSpent !== undefined && totalSpent !== null ? totalSpent : data.reduce((s, i) => s + (i.value || 0), 0);
 
   const handleSelectPeriod = (newPeriod) => {
     setPeriod(newPeriod);
@@ -128,27 +82,31 @@ export default function SpendingCategoryChart({
     <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-3.5 sm:p-4.5 h-full flex flex-col justify-between overflow-hidden">
       {/* Chart Header */}
       <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight">
-          Spending by Category
-        </h3>
+        <div>
+          <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight">
+            Spending by Category
+          </h3>
+          <p className="text-[11px] text-[#71848A] mt-0.5">
+            Total Spent:{' '}
+            <span className="font-semibold text-[#F1F5F4]">
+              {formatCurrency(currentTotal)}
+            </span>
+          </p>
+        </div>
 
-        {/* Period Selector Dropdown */}
+        {/* Period Selector */}
         <div className="relative" ref={dropdownRef}>
           <button
             type="button"
-            onClick={() => setPeriodDropdownOpen((prev) => !prev)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#18272C] border border-[#24363B] text-xs text-[#F1F5F4] hover:border-[#35E9A0]/50 transition cursor-pointer"
+            onClick={() => setPeriodDropdownOpen(!periodDropdownOpen)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#18272C] border border-[#24363B] text-[11px] font-medium text-[#A5B4B8] hover:border-[#35E9A0]/50 transition cursor-pointer"
           >
             <span>{period}</span>
-            <ChevronDown
-              className={`w-3.5 h-3.5 text-[#71848A] transition-transform duration-200 ${
-                periodDropdownOpen ? 'rotate-180 text-[#35E9A0]' : ''
-              }`}
-            />
+            <ChevronDown className="w-3 h-3 text-[#71848A]" />
           </button>
 
           {periodDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-32 bg-[#18272C] border border-[#24363B] rounded-xl shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 mt-1 w-32 bg-[#18272C] border border-[#24363B] rounded-xl shadow-xl py-1 z-50">
               {periods.map((p) => (
                 <button
                   key={p}
@@ -156,7 +114,7 @@ export default function SpendingCategoryChart({
                   onClick={() => handleSelectPeriod(p)}
                   className={`w-full px-3 py-1.5 text-xs text-left transition cursor-pointer ${
                     period === p
-                      ? 'text-[#35E9A0] bg-[#15372F] font-medium'
+                      ? 'text-[#35E9A0] bg-[#123D32]/50 font-medium'
                       : 'text-[#A5B4B8] hover:text-[#F1F5F4] hover:bg-[#203238]'
                   }`}
                 >
@@ -168,78 +126,89 @@ export default function SpendingCategoryChart({
         </div>
       </div>
 
-      {/* Donut Chart & Category Legend */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 my-auto w-full min-w-0">
-        {/* Donut Chart with Center Text */}
-        <div className="relative w-[135px] h-[135px] sm:w-[145px] sm:h-[145px] shrink-0 flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip content={<CustomTooltip />} />
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="#121E22"
-                strokeWidth={2}
-                animationDuration={600}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${entry.name}-${index}`}
-                    fill={entry.color}
-                    className="hover:opacity-85 transition-opacity cursor-pointer outline-none"
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-
-          {/* Donut Hole Center Text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-            <span className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight">
-              {formatCurrency(currentTotal)}
-            </span>
-            <span className="text-[9px] text-[#71848A] font-medium uppercase tracking-wider">
-              Total Spent
-            </span>
+      {data.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <div className="w-10 h-10 rounded-xl bg-[#18272C] border border-[#24363B] flex items-center justify-center text-[#71848A] mb-2.5">
+            <PieIcon className="w-5 h-5 text-[#35E9A0]" />
           </div>
+          <p className="text-xs font-semibold text-[#F1F5F4]">No spending recorded</p>
+          <p className="text-[11px] text-[#71848A] mt-0.5">Expenses will be grouped by category here.</p>
         </div>
+      ) : (
+        /* Donut Chart & Legend Row */
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-center">
+          {/* Donut Chart with Center Total */}
+          <div className="sm:col-span-5 relative flex items-center justify-center">
+            <div className="w-40 h-40 sm:w-44 sm:h-44 relative">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={52}
+                    outerRadius={68}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="#121E22"
+                    strokeWidth={2}
+                  >
+                    {data.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
+                        className="transition-opacity duration-200 hover:opacity-80"
+                      />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
 
-        {/* Legend on the right: strictly contained with min-w-0 */}
-        <div className="w-full sm:flex-1 min-w-0 space-y-1 sm:space-y-1.5">
-          {data.map((cat) => (
-            <div
-              key={cat.name}
-              className="flex items-center justify-between text-xs py-0.5 px-1 rounded hover:bg-[#18272C]/60 transition min-w-0 group"
-            >
-              {/* Dot & Category Name (truncates smoothly if needed) */}
-              <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: cat.color }}
-                />
-                <span className="text-[#A5B4B8] group-hover:text-[#F1F5F4] truncate font-medium text-[11px] sm:text-[12px]">
-                  {cat.name}
+              {/* Centered Total inside Donut */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center">
+                <span className="text-[10px] uppercase font-semibold tracking-wider text-[#71848A]">
+                  Spent
                 </span>
-              </div>
-
-              {/* Percentage & Amount (always fully visible and aligned) */}
-              <div className="flex items-center gap-2 shrink-0 text-right">
-                <span className="text-[#71848A] text-[10px] sm:text-[11px] w-7 text-right">
-                  {cat.percentage}%
-                </span>
-                <span className="text-[#F1F5F4] font-semibold text-[11px] sm:text-[12px] min-w-[55px] text-right">
-                  {formatCurrency(cat.value)}
+                <span className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight mt-0.5">
+                  {formatCurrency(currentTotal)}
                 </span>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Right 58%: Category Legend Breakdown */}
+          <div className="sm:col-span-7 space-y-1.5 sm:space-y-2">
+            {data.slice(0, 5).map((category) => (
+              <div
+                key={category.name}
+                className="flex items-center justify-between text-xs py-0.5 hover:bg-[#18272C]/40 px-1.5 rounded-lg transition"
+              >
+                {/* Left: Color dot & Category Name */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  <span className="text-[#A5B4B8] truncate text-[11px] sm:text-xs">
+                    {category.name}
+                  </span>
+                </div>
+
+                {/* Right: Amount & Percentage */}
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+                  <span className="font-semibold text-[#F1F5F4] text-[11px] sm:text-xs">
+                    {formatCurrency(category.value)}
+                  </span>
+                  <span className="text-[10px] sm:text-[11px] font-medium text-[#71848A] w-7 text-right">
+                    {category.percentage}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

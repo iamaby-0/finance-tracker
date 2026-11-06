@@ -90,15 +90,15 @@ export function Reports() {
       const expYear = d.getFullYear();
       const expMonth = d.getMonth();
 
-      if (dateRange.includes('Oct 1, 2026')) {
-        return expYear === nowYear && expMonth === nowMonth;
-      }
-      if (dateRange.includes('Sep 1, 2026')) {
+      if (dateRange.includes('Sep') || dateRange.includes('Last Month')) {
         const lastMonth = nowMonth === 0 ? 11 : nowMonth - 1;
         const lastMonthYear = nowMonth === 0 ? nowYear - 1 : nowYear;
         return expYear === lastMonthYear && expMonth === lastMonth;
       }
-      return true;
+      if (dateRange.includes('Dec') || dateRange.includes('Year')) {
+        return expYear === nowYear;
+      }
+      return expYear === nowYear && expMonth === nowMonth;
     });
   }, [expenses, dateRange]);
 
@@ -118,15 +118,15 @@ export function Reports() {
       const incYear = d.getFullYear();
       const incMonth = d.getMonth();
 
-      if (dateRange.includes('Oct 1, 2026')) {
-        return incYear === nowYear && incMonth === nowMonth;
-      }
-      if (dateRange.includes('Sep 1, 2026')) {
+      if (dateRange.includes('Sep') || dateRange.includes('Last Month')) {
         const lastMonth = nowMonth === 0 ? 11 : nowMonth - 1;
         const lastMonthYear = nowMonth === 0 ? nowYear - 1 : nowYear;
         return incYear === lastMonthYear && incMonth === lastMonth;
       }
-      return true;
+      if (dateRange.includes('Dec') || dateRange.includes('Year')) {
+        return incYear === nowYear;
+      }
+      return incYear === nowYear && incMonth === nowMonth;
     });
   }, [incomes, dateRange]);
 
@@ -140,50 +140,60 @@ export function Reports() {
     const periodExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
     const periodSavings = periodInc - periodExp;
 
-    if (incomes.length > 0 || expenses.length > 0) {
-      return {
-        totalIncome: periodInc > 0 ? periodInc : 85000,
-        totalExpenses: periodExp > 0 ? periodExp : 42350,
-        totalSavings: periodSavings > 0 ? periodSavings : 28650,
-        netBalance: liveBalance > 0 ? liveBalance : 124520,
-        incomeComparison: '+8.2%',
-        expenseComparison: '+12.5%',
-        savingsComparison: '+15.4%',
-        balanceComparison: '+5.8%'
-      };
-    }
-
     return {
-      totalIncome: 85000,
-      totalExpenses: 42350,
-      totalSavings: 28650,
-      netBalance: 124520,
-      incomeComparison: '+8.2%',
-      expenseComparison: '+12.5%',
-      savingsComparison: '+15.4%',
-      balanceComparison: '+5.8%'
+      totalIncome: periodInc,
+      totalExpenses: periodExp,
+      totalSavings: periodSavings,
+      netBalance: liveBalance,
+      incomeComparison: '+0.0%',
+      expenseComparison: '+0.0%',
+      savingsComparison: '+0.0%',
+      balanceComparison: '+0.0%'
     };
   }, [incomes, expenses, filteredIncomes, filteredExpenses]);
 
-  // 2. Monthly Financial Overview (Last 6 Months: May - Oct)
+  // 2. Monthly Financial Overview (Last 6 Months)
   const monthlyFinancialData = useMemo(() => {
-    if (incomes.length === 0 && expenses.length === 0) return null;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const last6 = [];
 
-    const months = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
-    const incMap = [72000, 68000, 84000, 78000, 82000, summaryMetrics.totalIncome];
-    const expMap = [32000, 48000, 36000, 40000, 44000, summaryMetrics.totalExpenses];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mIdx = d.getMonth();
+      const yr = d.getFullYear();
+      const mName = monthNames[mIdx];
 
-    return months.map((m, idx) => ({
-      month: m,
-      income: incMap[idx],
-      expenses: expMap[idx],
-      savings: Math.max(0, incMap[idx] - expMap[idx])
-    }));
-  }, [incomes, expenses, summaryMetrics]);
+      const inc = incomes
+        .filter((item) => {
+          if (!item.date) return false;
+          const dt = new Date(item.date);
+          return !isNaN(dt.getTime()) && dt.getFullYear() === yr && dt.getMonth() === mIdx;
+        })
+        .reduce((s, item) => s + Number(item.amount || 0), 0);
+
+      const exp = expenses
+        .filter((item) => {
+          if (!item.date) return false;
+          const dt = new Date(item.date);
+          return !isNaN(dt.getTime()) && dt.getFullYear() === yr && dt.getMonth() === mIdx;
+        })
+        .reduce((s, item) => s + Number(item.amount || 0), 0);
+
+      last6.push({
+        month: mName,
+        income: inc,
+        expenses: exp,
+        savings: Math.max(0, inc - exp)
+      });
+    }
+
+    return last6;
+  }, [incomes, expenses]);
 
   // 3. Category Breakdown for Donut Chart
   const categoryBreakdownData = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const catMap = {};
     filteredExpenses.forEach((exp) => {
@@ -223,7 +233,7 @@ export function Reports() {
 
   // 4. Category Report Table Data
   const categoryTableData = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const catData = {};
     filteredExpenses.forEach((exp) => {
@@ -260,7 +270,7 @@ export function Reports() {
 
   // 5. Payment Methods Data
   const paymentMethodsData = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const methodMap = {
       UPI: 0,
@@ -286,17 +296,19 @@ export function Reports() {
       Cash: '#F6C85F'
     };
 
-    return Object.keys(methodMap).map((m) => ({
-      name: m,
-      value: methodMap[m] || (m === 'UPI' ? 19058 : m === 'Credit Card' ? 12705 : 6353),
-      percentage: total > 0 ? Math.round((methodMap[m] / total) * 100) : m === 'UPI' ? 45 : 30,
-      color: colors[m]
-    }));
+    return Object.keys(methodMap)
+      .filter((m) => methodMap[m] > 0)
+      .map((m) => ({
+        name: m,
+        value: methodMap[m],
+        percentage: total > 0 ? Math.round((methodMap[m] / total) * 100) : 0,
+        color: colors[m]
+      }));
   }, [filteredExpenses]);
 
   // 6. Top Merchants Data
   const topMerchantsData = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const merchantMap = {};
     filteredExpenses.forEach((exp) => {
@@ -316,14 +328,14 @@ export function Reports() {
       id: idx + 1,
       name: m.name,
       amount: m.amount,
-      percentage: totalSpent > 0 ? Math.round((m.amount / totalSpent) * 100) : 10,
+      percentage: totalSpent > 0 ? Math.round((m.amount / totalSpent) * 100) : 0,
       barColor: colors[idx % colors.length]
     }));
   }, [filteredExpenses]);
 
   // 7. Recent Transactions (Report View)
   const reportTransactions = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const sorted = [...filteredExpenses].sort(compareLatestFirst);
     return sorted.slice(0, 5).map((exp, idx) => ({

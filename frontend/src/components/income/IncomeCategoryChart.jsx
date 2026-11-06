@@ -9,42 +9,9 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_INCOME_CATEGORIES = {
-  'This Month': {
-    total: 85000,
-    categories: [
-      { name: 'Salary', value: 70000, percentage: 82, color: '#35E9A0' },
-      { name: 'Freelance', value: 8500, percentage: 10, color: '#B18AFF' },
-      { name: 'Investment', value: 4200, percentage: 5, color: '#F6C85F' },
-      { name: 'Side Income', value: 2300, percentage: 3, color: '#FF667A' },
-      { name: 'Other', value: 0, percentage: 0, color: '#20D6C7' },
-    ]
-  },
-  'Last Month': {
-    total: 78000,
-    categories: [
-      { name: 'Salary', value: 65000, percentage: 83, color: '#35E9A0' },
-      { name: 'Freelance', value: 7000, percentage: 9, color: '#B18AFF' },
-      { name: 'Investment', value: 3800, percentage: 5, color: '#F6C85F' },
-      { name: 'Side Income', value: 2200, percentage: 3, color: '#FF667A' },
-      { name: 'Other', value: 0, percentage: 0, color: '#20D6C7' },
-    ]
-  },
-  'This Year': {
-    total: 640000,
-    categories: [
-      { name: 'Salary', value: 520000, percentage: 81, color: '#35E9A0' },
-      { name: 'Freelance', value: 65000, percentage: 10, color: '#B18AFF' },
-      { name: 'Investment', value: 35000, percentage: 6, color: '#F6C85F' },
-      { name: 'Side Income', value: 20000, percentage: 3, color: '#FF667A' },
-      { name: 'Other', value: 0, percentage: 0, color: '#20D6C7' },
-    ]
-  }
-};
-
 export default function IncomeCategoryChart({
   categories = null,
-  totalIncome = null,
+  totalIncome = 0,
   selectedPeriod: initialPeriod = 'This Month',
   onPeriodChange
 }) {
@@ -70,14 +37,8 @@ export default function IncomeCategoryChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const activeDataset = DEFAULT_INCOME_CATEGORIES[period] || DEFAULT_INCOME_CATEGORIES['This Month'];
-  const data = (period === 'This Month' && categories && categories.length > 0)
-    ? categories
-    : activeDataset.categories;
-
-  const currentTotal = (period === 'This Month' && totalIncome)
-    ? totalIncome
-    : activeDataset.total;
+  const data = Array.isArray(categories) ? categories : [];
+  const currentTotal = totalIncome || data.reduce((sum, item) => sum + (item.value || 0), 0);
 
   const handleSelectPeriod = (newPeriod) => {
     setPeriod(newPeriod);
@@ -116,7 +77,7 @@ export default function IncomeCategoryChart({
   };
 
   return (
-    <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-3.5 sm:p-4.5 h-full flex flex-col justify-between overflow-hidden">
+    <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-4 sm:p-5 flex flex-col justify-between h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-2 sm:mb-3">
         <h3 className="text-sm sm:text-base font-semibold text-[#F1F5F4] tracking-tight">
@@ -159,78 +120,84 @@ export default function IncomeCategoryChart({
         </div>
       </div>
 
-      {/* Donut Chart & Legend */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 my-auto w-full min-w-0">
-        {/* Donut Chart with Center Text */}
-        <div className="relative w-[135px] h-[135px] sm:w-[145px] sm:h-[145px] shrink-0 flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip content={<CustomTooltip />} />
-              <Pie
-                data={data.filter((d) => d.value > 0)}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={70}
-                paddingAngle={3}
-                dataKey="value"
-                stroke="#121E22"
-                strokeWidth={2}
-                animationDuration={600}
-              >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={`cell-${entry.name}-${index}`}
-                    fill={entry.color}
-                    className="hover:opacity-85 transition-opacity cursor-pointer outline-none"
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+      {/* Donut Chart & Legend or Empty State */}
+      {data.length === 0 || currentTotal === 0 ? (
+        <div className="py-8 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No income records for this period.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 my-auto w-full min-w-0">
+          {/* Donut Chart with Center Text */}
+          <div className="relative w-[135px] h-[135px] sm:w-[145px] sm:h-[145px] shrink-0 flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip content={<CustomTooltip />} />
+                <Pie
+                  data={data.filter((d) => d.value > 0)}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="#121E22"
+                  strokeWidth={2}
+                  animationDuration={600}
+                >
+                  {data.map((entry, index) => (
+                    <Cell
+                      key={`cell-${entry.name}-${index}`}
+                      fill={entry.color}
+                      className="hover:opacity-85 transition-opacity cursor-pointer outline-none"
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
 
-          {/* Donut Center */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center">
-            <span className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight">
-              {formatCurrency(currentTotal)}
-            </span>
-            <span className="text-[9px] text-[#71848A] font-medium uppercase tracking-wider">
-              Total Income
-            </span>
+            {/* Donut Center */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none text-center">
+              <span className="text-xs sm:text-sm font-bold text-[#F1F5F4] tracking-tight">
+                {formatCurrency(currentTotal)}
+              </span>
+              <span className="text-[9px] text-[#71848A] font-medium uppercase tracking-wider">
+                Total Income
+              </span>
+            </div>
+          </div>
+
+          {/* Legend on the right */}
+          <div className="w-full sm:flex-1 min-w-0 space-y-1 sm:space-y-1.5">
+            {data.map((cat) => (
+              <div
+                key={cat.name}
+                className="flex items-center justify-between text-xs py-0.5 px-1 rounded hover:bg-[#18272C]/60 transition min-w-0 group"
+              >
+                {/* Dot & Category Name */}
+                <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
+                  <span
+                    className="w-2 rounded-full shrink-0 h-2"
+                    style={{ backgroundColor: cat.color }}
+                  />
+                  <span className="text-[#A5B4B8] group-hover:text-[#F1F5F4] truncate font-medium text-[11px] sm:text-[12px]">
+                    {cat.name}
+                  </span>
+                </div>
+
+                {/* Percentage & Amount */}
+                <div className="flex items-center gap-2 shrink-0 text-right">
+                  <span className="text-[#71848A] text-[10px] sm:text-[11px] w-7 text-right">
+                    {cat.percentage}%
+                  </span>
+                  <span className="text-[#F1F5F4] font-semibold text-[11px] sm:text-[12px] min-w-[55px] text-right">
+                    {formatCurrency(cat.value)}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Legend on the right */}
-        <div className="w-full sm:flex-1 min-w-0 space-y-1 sm:space-y-1.5">
-          {data.map((cat) => (
-            <div
-              key={cat.name}
-              className="flex items-center justify-between text-xs py-0.5 px-1 rounded hover:bg-[#18272C]/60 transition min-w-0 group"
-            >
-              {/* Dot & Category Name */}
-              <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-2">
-                <span
-                  className="w-2 h-2 rounded-full shrink-0"
-                  style={{ backgroundColor: cat.color }}
-                />
-                <span className="text-[#A5B4B8] group-hover:text-[#F1F5F4] truncate font-medium text-[11px] sm:text-[12px]">
-                  {cat.name}
-                </span>
-              </div>
-
-              {/* Percentage & Amount */}
-              <div className="flex items-center gap-2 shrink-0 text-right">
-                <span className="text-[#71848A] text-[10px] sm:text-[11px] w-7 text-right">
-                  {cat.percentage}%
-                </span>
-                <span className="text-[#F1F5F4] font-semibold text-[11px] sm:text-[12px] min-w-[55px] text-right">
-                  {formatCurrency(cat.value)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

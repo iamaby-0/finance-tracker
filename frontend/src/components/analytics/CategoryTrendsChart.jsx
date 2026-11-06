@@ -26,49 +26,6 @@ const CATEGORY_CHIPS = [
   { id: 'Others', label: 'Others', icon: MoreHorizontal, key: 'Other' }
 ];
 
-const DEFAULT_SERIES = {
-  'Food & Dining': [
-    { month: 'May', amount: 8500 },
-    { month: 'Jun', amount: 11200 },
-    { month: 'Jul', amount: 14500 },
-    { month: 'Aug', amount: 10400 },
-    { month: 'Sep', amount: 11800 },
-    { month: 'Oct', amount: 14800 }
-  ],
-  Shopping: [
-    { month: 'May', amount: 6200 },
-    { month: 'Jun', amount: 8400 },
-    { month: 'Jul', amount: 7600 },
-    { month: 'Aug', amount: 9200 },
-    { month: 'Sep', amount: 7100 },
-    { month: 'Oct', amount: 8900 }
-  ],
-  Transport: [
-    { month: 'May', amount: 4800 },
-    { month: 'Jun', amount: 5200 },
-    { month: 'Jul', amount: 5900 },
-    { month: 'Aug', amount: 5400 },
-    { month: 'Sep', amount: 6100 },
-    { month: 'Oct', amount: 5930 }
-  ],
-  Bills: [
-    { month: 'May', amount: 4500 },
-    { month: 'Jun', amount: 4700 },
-    { month: 'Jul', amount: 5300 },
-    { month: 'Aug', amount: 5100 },
-    { month: 'Sep', amount: 4900 },
-    { month: 'Oct', amount: 5120 }
-  ],
-  Others: [
-    { month: 'May', amount: 3200 },
-    { month: 'Jun', amount: 3800 },
-    { month: 'Jul', amount: 4100 },
-    { month: 'Aug', amount: 3900 },
-    { month: 'Sep', amount: 4400 },
-    { month: 'Oct', amount: 4200 }
-  ]
-};
-
 export default function CategoryTrendsChart({
   categoryData = null,
   selectedPeriod = 'Last 6 Months',
@@ -91,7 +48,7 @@ export default function CategoryTrendsChart({
   const chartData =
     categoryData && categoryData[activeCategory]
       ? categoryData[activeCategory]
-      : DEFAULT_SERIES[activeCategory] || DEFAULT_SERIES['Food & Dining'];
+      : [];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

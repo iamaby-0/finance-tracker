@@ -72,11 +72,11 @@ export function Goals() {
 
   // Compute tab counts from current unfiltered data or analytics summary
   const counts = {
-    all: analytics?.summary?.totalGoals || goals.length || 5,
-    active: analytics?.summary?.activeGoals || 3,
-    completed: analytics?.summary?.completedGoals || 2,
-    onTrack: analytics?.summary?.onTrackCount || 3,
-    atRisk: analytics?.summary?.atRiskCount || 1
+    all: analytics?.summary?.totalGoals ?? goals.length,
+    active: analytics?.summary?.activeGoals ?? goals.filter((g) => g.status === 'in-progress' || !g.status).length,
+    completed: analytics?.summary?.completedGoals ?? goals.filter((g) => g.status === 'completed').length,
+    onTrack: analytics?.summary?.onTrackCount ?? 0,
+    atRisk: analytics?.summary?.atRiskCount ?? 0
   };
 
   // Handlers

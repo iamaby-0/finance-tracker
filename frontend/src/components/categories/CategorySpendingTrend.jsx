@@ -11,13 +11,13 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_TREND = [
-  { month: 'May', food: 8500, shopping: 6200, transport: 4800, bills: 4500, entertainment: 3200 },
-  { month: 'Jun', food: 11200, shopping: 8400, transport: 5200, bills: 4700, entertainment: 3800 },
-  { month: 'Jul', food: 14500, shopping: 7600, transport: 5900, bills: 5300, entertainment: 4100 },
-  { month: 'Aug', food: 10400, shopping: 9200, transport: 5400, bills: 5100, entertainment: 3900 },
-  { month: 'Sep', food: 11800, shopping: 7100, transport: 6100, bills: 4900, entertainment: 4400 },
-  { month: 'Oct', food: 14800, shopping: 8900, transport: 5930, bills: 5120, entertainment: 4230 }
+const ZERO_TREND = [
+  { month: 'May', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 },
+  { month: 'Jun', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 },
+  { month: 'Jul', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 },
+  { month: 'Aug', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 },
+  { month: 'Sep', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 },
+  { month: 'Oct', food: 0, shopping: 0, transport: 0, bills: 0, entertainment: 0 }
 ];
 
 export default function CategorySpendingTrend({
@@ -38,7 +38,7 @@ export default function CategorySpendingTrend({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const chartData = data && data.length > 0 ? data : DEFAULT_TREND;
+  const chartData = data && data.length > 0 ? data : ZERO_TREND;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {

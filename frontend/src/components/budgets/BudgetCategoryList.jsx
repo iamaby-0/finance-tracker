@@ -16,100 +16,6 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_CATEGORIES = [
-  {
-    id: 'food',
-    name: 'Food & Dining',
-    category: 'Food',
-    spent: 11850,
-    budget: 15000,
-    percentage: 79,
-    status: 'On Track',
-    color: '#FF667A',
-    iconBg: 'bg-[#3D1A22]',
-    iconColor: 'text-[#FF667A]',
-    icon: UtensilsCrossed
-  },
-  {
-    id: 'shopping',
-    name: 'Shopping',
-    category: 'Shopping',
-    spent: 8500,
-    budget: 10000,
-    percentage: 85,
-    status: 'Near Limit',
-    color: '#B18AFF',
-    iconBg: 'bg-[#2B1B3D]',
-    iconColor: 'text-[#B18AFF]',
-    icon: ShoppingBag
-  },
-  {
-    id: 'transport',
-    name: 'Transport',
-    category: 'Transport',
-    spent: 5930,
-    budget: 8000,
-    percentage: 74,
-    status: 'On Track',
-    color: '#20D6C7',
-    iconBg: 'bg-[#142C2F]',
-    iconColor: 'text-[#20D6C7]',
-    icon: Car
-  },
-  {
-    id: 'bills',
-    name: 'Bills & Utilities',
-    category: 'Bills',
-    spent: 6200,
-    budget: 7000,
-    percentage: 89,
-    status: 'Near Limit',
-    color: '#F6C85F',
-    iconBg: 'bg-[#382818]',
-    iconColor: 'text-[#F6C85F]',
-    icon: Receipt
-  },
-  {
-    id: 'entertainment',
-    name: 'Entertainment',
-    category: 'Entertainment',
-    spent: 3800,
-    budget: 5000,
-    percentage: 76,
-    status: 'On Track',
-    color: '#FF66B2',
-    iconBg: 'bg-[#3D1B2E]',
-    iconColor: 'text-[#FF66B2]',
-    icon: Gamepad2
-  },
-  {
-    id: 'health',
-    name: 'Health & Fitness',
-    category: 'Health',
-    spent: 2400,
-    budget: 4000,
-    percentage: 60,
-    status: 'On Track',
-    color: '#FF85A2',
-    iconBg: 'bg-[#3D1B24]',
-    iconColor: 'text-[#FF85A2]',
-    icon: Heart
-  },
-  {
-    id: 'others',
-    name: 'Others',
-    category: 'Other',
-    spent: 2970,
-    budget: 5000,
-    percentage: 59,
-    status: 'On Track',
-    color: '#9F7AEA',
-    iconBg: 'bg-[#251F3D]',
-    iconColor: 'text-[#9F7AEA]',
-    icon: MoreHorizontal
-  }
-];
-
 export const getCategoryConfig = (category = '') => {
   const cat = (category || '').toLowerCase();
 
@@ -218,7 +124,7 @@ export default function BudgetCategoryList({
     }
   };
 
-  const items = (categories && categories.length > 0) ? categories : DEFAULT_CATEGORIES;
+  const items = Array.isArray(categories) ? categories : [];
 
   return (
     <div className="bg-[#121E22] border border-[#24363B] rounded-xl p-4 sm:p-5 h-full flex flex-col justify-between">
@@ -235,9 +141,14 @@ export default function BudgetCategoryList({
         </button>
       </div>
 
-      {/* Category Rows */}
-      <div className="space-y-3.5 flex-1 overflow-y-auto scrollbar-none pr-0.5">
-        {items.map((item) => {
+      {/* Category Rows or Empty State */}
+      {items.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No budgets set yet. Create your first budget to start tracking.</p>
+        </div>
+      ) : (
+        <div className="space-y-3.5 flex-1 overflow-y-auto scrollbar-none pr-0.5">
+          {items.map((item) => {
           const Icon = item.icon || UtensilsCrossed;
           const pct = item.percentage ?? (item.budget > 0 ? Math.round((item.spent / item.budget) * 100) : 0);
 
@@ -305,7 +216,8 @@ export default function BudgetCategoryList({
             </div>
           );
         })}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

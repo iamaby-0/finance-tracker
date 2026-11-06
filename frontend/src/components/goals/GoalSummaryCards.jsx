@@ -12,13 +12,13 @@ export default function GoalSummaryCards({ summary, loading }) {
     return val;
   };
 
-  const totalGoals = summary?.totalGoals !== undefined ? summary.totalGoals : 5;
-  const activeGoals = summary?.activeGoals !== undefined ? summary.activeGoals : 3;
-  const completedGoals = summary?.completedGoals !== undefined ? summary.completedGoals : 2;
-  const totalTarget = summary?.totalTargetAmount !== undefined ? formatINR(summary.totalTargetAmount) : '₹18,50,000';
-  const totalSaved = summary?.totalSaved !== undefined ? formatINR(summary.totalSaved) : '₹7,25,000';
-  const savedPct = summary?.savedPercentage !== undefined ? `${summary.savedPercentage}%` : '39%';
-  const onTrackCount = summary?.onTrackCount !== undefined ? summary.onTrackCount : 3;
+  const totalGoals = summary?.totalGoals !== undefined ? summary.totalGoals : 0;
+  const activeGoals = summary?.activeGoals !== undefined ? summary.activeGoals : 0;
+  const completedGoals = summary?.completedGoals !== undefined ? summary.completedGoals : 0;
+  const totalTarget = summary?.totalTargetAmount !== undefined ? formatINR(summary.totalTargetAmount) : '₹0';
+  const totalSaved = summary?.totalSaved !== undefined ? formatINR(summary.totalSaved) : '₹0';
+  const savedPct = summary?.savedPercentage !== undefined ? `${summary.savedPercentage}%` : '0%';
+  const onTrackCount = summary?.onTrackCount !== undefined ? summary.onTrackCount : 0;
 
   const cards = [
     {

@@ -146,44 +146,29 @@ export function Analytics() {
     const periodExp = filteredExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
     const periodSavings = periodInc - periodExp;
 
-    if (incomes.length > 0 || expenses.length > 0) {
-      return {
-        totalBalance: liveBalance > 0 ? liveBalance : 124520,
-        totalIncome: periodInc > 0 ? periodInc : 85000,
-        totalExpenses: periodExp > 0 ? periodExp : 42350,
-        totalSavings: periodSavings > 0 ? periodSavings : 28650,
-        balanceChange: '+12.5%',
-        incomeChange: '+8.2%',
-        expenseChange: '+3.1%',
-        savingsChange: '+15.4%'
-      };
-    }
-
-    // Default reference metrics when dataset is empty
     return {
-      totalBalance: 124520,
-      totalIncome: 85000,
-      totalExpenses: 42350,
-      totalSavings: 28650,
-      balanceChange: '+12.5%',
-      incomeChange: '+8.2%',
-      expenseChange: '+3.1%',
-      savingsChange: '+15.4%'
+      totalBalance: liveBalance,
+      totalIncome: periodInc,
+      totalExpenses: periodExp,
+      totalSavings: periodSavings,
+      balanceChange: '+0.0%',
+      incomeChange: '+0.0%',
+      expenseChange: '+0.0%',
+      savingsChange: '+0.0%'
     };
   }, [incomes, expenses, filteredIncomes, filteredExpenses]);
 
   // 2. Income vs Expenses Trend (12 Months Composed Chart)
   const monthlyTrendsData = useMemo(() => {
-    if (incomes.length === 0 && expenses.length === 0) return null;
-
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const nowYear = new Date().getFullYear();
     const incMap = Array(12).fill(0);
     const expMap = Array(12).fill(0);
 
     incomes.forEach((inc) => {
       if (inc.date) {
         const d = new Date(inc.date);
-        if (!isNaN(d.getTime())) {
+        if (!isNaN(d.getTime()) && d.getFullYear() === nowYear) {
           incMap[d.getMonth()] += Number(inc.amount || 0);
         }
       }
@@ -192,15 +177,15 @@ export function Analytics() {
     expenses.forEach((exp) => {
       if (exp.date) {
         const d = new Date(exp.date);
-        if (!isNaN(d.getTime())) {
+        if (!isNaN(d.getTime()) && d.getFullYear() === nowYear) {
           expMap[d.getMonth()] += Number(exp.amount || 0);
         }
       }
     });
 
     return months.map((month, idx) => {
-      const inc = incMap[idx] || (idx === 9 ? 85000 : 30000 + idx * 1200);
-      const exp = expMap[idx] || (idx === 9 ? 42350 : 15000 + idx * 800);
+      const inc = incMap[idx] || 0;
+      const exp = expMap[idx] || 0;
       return {
         month,
         income: inc,
@@ -212,7 +197,7 @@ export function Analytics() {
 
   // 3. Spending Breakdown (Donut Chart)
   const spendingBreakdownData = useMemo(() => {
-    if (filteredExpenses.length === 0) return null;
+    if (filteredExpenses.length === 0) return [];
 
     const catMap = {};
     filteredExpenses.forEach((exp) => {
@@ -252,23 +237,22 @@ export function Analytics() {
 
   // 4. Monthly Summary Heatmap Data
   const monthlyHeatmapData = useMemo(() => {
-    if (incomes.length === 0 && expenses.length === 0) return null;
-
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const nowYear = new Date().getFullYear();
     const incTotals = Array(12).fill(0);
     const expTotals = Array(12).fill(0);
 
     incomes.forEach((i) => {
       if (i.date) {
         const d = new Date(i.date);
-        if (!isNaN(d.getTime())) incTotals[d.getMonth()] += Number(i.amount || 0);
+        if (!isNaN(d.getTime()) && d.getFullYear() === nowYear) incTotals[d.getMonth()] += Number(i.amount || 0);
       }
     });
 
     expenses.forEach((e) => {
       if (e.date) {
         const d = new Date(e.date);
-        if (!isNaN(d.getTime())) expTotals[d.getMonth()] += Number(e.amount || 0);
+        if (!isNaN(d.getTime()) && d.getFullYear() === nowYear) expTotals[d.getMonth()] += Number(e.amount || 0);
       }
     });
 
@@ -278,20 +262,20 @@ export function Analytics() {
     const expList = months.map((m, idx) => {
       const amt = expTotals[idx];
       const ratio = amt / maxExp;
-      const level = ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1;
+      const level = amt === 0 ? 0 : ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1;
       return { month: m, amount: amt, level };
     });
 
     const incList = months.map((m, idx) => {
       const amt = incTotals[idx];
       const ratio = amt / maxInc;
-      const level = ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1;
+      const level = amt === 0 ? 0 : ratio > 0.75 ? 4 : ratio > 0.5 ? 3 : ratio > 0.25 ? 2 : 1;
       return { month: m, amount: amt, level };
     });
 
     const savList = months.map((m, idx) => {
       const amt = Math.max(0, incTotals[idx] - expTotals[idx]);
-      const level = amt > 20000 ? 4 : amt > 14000 ? 3 : amt > 8000 ? 2 : 1;
+      const level = amt === 0 ? 0 : amt > 20000 ? 4 : amt > 14000 ? 3 : amt > 8000 ? 2 : 1;
       return { month: m, amount: amt, level };
     });
 
@@ -304,9 +288,19 @@ export function Analytics() {
 
   // 5. Category Trends (Last 6 Months Area Chart)
   const categoryTrendsData = useMemo(() => {
-    if (expenses.length === 0) return null;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const last6 = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      last6.push({
+        month: monthNames[d.getMonth()],
+        year: d.getFullYear(),
+        monthIndex: d.getMonth()
+      });
+    }
 
-    const last6 = ['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'];
+    const categories = ['Food & Dining', 'Shopping', 'Transport', 'Bills', 'Others'];
     const result = {
       'Food & Dining': [],
       Shopping: [],
@@ -315,12 +309,33 @@ export function Analytics() {
       Others: []
     };
 
-    last6.forEach((m, idx) => {
-      result['Food & Dining'].push({ month: m, amount: 8500 + idx * 1200 });
-      result['Shopping'].push({ month: m, amount: 6000 + idx * 600 });
-      result['Transport'].push({ month: m, amount: 4800 + idx * 250 });
-      result['Bills'].push({ month: m, amount: 4500 + idx * 130 });
-      result['Others'].push({ month: m, amount: 3200 + idx * 200 });
+    last6.forEach(({ month, year, monthIndex }) => {
+      const monthExpenses = expenses.filter((e) => {
+        if (!e.date) return false;
+        const d = new Date(e.date);
+        return !isNaN(d.getTime()) && d.getFullYear() === year && d.getMonth() === monthIndex;
+      });
+
+      const catSum = {
+        'Food & Dining': 0,
+        Shopping: 0,
+        Transport: 0,
+        Bills: 0,
+        Others: 0
+      };
+
+      monthExpenses.forEach((e) => {
+        const c = e.category || 'Other';
+        if (c === 'Food') catSum['Food & Dining'] += Number(e.amount || 0);
+        else if (c === 'Shopping') catSum.Shopping += Number(e.amount || 0);
+        else if (c === 'Transport') catSum.Transport += Number(e.amount || 0);
+        else if (c === 'Bills') catSum.Bills += Number(e.amount || 0);
+        else catSum.Others += Number(e.amount || 0);
+      });
+
+      categories.forEach((cat) => {
+        result[cat].push({ month, amount: catSum[cat] });
+      });
     });
 
     return result;
@@ -328,7 +343,7 @@ export function Analytics() {
 
   // 6. Income Sources (Donut Chart)
   const incomeSourcesData = useMemo(() => {
-    if (filteredIncomes.length === 0) return null;
+    if (filteredIncomes.length === 0) return [];
 
     const sourceMap = {};
     filteredIncomes.forEach((inc) => {
@@ -357,14 +372,41 @@ export function Analytics() {
 
   // 7. Expense Comparison (Last 3 Months Grouped Bars)
   const comparisonData = useMemo(() => {
-    if (incomes.length === 0 && expenses.length === 0) return null;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const last3 = [];
 
-    return [
-      { month: 'Aug', income: 82000, expenses: 38000 },
-      { month: 'Sep', income: 76000, expenses: 40000 },
-      { month: 'Oct', income: summaryMetrics.totalIncome, expenses: summaryMetrics.totalExpenses }
-    ];
-  }, [incomes, expenses, summaryMetrics]);
+    for (let i = 2; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mIdx = d.getMonth();
+      const yr = d.getFullYear();
+      const mName = monthNames[mIdx];
+
+      const incTotal = incomes
+        .filter((inc) => {
+          if (!inc.date) return false;
+          const dt = new Date(inc.date);
+          return !isNaN(dt.getTime()) && dt.getFullYear() === yr && dt.getMonth() === mIdx;
+        })
+        .reduce((s, i) => s + Number(i.amount || 0), 0);
+
+      const expTotal = expenses
+        .filter((exp) => {
+          if (!exp.date) return false;
+          const dt = new Date(exp.date);
+          return !isNaN(dt.getTime()) && dt.getFullYear() === yr && dt.getMonth() === mIdx;
+        })
+        .reduce((s, e) => s + Number(e.amount || 0), 0);
+
+      last3.push({
+        month: mName,
+        income: incTotal,
+        expenses: expTotal
+      });
+    }
+
+    return last3;
+  }, [incomes, expenses]);
 
   return (
     <div className="min-h-screen bg-[#0B1114] text-[#F1F5F4] flex">

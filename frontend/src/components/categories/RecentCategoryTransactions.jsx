@@ -10,54 +10,6 @@ import {
 } from 'lucide-react';
 import { formatDate, formatCurrency, compareLatestFirst } from '../../utils/formatters';
 
-const DEFAULT_TRANSACTIONS = [
-  {
-    id: 1,
-    date: '2026-10-20',
-    description: 'Zomato Order',
-    category: 'Food & Dining',
-    categoryKey: 'Food',
-    amount: 480,
-    type: 'Expense'
-  },
-  {
-    id: 2,
-    date: '2026-10-19',
-    description: 'Amazon Purchase',
-    category: 'Shopping',
-    categoryKey: 'Shopping',
-    amount: 2199,
-    type: 'Expense'
-  },
-  {
-    id: 3,
-    date: '2026-10-18',
-    description: 'Diesel',
-    category: 'Transport',
-    categoryKey: 'Transport',
-    amount: 1200,
-    type: 'Expense'
-  },
-  {
-    id: 4,
-    date: '2026-10-17',
-    description: 'Electricity Bill',
-    category: 'Bills & Utilities',
-    categoryKey: 'Bills',
-    amount: 1230,
-    type: 'Expense'
-  },
-  {
-    id: 5,
-    date: '2026-10-16',
-    description: 'Movie Tickets',
-    category: 'Entertainment',
-    categoryKey: 'Entertainment',
-    amount: 650,
-    type: 'Expense'
-  }
-];
-
 export default function RecentCategoryTransactions({ transactions = null, onViewAll }) {
   const navigate = useNavigate();
 
@@ -72,7 +24,7 @@ export default function RecentCategoryTransactions({ transactions = null, onView
   const items =
     transactions && transactions.length > 0
       ? [...transactions].sort(compareLatestFirst).slice(0, 5)
-      : DEFAULT_TRANSACTIONS;
+      : [];
 
   const getCategoryBadge = (cat) => {
     switch (cat) {
@@ -158,57 +110,65 @@ export default function RecentCategoryTransactions({ transactions = null, onView
             </tr>
           </thead>
           <tbody className="divide-y divide-[#24363B]/40 text-xs">
-            {items.slice(0, 5).map((tx) => {
-              const catBadge = getCategoryBadge(tx.category || tx.categoryKey);
-              const CatIcon = catBadge.icon;
-              const isExpense = (tx.type || 'Expense').toLowerCase() === 'expense';
+            {items.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#71848A]">
+                  No category transactions recorded yet.
+                </td>
+              </tr>
+            ) : (
+              items.slice(0, 5).map((tx) => {
+                const catBadge = getCategoryBadge(tx.category || tx.categoryKey);
+                const CatIcon = catBadge.icon;
+                const isExpense = (tx.type || 'Expense').toLowerCase() === 'expense';
 
-              return (
-                <tr
-                  key={tx.id || tx._id || tx.description}
-                  className="hover:bg-[#18272C]/40 transition-colors"
-                >
-                  {/* Date */}
-                  <td className="py-2.5 px-3 text-[#A5B4B8] whitespace-nowrap">
-                    {formatDate(tx.date)}
-                  </td>
+                return (
+                  <tr
+                    key={tx.id || tx._id || tx.description}
+                    className="hover:bg-[#18272C]/40 transition-colors"
+                  >
+                    {/* Date */}
+                    <td className="py-2.5 px-3 text-[#A5B4B8] whitespace-nowrap">
+                      {formatDate(tx.date)}
+                    </td>
 
-                  {/* Description */}
-                  <td className="py-2.5 px-3 font-semibold text-[#F1F5F4] truncate max-w-[150px]">
-                    {tx.description}
-                  </td>
+                    {/* Description */}
+                    <td className="py-2.5 px-3 font-semibold text-[#F1F5F4] truncate max-w-[150px]">
+                      {tx.description}
+                    </td>
 
-                  {/* Category Pill */}
-                  <td className="py-2.5 px-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${catBadge.bg} ${catBadge.border} ${catBadge.text}`}
-                    >
-                      <CatIcon className="w-3 h-3" />
-                      <span>{catBadge.label}</span>
-                    </span>
-                  </td>
+                    {/* Category Pill */}
+                    <td className="py-2.5 px-3">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border ${catBadge.bg} ${catBadge.border} ${catBadge.text}`}
+                      >
+                        <CatIcon className="w-3 h-3" />
+                        <span>{catBadge.label}</span>
+                      </span>
+                    </td>
 
-                  {/* Amount (Negative in Coral-Red for Expense) */}
-                  <td className="py-2.5 px-3 text-right font-bold text-[#FF667A] whitespace-nowrap">
-                    -{formatCurrency(tx.amount)}
-                  </td>
+                    {/* Amount (Negative in Coral-Red for Expense) */}
+                    <td className="py-2.5 px-3 text-right font-bold text-[#FF667A] whitespace-nowrap">
+                      -{formatCurrency(tx.amount)}
+                    </td>
 
-                  {/* Type Pill */}
-                  <td className="py-2.5 px-3 text-center">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide border ${
-                        isExpense
-                          ? 'bg-[#2A161B] border-[#FF667A]/30 text-[#FF667A]'
-                          : 'bg-[#123D32] border-[#35E9A0]/30 text-[#35E9A0]'
-                      }`}
-                    >
-                      <Tag className="w-2.5 h-2.5" />
-                      <span>{isExpense ? 'Expense' : 'Income'}</span>
-                    </span>
-                  </td>
-                </tr>
-              );
-            })}
+                    {/* Type Pill */}
+                    <td className="py-2.5 px-3 text-center">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide border ${
+                          isExpense
+                            ? 'bg-[#2A161B] border-[#FF667A]/30 text-[#FF667A]'
+                            : 'bg-[#123D32] border-[#35E9A0]/30 text-[#35E9A0]'
+                        }`}
+                      >
+                        <Tag className="w-2.5 h-2.5" />
+                        <span>{isExpense ? 'Expense' : 'Income'}</span>
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

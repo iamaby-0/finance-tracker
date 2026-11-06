@@ -145,7 +145,8 @@ function Signup() {
   const handleGoogleSignup = () => {
     const rawApiUrl = import.meta.env.VITE_API_URL || "https://finance-tracker-m46z.onrender.com/aft/api/v1";
     const apiUrl = rawApiUrl.replace(/\/+$/, "");
-    window.location.href = `${apiUrl}/auth/google`;
+    const returnOrigin = window.location.origin;
+    window.location.href = `${apiUrl}/auth/google?state=${encodeURIComponent(returnOrigin)}`;
   };
 
   return (

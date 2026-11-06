@@ -10,38 +10,15 @@ import {
 } from 'recharts';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_BREAKDOWN_DATA = {
-  Daily: [
-    { label: '1 Oct', amount: 1450 },
-    { label: '5 Oct', amount: 890 },
-    { label: '10 Oct', amount: 3200 },
-    { label: '15 Oct', amount: 2100 },
-    { label: '20 Oct', amount: 4850 },
-    { label: '25 Oct', amount: 1650 },
-    { label: '31 Oct', amount: 980 }
-  ],
-  Weekly: [
-    { label: 'Week 1', amount: 9800 },
-    { label: 'Week 2', amount: 12450 },
-    { label: 'Week 3', amount: 11200 },
-    { label: 'Week 4', amount: 8900 }
-  ],
-  Monthly: [
-    { label: 'Jun', amount: 38000 },
-    { label: 'Jul', amount: 31000 },
-    { label: 'Aug', amount: 29000 },
-    { label: 'Sep', amount: 34500 },
-    { label: 'Oct', amount: 42350 }
-  ]
-};
-
 export default function ExpenseBreakdownChart({ data = null }) {
   const [activeTab, setActiveTab] = useState('Daily'); // 'Daily' | 'Weekly' | 'Monthly'
 
   const chartData =
-    data && data[activeTab] && data[activeTab].length > 0
+    data && Array.isArray(data[activeTab])
       ? data[activeTab]
-      : DEFAULT_BREAKDOWN_DATA[activeTab];
+      : [];
+
+  const hasData = chartData.length > 0 && chartData.some((d) => Number(d.amount) > 0);
 
   // Custom Dark Tooltip
   const CustomTooltip = ({ active, payload, label }) => {
@@ -97,54 +74,60 @@ export default function ExpenseBreakdownChart({ data = null }) {
       </div>
 
       {/* Area / Line Chart Container */}
-      <div className="w-full h-[220px] mt-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="breakdownGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#FF667A" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#FF667A" stopOpacity={0.0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="#24363B"
-              vertical={false}
-              opacity={0.6}
-            />
-            <XAxis
-              dataKey="label"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 11 }}
-              dy={6}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#71848A', fontSize: 11 }}
-              tickFormatter={(v) => (v === 0 ? '0' : `${Math.round(v / 1000)}K`)}
-              dx={-4}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ stroke: '#FF667A', strokeWidth: 1, strokeDasharray: '3 3' }}
-            />
-            <Area
-              type="monotone"
-              dataKey="amount"
-              stroke="#FF667A"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#breakdownGrad)"
-              dot={{ r: 3.5, fill: '#FF667A', stroke: '#121E22', strokeWidth: 1.5 }}
-              activeDot={{ r: 5, fill: '#FF8A48', stroke: '#fff', strokeWidth: 2 }}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+      <div className="w-full h-[220px] mt-1 flex items-center justify-center">
+        {!hasData ? (
+          <p className="text-xs text-[#71848A]">
+            No expense records found for this period.
+          </p>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="breakdownGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#FF667A" stopOpacity={0.35} />
+                  <stop offset="95%" stopColor="#FF667A" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#24363B"
+                vertical={false}
+                opacity={0.6}
+              />
+              <XAxis
+                dataKey="label"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 11 }}
+                dy={6}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#71848A', fontSize: 11 }}
+                tickFormatter={(v) => (v === 0 ? '0' : `${Math.round(v / 1000)}K`)}
+                dx={-4}
+              />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ stroke: '#FF667A', strokeWidth: 1, strokeDasharray: '3 3' }}
+              />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke="#FF667A"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#breakdownGrad)"
+                dot={{ r: 3.5, fill: '#FF667A', stroke: '#121E22', strokeWidth: 1.5 }}
+                activeDot={{ r: 5, fill: '#FF8A48', stroke: '#fff', strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

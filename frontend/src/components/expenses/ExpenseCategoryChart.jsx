@@ -77,16 +77,8 @@ export default function ExpenseCategoryChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const currentDefault =
-    DEFAULT_EXPENSE_CATEGORIES[period] || DEFAULT_EXPENSE_CATEGORIES['This Month'];
-
-  const categoryList =
-    categories && categories.length > 0 ? categories : currentDefault.categories;
-
-  const total =
-    totalExpenses !== null && totalExpenses !== undefined && totalExpenses > 0
-      ? totalExpenses
-      : currentDefault.total;
+  const categoryList = Array.isArray(categories) ? categories : [];
+  const total = totalExpenses !== null && totalExpenses !== undefined ? totalExpenses : categoryList.reduce((s, i) => s + (i.value || 0), 0);
 
   const handleSelectPeriod = (p) => {
     setPeriod(p);
@@ -168,6 +160,12 @@ export default function ExpenseCategoryChart({
       </div>
 
       {/* Donut & Legend Container */}
+      {categoryList.length === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs font-semibold text-[#F1F5F4]">No category expenses</p>
+          <p className="text-[11px] text-[#71848A] mt-0.5">Recorded expenses will be categorized here.</p>
+        </div>
+      ) : (
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-2">
         {/* Donut Chart with Centered Total */}
         <div className="relative w-[180px] h-[180px] shrink-0">
@@ -231,6 +229,7 @@ export default function ExpenseCategoryChart({
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }

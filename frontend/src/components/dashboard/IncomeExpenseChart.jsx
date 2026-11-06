@@ -85,10 +85,9 @@ export default function IncomeExpenseChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Determine chart data for selected period
-  const chartData = (data && data.length > 0 && period === 'This Year')
-    ? data
-    : (CHART_DATA_SETS[period] || CHART_DATA_SETS['This Year']);
+  // Determine chart data for selected period strictly from live data
+  const defaultMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => ({ month: m, income: 0, expenses: 0 }));
+  const chartData = (data && data.length > 0) ? data : defaultMonths;
 
   const handleSelectPeriod = (newPeriod) => {
     setPeriod(newPeriod);

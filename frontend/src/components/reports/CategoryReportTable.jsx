@@ -13,93 +13,6 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_ROWS = [
-  {
-    id: 1,
-    name: 'Food & Dining',
-    icon: Utensils,
-    iconBg: 'bg-[#2A161B]',
-    iconColor: 'text-[#FF667A]',
-    transactions: 12,
-    amount: 11850,
-    percentage: 28,
-    trendDirection: 'up',
-    trendPercent: '18%'
-  },
-  {
-    id: 2,
-    name: 'Shopping',
-    icon: ShoppingBag,
-    iconBg: 'bg-[#251E38]',
-    iconColor: 'text-[#B18AFF]',
-    transactions: 8,
-    amount: 7620,
-    percentage: 18,
-    trendDirection: 'down',
-    trendPercent: '5%'
-  },
-  {
-    id: 3,
-    name: 'Transport',
-    icon: Car,
-    iconBg: 'bg-[#152538]',
-    iconColor: 'text-[#45B7F5]',
-    transactions: 6,
-    amount: 5930,
-    percentage: 14,
-    trendDirection: 'up',
-    trendPercent: '12%'
-  },
-  {
-    id: 4,
-    name: 'Bills & Utilities',
-    icon: FileText,
-    iconBg: 'bg-[#123832]',
-    iconColor: 'text-[#20D6C7]',
-    transactions: 5,
-    amount: 5120,
-    percentage: 12,
-    trendDirection: 'down',
-    trendPercent: '8%'
-  },
-  {
-    id: 5,
-    name: 'Entertainment',
-    icon: Film,
-    iconBg: 'bg-[#2E1825]',
-    iconColor: 'text-[#FF6EA7]',
-    transactions: 4,
-    amount: 4230,
-    percentage: 10,
-    trendDirection: 'up',
-    trendPercent: '25%'
-  },
-  {
-    id: 6,
-    name: 'Health & Fitness',
-    icon: Heart,
-    iconBg: 'bg-[#2C1820]',
-    iconColor: 'text-[#FF8A48]',
-    transactions: 3,
-    amount: 3400,
-    percentage: 8,
-    trendDirection: 'down',
-    trendPercent: '10%'
-  },
-  {
-    id: 7,
-    name: 'Others',
-    icon: MoreHorizontal,
-    iconBg: 'bg-[#18272C]',
-    iconColor: 'text-[#A5B4B8]',
-    transactions: 5,
-    amount: 4200,
-    percentage: 10,
-    trendDirection: 'up',
-    trendPercent: '8%'
-  }
-];
-
 export default function CategoryReportTable({
   categories = null,
   selectedPeriod = 'This Month',
@@ -118,7 +31,7 @@ export default function CategoryReportTable({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const rows = categories && categories.length > 0 ? categories : DEFAULT_ROWS;
+  const rows = Array.isArray(categories) ? categories : [];
 
   return (
     <div className="rounded-2xl bg-[#121E22] border border-[#24363B] p-5 flex flex-col justify-between h-full shadow-sm">
@@ -184,7 +97,14 @@ export default function CategoryReportTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-[#24363B]/40 text-xs">
-            {rows.map((row) => {
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-xs text-[#71848A]">
+                  No category records found for this period.
+                </td>
+              </tr>
+            ) : (
+              rows.map((row) => {
               const Icon = row.icon || Utensils;
               const isUp = row.trendDirection === 'up';
 
@@ -253,7 +173,8 @@ export default function CategoryReportTable({
                   </td>
                 </tr>
               );
-            })}
+            })
+          )}
           </tbody>
         </table>
       </div>

@@ -111,30 +111,11 @@ export function Budgets() {
       };
     }
 
-    if (selectedPeriod === 'Last Month') {
-      return {
-        totalBudget: 65000,
-        overallSpent: 42250,
-        categoriesCount: 6,
-        overBudgetCount: 0
-      };
-    }
-
-    if (selectedPeriod === 'This Year') {
-      return {
-        totalBudget: 840000,
-        overallSpent: 571200,
-        categoriesCount: 6,
-        overBudgetCount: 2
-      };
-    }
-
-    // Default reference metrics for 'This Month'
     return {
-      totalBudget: 70000,
-      overallSpent: 47650,
-      categoriesCount: 6,
-      overBudgetCount: 1
+      totalBudget: 0,
+      overallSpent: 0,
+      categoriesCount: 0,
+      overBudgetCount: 0
     };
   };
 
@@ -168,7 +149,7 @@ export function Budgets() {
         };
       });
     }
-    return null; // Will fallback to DEFAULT_CATEGORIES in component
+    return [];
   };
 
   // Format chart data for Budget vs Spending
@@ -188,7 +169,7 @@ export function Budgets() {
         };
       });
     }
-    return null; // Will fallback to DEFAULT_CHART_DATA in component
+    return [];
   };
 
   // Status mapping for RecentBudgetActivity
@@ -272,7 +253,16 @@ export function Budgets() {
 
       return items;
     }
-    return null;
+    return [
+      {
+        id: 'insight-empty',
+        title: 'No Budgets Configured',
+        description: 'Set spending limits for your essential categories like Food, Bills, and Shopping to track budget health.',
+        iconBg: 'bg-[#123D32]',
+        iconColor: 'text-[#35E9A0]',
+        hoverBorder: 'hover:border-[#35E9A0]/30'
+      }
+    ];
   };
 
   return (

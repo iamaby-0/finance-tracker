@@ -3,17 +3,9 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { ChevronDown } from 'lucide-react';
 import { formatCurrency } from '../../utils/formatters';
 
-const DEFAULT_SOURCES = [
-  { name: 'Salary', value: 70000, percentage: 82, color: '#35E9A0' },
-  { name: 'Freelance', value: 8500, percentage: 10, color: '#B18AFF' },
-  { name: 'Investment', value: 4200, percentage: 5, color: '#45B7F5' },
-  { name: 'Side Income', value: 2300, percentage: 3, color: '#FF8A48' },
-  { name: 'Others', value: 0, percentage: 0, color: '#20D6C7' }
-];
-
 export default function IncomeSourcesChart({
   sources = null,
-  totalIncome = 85000,
+  totalIncome = 0,
   selectedPeriod = 'This Month',
   onPeriodChange
 }) {
@@ -30,7 +22,7 @@ export default function IncomeSourcesChart({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const items = sources && sources.length > 0 ? sources : DEFAULT_SOURCES;
+  const items = Array.isArray(sources) ? sources : [];
   const totalAmount = totalIncome || items.reduce((sum, item) => sum + (item.value || 0), 0);
 
   // Filter out 0 value items for chart rendering so slices don't collapse or overlap
@@ -104,69 +96,75 @@ export default function IncomeSourcesChart({
         </div>
       </div>
 
-      {/* Donut Chart & Legend List */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-1">
-        {/* Donut Chart */}
-        <div className="relative w-36 h-36 sm:w-40 sm:h-40 xl:w-44 xl:h-44 shrink-0 flex items-center justify-center">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip content={<CustomTooltip />} />
-              <Pie
-                data={chartItems.length > 0 ? chartItems : [{ name: 'Income', value: 1, color: '#35E9A0' }]}
-                cx="50%"
-                cy="50%"
-                innerRadius={44}
-                outerRadius={68}
-                paddingAngle={2.5}
-                dataKey="value"
-                stroke="none"
-              >
-                {(chartItems.length > 0 ? chartItems : [{ color: '#35E9A0' }]).map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+      {/* Donut Chart & Legend List or Empty State */}
+      {chartItems.length === 0 || totalAmount === 0 ? (
+        <div className="py-12 flex flex-col items-center justify-center text-center my-auto">
+          <p className="text-xs text-[#71848A]">No income sources recorded for this period.</p>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-1">
+          {/* Donut Chart */}
+          <div className="relative w-36 h-36 sm:w-40 sm:h-40 xl:w-44 xl:h-44 shrink-0 flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip content={<CustomTooltip />} />
+                <Pie
+                  data={chartItems}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={44}
+                  outerRadius={68}
+                  paddingAngle={2.5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {chartItems.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
 
-          {/* Centered Total Income Text */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-sm sm:text-base font-bold text-[#F1F5F4] tracking-tight">
-              {formatCurrency(totalAmount)}
-            </span>
-            <span className="text-[10px] text-[#71848A] font-medium tracking-wide">
-              Total Income
-            </span>
+            {/* Centered Total Income Text */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-sm sm:text-base font-bold text-[#F1F5F4] tracking-tight">
+                {formatCurrency(totalAmount)}
+              </span>
+              <span className="text-[10px] text-[#71848A] font-medium tracking-wide">
+                Total Income
+              </span>
+            </div>
+          </div>
+
+          {/* Legend List */}
+          <div className="flex-1 w-full space-y-1.5">
+            {items.map((src, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between text-xs py-0.5 hover:bg-[#18272C]/40 px-1.5 rounded-md transition-colors"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: src.color }}
+                  />
+                  <span className="text-[#A5B4B8] truncate text-[12px]">
+                    {src.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <span className="text-[#71848A] text-[11px] w-7 text-right">
+                    {src.percentage}%
+                  </span>
+                  <span className="font-semibold text-[#F1F5F4] text-[12px] w-14 text-right">
+                    {formatCurrency(src.value)}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Legend List */}
-        <div className="flex-1 w-full space-y-1.5">
-          {items.map((src, idx) => (
-            <div
-              key={idx}
-              className="flex items-center justify-between text-xs py-0.5 hover:bg-[#18272C]/40 px-1.5 rounded-md transition-colors"
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: src.color }}
-                />
-                <span className="text-[#A5B4B8] truncate text-[12px]">
-                  {src.name}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                <span className="text-[#71848A] text-[11px] w-7 text-right">
-                  {src.percentage}%
-                </span>
-                <span className="font-semibold text-[#F1F5F4] text-[12px] w-14 text-right">
-                  {formatCurrency(src.value)}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
